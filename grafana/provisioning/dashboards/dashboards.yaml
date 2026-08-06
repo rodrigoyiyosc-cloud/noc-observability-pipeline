@@ -1,0 +1,15 @@
+# grafana/provisioning/dashboards/dashboards.yaml
+# Le dice a Grafana dónde buscar los JSON de dashboards al arrancar.
+
+apiVersion: 1
+
+providers:
+  - name:            NOC Dashboards
+    orgId:           1
+    type:            file
+    disableDeletion: false      # permite editar en UI y que persista en disco
+    updateIntervalSeconds: 30   # recarga si el JSON cambia en disco
+    allowUiUpdates:  true
+    options:
+      path:          /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

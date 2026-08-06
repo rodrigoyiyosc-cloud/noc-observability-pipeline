@@ -1,0 +1,1001 @@
+timestamp,hostname,ip,role,severity,message,cpu_pct,latency_ms,packet_loss_pct,interface,iface_status,peer_ip
+2026-07-28T23:23:03.239566+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,14.02,7.72,0.0,Fa0/1,UP,10.2.1.63
+2026-07-28T23:23:03.240501+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 23.07% on access-sw-01,23.07,13.82,1.21,Fa0/3,UP,10.1.0.193
+2026-07-28T23:23:03.241525+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: dist-sw-01 unreachable - RTT 20.65ms,81.98,20.65,19.79,Gi1/0/1,UP,10.1.1.215
+2026-07-28T23:23:03.242059+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 27.64% on access-sw-01,27.64,14.81,1.97,Fa0/3,DOWN,10.0.2.231
+2026-07-28T23:23:03.242524+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 22.52% on access-sw-01,22.52,12.84,0.93,Fa0/2,UP,10.0.5.18
+2026-07-28T23:23:03.243040+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 35.06% on dist-sw-02,35.06,11.57,1.95,Gi1/0/3,DOWN,10.1.5.160
+2026-07-28T23:23:03.243424+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,10.66,16.76,Gi0/0/0,UP,10.1.3.53
+2026-07-28T23:23:03.243805+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,19.77,6.39,0.0,Gi1/0/1,UP,10.0.3.221
+2026-07-28T23:23:03.244261+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 29.16% on access-sw-01,29.16,12.57,0.59,Fa0/3,UP,10.2.5.238
+2026-07-28T23:23:03.244749+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,30.61,6.51,0.0,Gi1/0/2,UP,10.1.4.165
+2026-07-28T23:23:03.245171+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,17.9,9.14,0.0,Fa0/2,UP,10.1.1.98
+2026-07-28T23:23:03.245630+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.4.125 keepalive received,49.31,2.75,0.0,Te0/1/0,UP,10.1.4.125
+2026-07-28T23:23:03.246228+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/0 is UP - flapping detected,80.03,4.84,1.18,Gi0/0/0,UP,10.0.1.20
+2026-07-28T23:23:03.246641+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,14.13,8.73,0.0,Fa0/2,UP,10.1.4.197
+2026-07-28T23:23:03.247010+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,33.26,10.58,0.61,Gi1/0/1,UP,10.0.4.10
+2026-07-28T23:23:03.247525+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.0.53 keepalive received,27.4,4.86,0.0,Gi1/0/3,UP,10.2.0.53
+2026-07-28T23:23:03.248146+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,26.96,5.24,0.0,Gi1/0/2,UP,10.2.4.126
+2026-07-28T23:23:03.248716+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,27.22,4.6,0.0,Gi1/0/2,UP,10.0.1.12
+2026-07-28T23:23:03.249252+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.3.24 keepalive received,41.86,4.61,0.0,Te0/1/0,UP,10.2.3.24
+2026-07-28T23:23:03.249831+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,15.26,9.0,0.0,Fa0/1,UP,10.2.5.108
+2026-07-28T23:23:03.250328+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,49.5,3.13,0.0,Gi0/0/0,UP,10.2.4.248
+2026-07-28T23:23:03.250808+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Packet loss 28.34% - circuit down,92.23,24.45,28.34,Gi1/0/3,UP,10.0.0.215
+2026-07-28T23:23:03.251321+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.2.1.129 hold-timer expiring,35.88,11.99,1.13,Gi1/0/1,UP,10.2.1.129
+2026-07-28T23:23:03.251760+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.05ms on dist-sw-01,47.45,9.05,1.25,Gi1/0/1,UP,10.0.2.176
+2026-07-28T23:23:03.252334+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,14.41,8.87,0.0,Fa0/1,UP,10.1.3.131
+2026-07-28T23:23:03.252825+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 40.11% on dist-sw-02,40.11,11.91,1.95,Gi1/0/2,UP,10.0.0.37
+2026-07-28T23:23:03.253362+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.79ms on core-rtr-01,86.92,5.79,1.4,Gi0/0/2,UP,10.1.2.253
+2026-07-28T23:23:03.254092+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,16.45,7.72,0.0,Fa0/3,UP,10.2.1.83
+2026-07-28T23:23:03.254711+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,45.39,9.68,1.68,Gi1/0/24,UP,10.0.0.42
+2026-07-28T23:23:03.255316+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.53ms on core-rtr-01,78.59,5.53,1.8,Gi0/0/0,UP,10.0.2.22
+2026-07-28T23:23:03.255838+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.1.4.162,68.24,14.21,8.25,Gi1/0/2,UP,10.1.4.162
+2026-07-28T23:23:03.256304+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.3.184 keepalive received,25.4,6.22,0.0,Gi1/0/1,UP,10.1.3.184
+2026-07-28T23:23:03.256748+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.0.68 hold-timer expiring,26.59,14.0,1.77,Fa0/24,UP,10.1.0.68
+2026-07-28T23:23:03.257179+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,18.34,5.89,0.0,Gi1/0/1,UP,10.2.0.238
+2026-07-28T23:23:03.257650+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Packet loss 7.89% exceeds SLO on dist-sw-01,72.28,12.07,7.89,Gi1/0/2,UP,10.2.3.220
+2026-07-28T23:23:03.258075+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 78.63% on core-rtr-02,78.63,5.28,0.55,Te0/1/0,UP,10.2.2.138
+2026-07-28T23:23:03.258468+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 48.0% on dist-sw-01,48.0,11.26,1.46,Gi1/0/24,UP,10.0.0.33
+2026-07-28T23:23:03.258956+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,43.48,2.85,0.0,Gi0/0/0,UP,10.0.4.39
+2026-07-28T23:23:03.259400+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 82.91% on core-rtr-01,82.91,5.55,0.69,Gi0/0/2,UP,10.2.0.19
+2026-07-28T23:23:03.260029+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/3,15.61,9.47,0.0,Fa0/3,UP,10.2.5.50
+2026-07-28T23:23:03.260644+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.3.136 hold-timer expiring,86.17,4.69,1.77,Gi0/0/0,UP,10.2.3.136
+2026-07-28T23:23:03.261237+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Interface Fa0/1 DOWN - service impact,63.6,27.07,19.74,Fa0/1,DOWN,10.2.2.49
+2026-07-28T23:23:03.261682+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.1.158 keepalive received,24.61,8.07,0.0,Gi1/0/1,UP,10.0.1.158
+2026-07-28T23:23:03.262137+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.0.153 keepalive received,17.4,9.71,0.0,Fa0/2,UP,10.2.0.153
+2026-07-28T23:23:03.262743+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 22.53% on access-sw-01,22.53,13.24,0.55,Fa0/1,UP,10.2.3.52
+2026-07-28T23:23:03.263180+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.0.103 hold-timer expiring,27.51,13.35,1.76,Fa0/1,UP,10.2.0.103
+2026-07-28T23:23:03.263684+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,56.27,2.71,0.0,Gi0/0/0,UP,10.0.5.154
+2026-07-28T23:23:03.264184+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,17.9,6.31,0.0,Gi1/0/2,UP,10.2.5.171
+2026-07-28T23:23:03.264610+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.4.215 keepalive received,19.7,5.81,0.0,Gi1/0/2,UP,10.1.4.215
+2026-07-28T23:23:03.265053+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: CPU at 45.32% - process crash risk,45.32,31.32,24.08,Fa0/1,UP,10.2.2.222
+2026-07-28T23:23:03.265514+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,OSPF adjacency lost with 10.2.5.27,36.39,17.42,6.26,Fa0/2,DOWN,10.2.5.27
+2026-07-28T23:23:03.265930+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.7ms on dist-sw-01,47.41,9.7,1.84,Gi1/0/3,UP,10.2.3.187
+2026-07-28T23:23:03.266372+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,16.38,4.8,0.0,Fa0/3,UP,10.0.2.214
+2026-07-28T23:23:03.266883+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,21.37,5.63,0.0,Gi1/0/1,UP,10.2.1.40
+2026-07-28T23:23:03.267685+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Te0/1/0 went UP - link failure,86.19,9.15,9.89,Te0/1/0,UP,10.0.1.71
+2026-07-28T23:23:03.268224+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 22.74% on access-sw-01,22.74,15.14,1.45,Fa0/1,UP,10.2.5.181
+2026-07-28T23:23:03.268753+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,24.15,7.16,0.0,Gi1/0/24,UP,10.0.5.44
+2026-07-28T23:23:03.269230+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,18.73,9.72,0.0,Gi1/0/3,UP,10.2.4.197
+2026-07-28T23:23:03.269765+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,25.44,6.06,0.0,Gi1/0/2,UP,10.0.1.96
+2026-07-28T23:23:03.270350+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.7ms on dist-sw-01,43.44,10.7,1.14,Gi1/0/2,UP,10.0.5.128
+2026-07-28T23:23:03.270889+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: access-sw-01 unreachable - RTT 31.3ms,54.9,31.3,32.26,Fa0/24,UP,10.1.2.97
+2026-07-28T23:23:03.271331+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 27.74% on access-sw-01,27.74,15.52,1.94,Fa0/24,DOWN,10.1.1.180
+2026-07-28T23:23:03.271929+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.2.50 keepalive received,18.42,9.84,0.0,Fa0/3,UP,10.0.2.50
+2026-07-28T23:23:03.272409+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,35.86,12.67,1.65,Gi1/0/1,UP,10.1.5.45
+2026-07-28T23:23:03.272857+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.0.169 keepalive received,32.79,2.21,0.0,Gi0/0/0,UP,10.1.0.169
+2026-07-28T23:23:03.273399+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,34.48,2.88,0.0,Gi0/0/1,UP,10.2.3.181
+2026-07-28T23:23:03.273878+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,26.68,7.11,0.0,Gi1/0/1,UP,10.2.3.77
+2026-07-28T23:23:03.274439+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.0.78 hold-timer expiring,74.93,5.5,1.92,Te0/1/0,UP,10.2.0.78
+2026-07-28T23:23:03.274947+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.0.1.118 hold-timer expiring,78.0,6.38,1.1,Te0/1/0,UP,10.0.1.118
+2026-07-28T23:23:03.275474+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,15.79,10.39,0.0,Fa0/2,UP,10.1.0.163
+2026-07-28T23:23:03.276008+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,48.55,3.35,0.0,Gi0/0/1,UP,10.0.5.83
+2026-07-28T23:23:03.276563+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,23.31,4.03,0.0,Gi1/0/3,UP,10.1.2.242
+2026-07-28T23:23:03.277074+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.2.80 keepalive received,30.07,5.91,0.0,Gi1/0/1,UP,10.0.2.80
+2026-07-28T23:23:03.277898+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.0.1.31 hold-timer expiring,34.86,10.12,0.87,Gi1/0/1,UP,10.0.1.31
+2026-07-28T23:23:03.278400+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.4.238 keepalive received,11.99,7.92,0.0,Fa0/3,UP,10.0.4.238
+2026-07-28T23:23:03.278832+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.2.81 keepalive received,14.64,7.68,0.0,Fa0/2,UP,10.2.2.81
+2026-07-28T23:23:03.279315+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.1.53 hold-timer expiring,22.67,15.45,1.03,Fa0/2,UP,10.2.1.53
+2026-07-28T23:23:03.279766+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,43.84,3.88,0.0,Te0/1/0,UP,10.2.4.152
+2026-07-28T23:23:03.280293+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.1.160 keepalive received,50.8,3.53,0.0,Gi0/0/2,UP,10.0.1.160
+2026-07-28T23:23:03.280762+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.1.45 keepalive received,22.55,6.18,0.0,Gi1/0/2,UP,10.1.1.45
+2026-07-28T23:23:03.281286+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.0.44 keepalive received,28.65,7.17,0.0,Gi1/0/2,UP,10.0.0.44
+2026-07-28T23:23:03.281757+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/1 is UP - flapping detected,28.12,15.75,1.16,Fa0/1,UP,10.1.1.87
+2026-07-28T23:23:03.282252+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,44.73,3.42,0.0,Gi0/0/1,UP,10.0.5.217
+2026-07-28T23:23:03.282722+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.3.35 keepalive received,19.88,5.14,0.0,Gi1/0/3,UP,10.0.3.35
+2026-07-28T23:23:03.283222+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 77.65% on core-rtr-02,77.65,5.93,1.4,Te0/1/0,UP,10.2.1.177
+2026-07-28T23:23:03.283741+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,21.39,5.37,0.0,Gi1/0/3,UP,10.0.5.84
+2026-07-28T23:23:03.284197+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,26.46,3.49,0.0,Gi1/0/2,UP,10.0.4.165
+2026-07-28T23:23:03.284704+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,34.48,11.24,1.96,Gi1/0/3,UP,10.0.3.246
+2026-07-28T23:23:03.285175+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,24.43,5.49,0.0,Gi1/0/3,UP,10.2.4.123
+2026-07-28T23:23:03.285666+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.0.5.162 hold-timer expiring,39.01,10.5,0.74,Gi1/0/3,UP,10.0.5.162
+2026-07-28T23:23:03.286178+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,46.75,2.54,0.0,Gi0/0/2,UP,10.2.1.6
+2026-07-28T23:23:03.286668+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,20.94,7.11,0.0,Gi1/0/3,UP,10.2.0.216
+2026-07-28T23:23:03.287224+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,22.08,8.21,0.0,Gi1/0/3,UP,10.1.3.109
+2026-07-28T23:23:03.287648+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.2.0.122,99.16,6.31,9.76,Gi0/0/2,UP,10.2.0.122
+2026-07-28T23:23:03.288192+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,43.56,2.76,0.0,Gi0/0/0,UP,10.0.0.130
+2026-07-28T23:23:03.288639+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,40.06,3.01,0.0,Te0/1/0,UP,10.2.2.187
+2026-07-28T23:23:03.289124+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,55.44,3.21,0.0,Te0/1/0,UP,10.0.4.79
+2026-07-28T23:23:03.289617+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,11.18,15.21,Te0/1/0,UP,10.1.5.222
+2026-07-28T23:23:03.290085+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,25.51,6.41,0.0,Gi1/0/24,UP,10.1.5.120
+2026-07-28T23:23:03.290654+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.2.196 keepalive received,21.98,5.2,0.0,Gi1/0/2,UP,10.0.2.196
+2026-07-28T23:23:03.291141+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Packet loss 22.59% - circuit down,48.36,26.85,22.59,Fa0/3,UP,10.0.1.47
+2026-07-28T23:23:03.291613+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Packet loss 4.38% exceeds SLO on dist-sw-01,68.54,17.82,4.38,Gi1/0/1,UP,10.0.5.51
+2026-07-28T23:23:03.292065+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,25.06,5.98,0.0,Gi1/0/1,UP,10.1.5.57
+2026-07-28T23:23:03.292562+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,47.49,2.92,0.0,Gi0/0/2,UP,10.0.3.173
+2026-07-28T23:23:03.293093+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.3.48 keepalive received,46.84,2.86,0.0,Gi0/0/1,UP,10.2.3.48
+2026-07-28T23:23:03.293475+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,11.4,7.23,0.0,Fa0/2,UP,10.2.1.83
+2026-07-28T23:23:03.293987+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.0.160 keepalive received,15.09,6.94,0.0,Fa0/2,UP,10.1.0.160
+2026-07-28T23:23:03.294585+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,73.68,5.49,1.82,Gi0/0/1,UP,10.0.4.60
+2026-07-28T23:23:03.295053+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 11.82ms on dist-sw-01,45.67,11.82,1.38,Gi1/0/3,UP,10.1.0.91
+2026-07-28T23:23:03.295480+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 11.28ms on dist-sw-02,35.32,11.28,1.43,Gi1/0/2,UP,10.1.5.84
+2026-07-28T23:23:03.296046+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,50.17,2.97,0.0,Gi0/0/1,UP,10.1.2.94
+2026-07-28T23:23:03.296652+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.3.106 keepalive received,13.56,9.12,0.0,Fa0/24,UP,10.2.3.106
+2026-07-28T23:23:03.297108+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,33.84,4.14,0.0,Gi0/0/1,UP,10.1.3.132
+2026-07-28T23:23:03.297514+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,49.7,2.73,0.0,Gi0/0/0,UP,10.2.0.123
+2026-07-28T23:23:03.297947+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,26.76,8.57,0.0,Gi1/0/2,UP,10.2.3.197
+2026-07-28T23:23:03.298601+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,19.44,5.01,0.0,Gi1/0/24,UP,10.1.1.26
+2026-07-28T23:23:03.299027+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,OSPF adjacency lost with 10.2.0.139,56.14,17.46,7.98,Gi1/0/2,UP,10.2.0.139
+2026-07-28T23:23:03.299511+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 49.57% on dist-sw-01,49.57,9.81,0.77,Gi1/0/2,UP,10.2.3.87
+2026-07-28T23:23:03.299946+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 76.7% on core-rtr-02,76.7,6.6,1.73,Gi0/0/0,UP,10.2.3.76
+2026-07-28T23:23:03.300535+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.2.5.239 hold-timer expiring,38.25,11.72,1.12,Gi1/0/2,UP,10.2.5.239
+2026-07-28T23:23:03.301007+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 24.5% on access-sw-01,24.5,12.46,0.7,Fa0/2,UP,10.1.0.91
+2026-07-28T23:23:03.301508+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/3,11.76,9.14,0.0,Fa0/3,UP,10.2.4.131
+2026-07-28T23:23:03.301972+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.5.27 keepalive received,24.47,5.6,0.0,Gi1/0/1,UP,10.1.5.27
+2026-07-28T23:23:03.302417+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.4.220 keepalive received,21.07,7.35,0.0,Gi1/0/3,UP,10.1.4.220
+2026-07-28T23:23:03.302933+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.5.43 keepalive received,23.77,6.84,0.0,Gi1/0/2,UP,10.0.5.43
+2026-07-28T23:23:03.303431+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 38.95% on dist-sw-02,38.95,11.4,0.7,Gi1/0/3,UP,10.1.1.60
+2026-07-28T23:23:03.303946+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: Packet loss 16.89% - circuit down,89.34,21.03,16.89,Gi1/0/2,DOWN,10.1.4.107
+2026-07-28T23:23:03.304415+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Packet loss 23.15% - circuit down,100.0,10.71,23.15,Gi0/0/1,DOWN,10.2.3.91
+2026-07-28T23:23:03.304920+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,CPU threshold exceeded: 100.0% on core-rtr-02,100.0,8.42,9.61,Gi0/0/1,UP,10.0.3.182
+2026-07-28T23:23:03.305406+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,37.34,2.38,0.0,Gi0/0/0,UP,10.1.2.11
+2026-07-28T23:23:03.305882+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,47.17,3.25,0.0,Gi0/0/1,UP,10.2.5.157
+2026-07-28T23:23:03.306422+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,31.78,3.11,0.0,Gi0/0/1,UP,10.0.3.171
+2026-07-28T23:23:03.306914+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 12.58ms on dist-sw-02,40.36,12.58,0.64,Gi1/0/3,UP,10.0.0.9
+2026-07-28T23:23:03.307381+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,16.52,8.67,0.0,Fa0/24,UP,10.1.5.60
+2026-07-28T23:23:03.307961+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 9.79ms on dist-sw-02,33.43,9.79,0.56,Gi1/0/1,UP,10.0.2.152
+2026-07-28T23:23:03.308376+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Te0/1/0 is UP - flapping detected,69.48,6.19,1.48,Te0/1/0,UP,10.1.1.110
+2026-07-28T23:23:03.308860+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,18.26,6.96,0.0,Fa0/3,UP,10.2.5.85
+2026-07-28T23:23:03.309278+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: Packet loss 22.23% - circuit down,100.0,14.26,22.23,Gi0/0/0,UP,10.1.5.164
+2026-07-28T23:23:03.309672+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,OSPF adjacency lost with 10.0.3.14,41.54,18.91,8.53,Fa0/1,UP,10.0.3.14
+2026-07-28T23:23:03.310053+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.1.1.172 hold-timer expiring,78.93,6.16,1.79,Te0/1/0,UP,10.1.1.172
+2026-07-28T23:23:03.310465+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,CPU threshold exceeded: 100.0% on core-rtr-01,100.0,8.87,7.38,Gi0/0/0,UP,10.1.4.160
+2026-07-28T23:23:03.310857+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.46ms on dist-sw-02,40.76,10.46,0.65,Gi1/0/3,DOWN,10.2.0.157
+2026-07-28T23:23:03.311222+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,34.72,12.37,1.18,Gi1/0/2,UP,10.1.0.161
+2026-07-28T23:23:03.311670+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,51.61,2.86,0.0,Gi0/0/0,UP,10.0.2.41
+2026-07-28T23:23:03.312152+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 42.31% on dist-sw-01,42.31,11.7,1.2,Gi1/0/1,UP,10.2.0.251
+2026-07-28T23:23:03.312661+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,31.22,6.23,0.0,Gi1/0/24,UP,10.2.5.116
+2026-07-28T23:23:03.313138+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 73.07% on core-rtr-01,73.07,5.25,1.21,Gi0/0/1,UP,10.2.5.155
+2026-07-28T23:23:03.313559+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.0.158 hold-timer expiring,29.59,14.09,0.61,Fa0/1,UP,10.1.0.158
+2026-07-28T23:23:03.314061+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.7,7.33,0.0,Fa0/24,UP,10.0.2.230
+2026-07-28T23:23:03.314507+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,28.53,3.58,0.0,Te0/1/0,UP,10.1.5.106
+2026-07-28T23:23:03.314971+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,39.56,2.72,0.0,Te0/1/0,UP,10.1.4.31
+2026-07-28T23:23:03.315422+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,24.27,3.01,0.0,Gi0/0/1,UP,10.0.5.103
+2026-07-28T23:23:03.315925+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,44.58,3.33,0.0,Te0/1/0,UP,10.1.2.158
+2026-07-28T23:23:03.316345+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,21.03,7.67,0.0,Fa0/24,UP,10.0.4.199
+2026-07-28T23:23:03.316754+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,43.33,3.73,0.0,Gi0/0/2,UP,10.1.3.174
+2026-07-28T23:23:03.317289+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.66ms on core-rtr-01,89.09,5.66,0.58,Gi0/0/1,UP,10.1.5.16
+2026-07-28T23:23:03.317691+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,20.74,6.19,0.0,Gi1/0/1,UP,10.1.5.125
+2026-07-28T23:23:03.318108+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.4.252 keepalive received,44.63,4.27,0.0,Gi0/0/1,UP,10.1.4.252
+2026-07-28T23:23:03.318600+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,22.87,4.22,0.0,Gi1/0/3,UP,10.1.2.241
+2026-07-28T23:23:03.319068+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,18.82,7.78,0.0,Gi1/0/3,UP,10.1.1.53
+2026-07-28T23:23:03.319526+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.4.119 keepalive received,51.77,3.63,0.0,Gi0/0/1,UP,10.0.4.119
+2026-07-28T23:23:03.319950+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,25.72,7.79,0.0,Gi1/0/2,UP,10.1.4.219
+2026-07-28T23:23:03.320349+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.5.216 keepalive received,12.88,7.51,0.0,Fa0/24,UP,10.2.5.216
+2026-07-28T23:23:03.320740+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,27.65,3.78,0.0,Te0/1/0,UP,10.1.1.130
+2026-07-28T23:23:03.321133+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,CPU threshold exceeded: 31.03% on access-sw-01,31.03,17.83,6.49,Fa0/24,DOWN,10.1.5.123
+2026-07-28T23:23:03.321509+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 23.52% on access-sw-01,23.52,14.63,1.69,Fa0/3,UP,10.1.2.104
+2026-07-28T23:23:03.321957+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,48.06,3.29,0.0,Gi0/0/1,UP,10.1.0.51
+2026-07-28T23:23:03.322363+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: core-rtr-02 unreachable - RTT 12.05ms,100.0,12.05,14.63,Gi0/0/0,DOWN,10.0.2.29
+2026-07-28T23:23:03.322780+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,CPU threshold exceeded: 39.57% on access-sw-01,39.57,21.78,4.33,Fa0/2,UP,10.2.1.58
+2026-07-28T23:23:03.323201+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,37.48,3.99,0.0,Te0/1/0,UP,10.1.4.84
+2026-07-28T23:23:03.323676+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,40.76,2.93,0.0,Te0/1/0,UP,10.0.3.1
+2026-07-28T23:23:03.324315+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,14.82,10.1,0.0,Fa0/24,UP,10.0.4.125
+2026-07-28T23:23:03.324856+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.3.88 hold-timer expiring,39.68,11.0,1.05,Gi1/0/24,UP,10.0.3.88
+2026-07-28T23:23:03.325352+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,45.77,3.43,0.0,Gi0/0/1,UP,10.1.1.62
+2026-07-28T23:23:03.325816+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/2 is UP,52.78,1.63,0.0,Gi0/0/2,UP,10.2.2.114
+2026-07-28T23:23:03.326330+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 8.63% exceeds SLO on access-sw-01,33.65,21.61,8.63,Fa0/24,UP,10.0.3.104
+2026-07-28T23:23:03.326742+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,22.06,6.29,0.0,Gi1/0/3,UP,10.1.1.231
+2026-07-28T23:23:03.327151+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,37.59,2.59,0.0,Gi0/0/2,UP,10.2.2.250
+2026-07-28T23:23:03.327692+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,58.04,4.21,0.0,Gi0/0/1,UP,10.1.4.7
+2026-07-28T23:23:03.328113+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,44.52,3.74,0.0,Gi0/0/0,UP,10.2.5.153
+2026-07-28T23:23:03.328512+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/1 is DOWN - flapping detected,38.66,9.42,1.06,Gi1/0/1,DOWN,10.2.1.19
+2026-07-28T23:23:03.328924+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,18.42,6.06,0.0,Gi1/0/1,UP,10.0.0.139
+2026-07-28T23:23:03.329324+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/24,25.53,5.46,0.0,Gi1/0/24,UP,10.1.3.65
+2026-07-28T23:23:03.329721+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.0.183 keepalive received,31.41,6.61,0.0,Gi1/0/24,UP,10.1.0.183
+2026-07-28T23:23:03.330239+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.1.176 keepalive received,52.64,2.72,0.0,Gi0/0/2,UP,10.1.1.176
+2026-07-28T23:23:03.330764+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.0.0.248,93.99,7.7,6.46,Gi0/0/1,UP,10.0.0.248
+2026-07-28T23:23:03.331217+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,17.53,5.37,0.0,Gi1/0/2,UP,10.1.0.65
+2026-07-28T23:23:03.331673+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,22.42,6.57,0.0,Gi1/0/3,UP,10.0.5.247
+2026-07-28T23:23:03.332239+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,49.91,2.86,0.0,Gi0/0/0,UP,10.1.1.36
+2026-07-28T23:23:03.332704+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.0.79 keepalive received,18.86,6.13,0.0,Gi1/0/1,UP,10.0.0.79
+2026-07-28T23:23:03.333104+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,38.86,3.49,0.0,Gi0/0/0,UP,10.2.0.59
+2026-07-28T23:23:03.333518+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,73.38,4.62,0.95,Gi0/0/1,UP,10.0.3.229
+2026-07-28T23:23:03.334046+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.7ms on dist-sw-02,43.33,10.7,1.56,Gi1/0/1,UP,10.1.0.186
+2026-07-28T23:23:03.334485+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,30.86,3.35,0.0,Gi1/0/3,UP,10.1.5.164
+2026-07-28T23:23:03.334886+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.1.2.165,100.0,7.82,2.92,Te0/1/0,DOWN,10.1.2.165
+2026-07-28T23:23:03.335290+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,30.95,5.83,0.0,Gi1/0/2,UP,10.2.2.179
+2026-07-28T23:23:03.335670+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.0.226 keepalive received,59.18,3.58,0.0,Te0/1/0,UP,10.0.0.226
+2026-07-28T23:23:03.336065+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,32.27,6.19,0.0,Gi1/0/2,UP,10.2.4.105
+2026-07-28T23:23:03.336539+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/24 UP - service impact,100.0,20.85,13.93,Gi1/0/24,UP,10.0.4.160
+2026-07-28T23:23:03.337024+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,22.92,10.02,0.0,Fa0/2,UP,10.1.5.206
+2026-07-28T23:23:03.337438+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Packet loss 5.07% exceeds SLO on core-rtr-01,100.0,8.55,5.07,Gi0/0/2,UP,10.1.3.161
+2026-07-28T23:23:03.337875+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.69,7.04,0.0,Fa0/24,UP,10.0.3.198
+2026-07-28T23:23:03.338261+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,26.75,6.9,0.0,Fa0/24,UP,10.2.5.41
+2026-07-28T23:23:03.338774+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.2.192 keepalive received,44.99,2.93,0.0,Gi0/0/0,UP,10.1.2.192
+2026-07-28T23:23:03.339238+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,49.71,2.62,0.0,Te0/1/0,UP,10.2.2.127
+2026-07-28T23:23:03.339833+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,OSPF adjacency lost with 10.2.3.33,86.89,8.52,9.09,Gi0/0/1,UP,10.2.3.33
+2026-07-28T23:23:03.340318+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,44.37,2.43,0.0,Gi0/0/2,UP,10.0.2.171
+2026-07-28T23:23:03.340789+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,18.37,8.04,0.0,Fa0/1,UP,10.1.0.195
+2026-07-28T23:23:03.341225+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,24.85,8.58,0.0,Gi1/0/2,UP,10.1.4.73
+2026-07-28T23:23:03.341682+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,13.79,10.46,0.0,Fa0/3,UP,10.2.2.97
+2026-07-28T23:23:03.342099+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.61ms on dist-sw-02,41.99,10.61,1.23,Gi1/0/2,UP,10.2.3.178
+2026-07-28T23:23:03.342700+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.37,7.56,0.0,Fa0/3,UP,10.0.0.177
+2026-07-28T23:23:03.343143+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 12.89ms on dist-sw-02,40.45,12.89,0.67,Gi1/0/3,UP,10.2.3.235
+2026-07-28T23:23:03.343589+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.83ms on core-rtr-01,80.59,4.83,0.77,Gi0/0/0,UP,10.1.0.204
+2026-07-28T23:23:03.344117+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.5.61 keepalive received,14.5,7.99,0.0,Fa0/2,UP,10.0.5.61
+2026-07-28T23:23:03.344593+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,34.55,6.11,0.0,Gi1/0/24,UP,10.1.1.91
+2026-07-28T23:23:03.345022+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,35.2,2.42,0.0,Te0/1/0,UP,10.1.5.105
+2026-07-28T23:23:03.345460+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,38.21,9.65,1.33,Gi1/0/24,UP,10.0.1.104
+2026-07-28T23:23:03.345942+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/2 is DOWN - flapping detected,24.53,14.68,1.9,Fa0/2,DOWN,10.1.1.101
+2026-07-28T23:23:03.346420+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.0.6 hold-timer expiring,27.76,13.8,1.46,Fa0/1,UP,10.1.0.6
+2026-07-28T23:23:03.346822+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Packet loss 27.46% - circuit down,100.0,10.43,27.46,Te0/1/0,DOWN,10.2.0.110
+2026-07-28T23:23:03.347230+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,35.12,2.9,0.0,Gi0/0/1,UP,10.0.0.26
+2026-07-28T23:23:03.347658+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 7.44% exceeds SLO on dist-sw-02,59.65,14.69,7.44,Gi1/0/1,UP,10.0.2.177
+2026-07-28T23:23:03.348053+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.5.95 keepalive received,26.03,5.77,0.0,Gi1/0/3,UP,10.1.5.95
+2026-07-28T23:23:03.348532+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,21.89,4.53,0.0,Gi1/0/1,UP,10.1.1.164
+2026-07-28T23:23:03.348936+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,22.47,4.82,0.0,Gi1/0/3,UP,10.0.0.187
+2026-07-28T23:23:03.349483+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: Interface Te0/1/0 UP - service impact,100.0,14.63,34.58,Te0/1/0,UP,10.1.2.48
+2026-07-28T23:23:03.350024+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.49ms on core-rtr-02,68.74,6.49,1.71,Gi0/0/0,UP,10.2.0.137
+2026-07-28T23:23:03.350483+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,36.95,4.49,0.0,Gi0/0/1,UP,10.0.4.140
+2026-07-28T23:23:03.350896+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.3.164 keepalive received,28.15,6.81,0.0,Gi1/0/3,UP,10.1.3.164
+2026-07-28T23:23:03.351314+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,15.09,7.95,0.0,Fa0/24,UP,10.1.3.146
+2026-07-28T23:23:03.351719+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,16.73,8.18,0.0,Fa0/2,UP,10.2.2.124
+2026-07-28T23:23:03.352164+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,24.49,4.71,0.0,Te0/1/0,UP,10.2.2.252
+2026-07-28T23:23:03.352634+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 5.81% exceeds SLO on access-sw-01,38.95,19.95,5.81,Fa0/2,DOWN,10.1.3.152
+2026-07-28T23:23:03.353022+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,23.33,4.35,0.0,Gi1/0/3,UP,10.0.1.16
+2026-07-28T23:23:03.353445+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,50.78,1.5,0.0,Gi0/0/1,UP,10.1.5.248
+2026-07-28T23:23:03.353902+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: core-rtr-01 unreachable - RTT 12.0ms,100.0,12.0,12.03,Gi0/0/0,DOWN,10.1.2.117
+2026-07-28T23:23:03.354449+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,17.64,9.87,0.0,Fa0/2,UP,10.2.2.243
+2026-07-28T23:23:03.354915+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.4.26 keepalive received,53.55,3.15,0.0,Gi0/0/0,UP,10.1.4.26
+2026-07-28T23:23:03.355522+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,19.46,4.93,0.0,Gi1/0/2,UP,10.2.4.214
+2026-07-28T23:23:03.356083+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/0 is UP - flapping detected,82.13,4.56,1.25,Gi0/0/0,UP,10.2.5.210
+2026-07-28T23:23:03.356561+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.1.252 keepalive received,46.67,3.39,0.0,Te0/1/0,UP,10.1.1.252
+2026-07-28T23:23:03.357005+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,63.28,3.81,0.0,Gi0/0/2,UP,10.2.5.91
+2026-07-28T23:23:03.357520+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,52.6,3.51,0.0,Te0/1/0,UP,10.1.1.138
+2026-07-28T23:23:03.357969+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.0.1.159,100.0,7.44,6.96,Te0/1/0,DOWN,10.0.1.159
+2026-07-28T23:23:03.358394+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,26.55,6.65,0.0,Gi1/0/24,UP,10.1.3.74
+2026-07-28T23:23:03.358881+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,25.0,8.53,0.0,Gi1/0/1,UP,10.0.2.21
+2026-07-28T23:23:03.359357+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,56.71,3.66,0.0,Gi0/0/0,UP,10.2.3.224
+2026-07-28T23:23:03.359829+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,100.0,7.91,4.38,Gi0/0/1,UP,10.0.0.248
+2026-07-28T23:23:03.360258+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Te0/1/0 is UP - flapping detected,65.22,6.8,1.21,Te0/1/0,UP,10.0.4.3
+2026-07-28T23:23:03.360750+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,25.65,5.56,0.0,Gi1/0/3,UP,10.0.1.49
+2026-07-28T23:23:03.361372+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.0.171 keepalive received,30.09,6.4,0.0,Gi1/0/1,UP,10.2.0.171
+2026-07-28T23:23:03.361838+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.2.151 keepalive received,11.26,7.94,0.0,Fa0/3,UP,10.2.2.151
+2026-07-28T23:23:03.362213+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,87.86,5.1,0.6,Gi0/0/1,UP,10.2.3.171
+2026-07-28T23:23:03.362627+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,38.54,2.59,0.0,Te0/1/0,UP,10.2.2.155
+2026-07-28T23:23:03.363028+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,13.91,7.13,0.0,Fa0/24,UP,10.0.5.203
+2026-07-28T23:23:03.363428+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.0.1.145 hold-timer expiring,85.89,5.46,0.51,Te0/1/0,UP,10.0.1.145
+2026-07-28T23:23:03.363851+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 27.8% on access-sw-01,27.8,12.14,1.58,Fa0/3,UP,10.1.0.145
+2026-07-28T23:23:03.364274+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,50.04,3.79,0.0,Te0/1/0,UP,10.1.0.253
+2026-07-28T23:23:03.364632+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,28.97,7.07,0.0,Gi1/0/2,UP,10.2.4.91
+2026-07-28T23:23:03.365035+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,23.34,4.93,0.0,Gi1/0/3,UP,10.0.2.252
+2026-07-28T23:23:03.365413+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,57.61,2.45,0.0,Gi0/0/0,UP,10.2.4.211
+2026-07-28T23:23:03.365799+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,29.08,6.08,0.0,Gi1/0/2,UP,10.1.2.176
+2026-07-28T23:23:03.366162+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.5.171 keepalive received,46.48,4.39,0.0,Gi0/0/1,UP,10.0.5.171
+2026-07-28T23:23:03.366605+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.5.93 keepalive received,34.71,8.22,0.0,Gi1/0/1,UP,10.0.5.93
+2026-07-28T23:23:03.367071+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,37.66,3.44,0.0,Gi0/0/1,UP,10.2.1.169
+2026-07-28T23:23:03.367460+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,42.24,2.55,0.0,Gi0/0/1,UP,10.1.3.92
+2026-07-28T23:23:03.367975+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Packet loss 18.36% - circuit down,100.0,9.57,18.36,Gi0/0/2,UP,10.2.5.206
+2026-07-28T23:23:03.368345+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: CPU at 77.32% - process crash risk,77.32,21.14,32.15,Gi1/0/1,DOWN,10.0.4.25
+2026-07-28T23:23:03.368730+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.01,8.54,0.0,Fa0/2,UP,10.1.3.1
+2026-07-28T23:23:03.369162+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.4.5 hold-timer expiring,29.39,14.07,1.03,Fa0/1,DOWN,10.1.4.5
+2026-07-28T23:23:03.369619+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/1 DOWN - service impact,84.77,24.72,11.09,Gi1/0/1,DOWN,10.0.3.234
+2026-07-28T23:23:03.370008+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,26.24,25.4,Gi1/0/3,DOWN,10.1.1.178
+2026-07-28T23:23:03.370420+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,87.04,5.25,1.53,Gi0/0/1,UP,10.0.5.89
+2026-07-28T23:23:03.370838+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,49.07,3.34,0.0,Gi0/0/1,UP,10.2.3.129
+2026-07-28T23:23:03.371335+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,25.33,9.5,0.0,Gi1/0/1,UP,10.1.4.176
+2026-07-28T23:23:03.371717+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Packet loss 3.21% exceeds SLO on core-rtr-01,100.0,6.59,3.21,Gi0/0/0,UP,10.0.4.111
+2026-07-28T23:23:03.372198+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/3 is UP - flapping detected,29.24,13.08,1.78,Fa0/3,UP,10.1.2.244
+2026-07-28T23:23:03.372685+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,22.11,3.47,0.0,Gi1/0/24,UP,10.2.1.144
+2026-07-28T23:23:03.373139+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,40.98,10.23,1.51,Gi1/0/2,UP,10.2.0.219
+2026-07-28T23:23:03.373584+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,14.9,8.27,0.0,Fa0/24,UP,10.2.2.144
+2026-07-28T23:23:03.373982+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,22.55,5.28,0.0,Gi1/0/1,UP,10.2.5.87
+2026-07-28T23:23:03.374389+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 43.98% on dist-sw-02,43.98,12.1,1.67,Gi1/0/2,UP,10.2.4.55
+2026-07-28T23:23:03.374880+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: Interface Te0/1/0 DOWN - service impact,100.0,12.21,18.9,Te0/1/0,DOWN,10.2.1.145
+2026-07-28T23:23:03.375332+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,31.6,3.33,0.0,Gi0/0/1,UP,10.2.3.50
+2026-07-28T23:23:03.375794+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 82.51% on core-rtr-01,82.51,5.67,1.57,Te0/1/0,UP,10.2.3.56
+2026-07-28T23:23:03.376265+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 12.33ms on dist-sw-02,42.13,12.33,0.73,Gi1/0/1,UP,10.1.5.115
+2026-07-28T23:23:03.376660+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.1.129 keepalive received,43.45,3.53,0.0,Gi0/0/0,UP,10.0.1.129
+2026-07-28T23:23:03.377170+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.4.244 keepalive received,17.3,11.58,0.0,Fa0/1,UP,10.0.4.244
+2026-07-28T23:23:03.377576+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,10.72,9.9,0.0,Gi1/0/2,UP,10.1.4.54
+2026-07-28T23:23:03.377963+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.4.157 hold-timer expiring,38.27,10.27,1.93,Gi1/0/2,UP,10.0.4.157
+2026-07-28T23:23:03.378367+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,29.64,7.21,0.0,Gi1/0/3,UP,10.1.2.209
+2026-07-28T23:23:03.378835+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,10.94,5.42,0.0,Fa0/24,UP,10.2.3.161
+2026-07-28T23:23:03.379286+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 38.65% on dist-sw-01,38.65,11.44,0.56,Gi1/0/24,UP,10.2.1.129
+2026-07-28T23:23:03.379773+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.1.74 keepalive received,15.53,7.08,0.0,Fa0/24,UP,10.1.1.74
+2026-07-28T23:23:03.380215+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,18.93,4.85,0.0,Gi1/0/2,UP,10.2.2.224
+2026-07-28T23:23:03.380673+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,35.51,3.92,0.0,Te0/1/0,UP,10.0.5.30
+2026-07-28T23:23:03.381096+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,15.42,9.72,0.0,Fa0/1,UP,10.0.5.84
+2026-07-28T23:23:03.381528+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.1.220 keepalive received,19.26,5.93,0.0,Gi1/0/2,UP,10.2.1.220
+2026-07-28T23:23:03.382030+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,18.02,7.29,0.0,Fa0/24,UP,10.1.3.27
+2026-07-28T23:23:03.382448+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,52.31,2.07,0.0,Te0/1/0,UP,10.2.4.182
+2026-07-28T23:23:03.383037+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/2 is UP - flapping detected,81.76,4.91,1.17,Gi0/0/2,UP,10.0.1.186
+2026-07-28T23:23:03.383435+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Latency spike to 13.64ms on access-sw-01,24.85,13.64,1.48,Fa0/24,UP,10.2.1.49
+2026-07-28T23:23:03.383848+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,74.55,5.16,1.57,Gi0/0/1,UP,10.1.2.113
+2026-07-28T23:23:03.384339+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 2.84% exceeds SLO on core-rtr-02,100.0,7.95,2.84,Te0/1/0,DOWN,10.2.1.198
+2026-07-28T23:23:03.384900+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,11.07,7.23,0.0,Gi1/0/1,UP,10.0.2.13
+2026-07-28T23:23:03.385494+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.2.3.157 keepalive received,36.21,2.12,0.0,Gi0/0/1,UP,10.2.3.157
+2026-07-28T23:23:03.386477+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,21.71,2.43,0.0,Te0/1/0,UP,10.2.2.222
+2026-07-28T23:23:03.386982+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,41.64,4.53,0.0,Te0/1/0,UP,10.1.1.124
+2026-07-28T23:23:03.387488+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,17.55,7.91,0.0,Fa0/1,UP,10.2.4.237
+2026-07-28T23:23:03.387960+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,16.25,7.68,0.0,Fa0/2,UP,10.1.4.231
+2026-07-28T23:23:03.388396+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.5.237 keepalive received,27.17,6.98,0.0,Gi1/0/2,UP,10.0.5.237
+2026-07-28T23:23:03.388879+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,21.32,5.43,0.0,Gi1/0/2,UP,10.0.1.28
+2026-07-28T23:23:03.389301+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,37.15,4.07,0.0,Gi0/0/1,UP,10.1.5.197
+2026-07-28T23:23:03.389779+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,10.6,6.98,0.0,Fa0/24,UP,10.1.5.239
+2026-07-28T23:23:03.390196+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.4.134 keepalive received,52.95,3.55,0.0,Gi0/0/2,UP,10.1.4.134
+2026-07-28T23:23:03.390659+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Latency spike to 14.6ms on access-sw-01,23.04,14.6,0.88,Fa0/2,UP,10.0.2.155
+2026-07-28T23:23:03.391130+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,44.51,2.81,0.0,Gi0/0/1,UP,10.0.1.10
+2026-07-28T23:23:03.391623+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 2.2% exceeds SLO on access-sw-01,37.34,18.33,2.2,Fa0/1,DOWN,10.1.3.182
+2026-07-28T23:23:03.392096+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Packet loss 23.82% - circuit down,64.24,35.67,23.82,Fa0/1,DOWN,10.2.4.202
+2026-07-28T23:23:03.392510+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: access-sw-01 unreachable - RTT 29.33ms,65.44,29.33,11.52,Fa0/1,DOWN,10.1.4.106
+2026-07-28T23:23:03.393028+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.4.100 hold-timer expiring,47.63,10.59,1.73,Gi1/0/3,UP,10.1.4.100
+2026-07-28T23:23:03.393574+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,18.39,8.39,0.0,Gi1/0/2,UP,10.1.1.88
+2026-07-28T23:23:03.394132+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,38.56,9.28,1.53,Gi1/0/2,UP,10.1.2.135
+2026-07-28T23:23:03.394569+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Interface Fa0/3 went UP - link failure,43.6,17.58,2.96,Fa0/3,UP,10.0.3.247
+2026-07-28T23:23:03.395009+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,30.16,6.17,0.0,Gi1/0/24,UP,10.2.1.110
+2026-07-28T23:23:03.395403+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Te0/1/0 is UP - flapping detected,70.76,6.69,1.73,Te0/1/0,UP,10.2.2.67
+2026-07-28T23:23:03.395799+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.1.64 hold-timer expiring,42.23,10.81,1.71,Gi1/0/1,UP,10.1.1.64
+2026-07-28T23:23:03.396212+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.0.187 hold-timer expiring,28.29,13.65,1.23,Fa0/2,UP,10.1.0.187
+2026-07-28T23:23:03.396609+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,20.74,5.71,0.0,Gi1/0/3,UP,10.1.5.219
+2026-07-28T23:23:03.397116+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 5.93ms on core-rtr-02,63.93,5.93,1.71,Gi0/0/1,UP,10.0.4.182
+2026-07-28T23:23:03.397539+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.4.110 hold-timer expiring,23.26,12.93,0.77,Fa0/1,UP,10.2.4.110
+2026-07-28T23:23:03.397995+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,25.83,5.38,0.0,Gi1/0/1,UP,10.2.5.148
+2026-07-28T23:23:03.398426+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,27.24,3.86,0.0,Gi1/0/2,UP,10.2.2.245
+2026-07-28T23:23:03.398884+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,27.36,3.26,0.0,Te0/1/0,UP,10.0.4.54
+2026-07-28T23:23:03.399320+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.3.22 hold-timer expiring,26.16,13.65,1.7,Fa0/24,UP,10.1.3.22
+2026-07-28T23:23:03.399716+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,32.46,3.42,0.0,Gi0/0/0,UP,10.1.4.45
+2026-07-28T23:23:03.400111+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.1.213 keepalive received,27.66,5.15,0.0,Gi1/0/24,UP,10.1.1.213
+2026-07-28T23:23:03.400562+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/2 is UP,34.77,2.53,0.0,Gi0/0/2,UP,10.1.3.77
+2026-07-28T23:23:03.400988+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.2.2.155,74.28,13.66,6.45,Gi1/0/3,UP,10.2.2.155
+2026-07-28T23:23:03.401550+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.6ms on core-rtr-01,74.5,5.6,1.5,Gi0/0/1,UP,10.2.4.69
+2026-07-28T23:23:03.402156+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,49.5,4.17,0.0,Gi0/0/1,UP,10.1.5.119
+2026-07-28T23:23:03.402571+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.4.136 keepalive received,8.42,6.2,0.0,Fa0/24,UP,10.1.4.136
+2026-07-28T23:23:03.403009+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,14.15,8.59,0.0,Fa0/24,UP,10.2.4.96
+2026-07-28T23:23:03.403494+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,19.67,5.71,0.0,Gi1/0/24,UP,10.2.5.54
+2026-07-28T23:23:03.403915+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,25.28,6.4,0.0,Gi1/0/3,UP,10.1.2.112
+2026-07-28T23:23:03.404500+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,27.89,4.55,0.0,Gi1/0/24,UP,10.1.0.170
+2026-07-28T23:23:03.405121+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,15.1,7.42,0.0,Gi1/0/2,UP,10.1.1.22
+2026-07-28T23:23:03.405679+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/2 is UP,39.71,3.38,0.0,Gi0/0/2,UP,10.2.5.22
+2026-07-28T23:23:03.406190+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.2.54 hold-timer expiring,24.96,12.81,0.67,Fa0/24,UP,10.1.2.54
+2026-07-28T23:23:03.406672+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Interface Fa0/24 went UP - link failure,35.45,19.35,2.17,Fa0/24,UP,10.1.2.10
+2026-07-28T23:23:03.407152+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.0.5.199 hold-timer expiring,38.51,10.6,1.25,Gi1/0/1,UP,10.0.5.199
+2026-07-28T23:23:03.407639+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,17.31,6.32,0.0,Fa0/3,UP,10.1.2.155
+2026-07-28T23:23:03.408132+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,30.73,7.81,0.0,Gi1/0/3,UP,10.0.5.108
+2026-07-28T23:23:03.408634+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 7.64% exceeds SLO on core-rtr-02,85.79,9.15,7.64,Te0/1/0,DOWN,10.0.2.149
+2026-07-28T23:23:03.409203+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.5.14 keepalive received,14.14,6.95,0.0,Fa0/1,UP,10.2.5.14
+2026-07-28T23:23:03.409745+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,29.37,7.78,0.0,Gi1/0/1,UP,10.0.4.66
+2026-07-28T23:23:03.410218+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,14.34,6.5,0.0,Gi1/0/1,UP,10.1.2.250
+2026-07-28T23:23:03.410737+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,10.6,8.88,0.0,Fa0/2,UP,10.1.4.210
+2026-07-28T23:23:03.411232+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,37.39,12.17,1.01,Gi1/0/3,UP,10.1.2.220
+2026-07-28T23:23:03.411650+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.2.1.196,100.0,7.8,2.2,Te0/1/0,UP,10.2.1.196
+2026-07-28T23:23:03.412138+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.1.4.66 hold-timer expiring,40.24,9.96,0.77,Gi1/0/1,UP,10.1.4.66
+2026-07-28T23:23:03.412631+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,CPU threshold exceeded: 49.73% on dist-sw-02,49.73,14.59,4.77,Gi1/0/2,UP,10.0.1.137
+2026-07-28T23:23:03.413102+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,24.5,4.34,0.0,Gi1/0/1,UP,10.1.0.70
+2026-07-28T23:23:03.413507+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 38.4% on dist-sw-02,38.4,12.03,0.55,Gi1/0/2,UP,10.1.5.124
+2026-07-28T23:23:03.413962+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,22.74,3.58,0.0,Gi0/0/1,UP,10.0.2.112
+2026-07-28T23:23:03.414381+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,50.06,2.39,0.0,Gi0/0/2,UP,10.2.5.110
+2026-07-28T23:23:03.414825+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.1.59 keepalive received,18.12,5.99,0.0,Gi1/0/2,UP,10.1.1.59
+2026-07-28T23:23:03.415338+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/3,18.91,8.76,0.0,Fa0/3,UP,10.1.0.21
+2026-07-28T23:23:03.415814+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.58ms on dist-sw-01,42.01,9.58,1.05,Gi1/0/3,UP,10.1.1.15
+2026-07-28T23:23:03.416343+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,9.21,9.52,0.0,Fa0/1,UP,10.1.2.96
+2026-07-28T23:23:03.416806+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/2 UP - service impact,99.21,21.03,25.5,Gi1/0/2,UP,10.2.1.139
+2026-07-28T23:23:03.417164+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,39.88,9.92,1.45,Gi1/0/24,UP,10.0.3.124
+2026-07-28T23:23:03.417555+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,23.36,7.24,0.0,Gi1/0/1,UP,10.0.2.19
+2026-07-28T23:23:03.418017+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,28.56,5.59,0.0,Gi1/0/24,UP,10.0.0.24
+2026-07-28T23:23:03.418530+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,40.85,3.25,0.0,Gi0/0/1,UP,10.2.3.91
+2026-07-28T23:23:03.419028+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,12.4,8.47,0.0,Fa0/1,UP,10.1.3.139
+2026-07-28T23:23:03.419560+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.2.205 keepalive received,23.46,5.26,0.0,Gi1/0/1,UP,10.1.2.205
+2026-07-28T23:23:03.420051+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 6.77% exceeds SLO on access-sw-01,36.93,23.02,6.77,Fa0/24,UP,10.1.4.243
+2026-07-28T23:23:03.420536+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,23.01,8.04,0.0,Gi1/0/1,UP,10.2.0.23
+2026-07-28T23:23:03.421030+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,12.33,8.29,0.0,Fa0/24,UP,10.2.0.20
+2026-07-28T23:23:03.421630+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,52.28,2.29,0.0,Te0/1/0,UP,10.0.4.13
+2026-07-28T23:23:03.422103+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.2.214 keepalive received,38.33,3.21,0.0,Gi0/0/1,UP,10.2.2.214
+2026-07-28T23:23:03.422687+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,12.04,7.68,0.0,Fa0/3,UP,10.1.3.251
+2026-07-28T23:23:03.423214+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,34.0,3.83,0.0,Te0/1/0,UP,10.0.2.171
+2026-07-28T23:23:03.423670+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: CPU at 93.05% - process crash risk,93.05,29.22,10.74,Gi1/0/3,DOWN,10.0.3.83
+2026-07-28T23:23:03.424131+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,47.21,2.19,0.0,Gi0/0/0,UP,10.0.2.42
+2026-07-28T23:23:03.424661+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.1.64 hold-timer expiring,41.88,11.3,1.59,Gi1/0/1,UP,10.0.1.64
+2026-07-28T23:23:03.425091+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,15.18,5.5,0.0,Gi1/0/1,UP,10.1.0.42
+2026-07-28T23:23:03.425492+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,37.48,3.37,0.0,Gi0/0/1,UP,10.0.4.32
+2026-07-28T23:23:03.425887+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,37.83,3.33,0.0,Te0/1/0,UP,10.0.1.232
+2026-07-28T23:23:03.426276+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Interface Fa0/3 UP - service impact,63.74,24.78,25.33,Fa0/3,UP,10.2.4.41
+2026-07-28T23:23:03.426707+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,41.63,4.01,0.0,Te0/1/0,UP,10.0.3.141
+2026-07-28T23:23:03.427171+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,34.99,2.77,0.0,Gi0/0/0,UP,10.2.5.218
+2026-07-28T23:23:03.427652+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,42.41,12.31,1.07,Gi1/0/2,UP,10.0.2.33
+2026-07-28T23:23:03.428054+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.0.4.68,100.0,7.14,3.95,Gi0/0/1,UP,10.0.4.68
+2026-07-28T23:23:03.428450+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 84.08% on core-rtr-01,84.08,5.34,0.57,Gi0/0/1,UP,10.1.4.31
+2026-07-28T23:23:03.428857+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,13.34,9.2,0.0,Fa0/1,UP,10.0.1.246
+2026-07-28T23:23:03.429352+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,34.69,3.26,0.0,Gi0/0/1,UP,10.1.4.187
+2026-07-28T23:23:03.429877+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.0.4.112 hold-timer expiring,27.23,14.2,0.87,Fa0/2,UP,10.0.4.112
+2026-07-28T23:23:03.430365+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Interface Gi1/0/3 went DOWN - link failure,67.79,12.65,3.15,Gi1/0/3,DOWN,10.0.0.54
+2026-07-28T23:23:03.430786+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.2.79 keepalive received,45.59,3.37,0.0,Gi0/0/1,UP,10.1.2.79
+2026-07-28T23:23:03.431209+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,26.7,7.47,0.0,Gi1/0/3,UP,10.2.5.30
+2026-07-28T23:23:03.431709+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 9.27% exceeds SLO on core-rtr-02,100.0,7.04,9.27,Te0/1/0,UP,10.0.2.122
+2026-07-28T23:23:03.432123+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.4.109 keepalive received,12.02,8.79,0.0,Fa0/24,UP,10.2.4.109
+2026-07-28T23:23:03.432582+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Packet loss 4.12% exceeds SLO on dist-sw-01,55.91,14.79,4.12,Gi1/0/2,UP,10.1.0.197
+2026-07-28T23:23:03.432965+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.2.218 keepalive received,8.02,8.24,0.0,Fa0/2,UP,10.2.2.218
+2026-07-28T23:23:03.433476+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Interface Te0/1/0 went DOWN - link failure,100.0,6.39,4.29,Te0/1/0,DOWN,10.0.4.31
+2026-07-28T23:23:03.434045+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.0.192 keepalive received,40.32,4.52,0.0,Gi0/0/0,UP,10.0.0.192
+2026-07-28T23:23:03.434567+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,11.27,6.98,0.0,Fa0/24,UP,10.1.4.195
+2026-07-28T23:23:03.435093+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,25.92,4.57,0.0,Gi1/0/2,UP,10.2.4.247
+2026-07-28T23:23:03.435642+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,12.53,8.57,0.0,Fa0/2,UP,10.0.5.157
+2026-07-28T23:23:03.436115+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,28.62,6.21,0.0,Gi1/0/1,UP,10.1.3.137
+2026-07-28T23:23:03.436632+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: CPU at 58.27% - process crash risk,58.27,34.36,17.85,Fa0/24,UP,10.0.2.97
+2026-07-28T23:23:03.437106+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,49.55,3.16,0.0,Gi0/0/1,UP,10.0.5.197
+2026-07-28T23:23:03.437611+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,39.5,2.83,0.0,Te0/1/0,UP,10.1.5.50
+2026-07-28T23:23:03.438077+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.2.5.117 hold-timer expiring,49.22,11.82,0.97,Gi1/0/1,UP,10.2.5.117
+2026-07-28T23:23:03.438533+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,30.41,3.38,0.0,Te0/1/0,UP,10.1.1.104
+2026-07-28T23:23:03.439031+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,17.78,6.25,0.0,Fa0/1,UP,10.1.3.94
+2026-07-28T23:23:03.439596+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 6.83% exceeds SLO on core-rtr-02,100.0,8.11,6.83,Gi0/0/0,UP,10.0.1.215
+2026-07-28T23:23:03.440146+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 26.97% on access-sw-01,26.97,13.59,1.03,Fa0/3,UP,10.2.1.11
+2026-07-28T23:23:03.440647+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,9.36,9.67,0.0,Fa0/3,UP,10.0.1.164
+2026-07-28T23:23:03.441178+00:00,core-rtr-02,10.0.0.2,core-router,CRITICAL,CRITICAL: Interface Te0/1/0 UP - service impact,100.0,12.42,10.12,Te0/1/0,UP,10.1.0.96
+2026-07-28T23:23:03.441743+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Interface Gi0/0/2 went UP - link failure,100.0,7.64,4.44,Gi0/0/2,UP,10.2.4.82
+2026-07-28T23:23:03.442308+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,OSPF adjacency lost with 10.1.1.167,49.05,15.05,2.94,Gi1/0/3,DOWN,10.1.1.167
+2026-07-28T23:23:03.442869+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,47.23,3.32,0.0,Gi0/0/0,UP,10.1.5.153
+2026-07-28T23:23:03.443371+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,44.45,2.95,0.0,Gi0/0/0,UP,10.0.2.139
+2026-07-28T23:23:03.443894+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.1.4.117 hold-timer expiring,81.05,5.53,1.05,Gi0/0/0,UP,10.1.4.117
+2026-07-28T23:23:03.444397+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.3.118 hold-timer expiring,24.65,15.54,1.55,Fa0/1,UP,10.2.3.118
+2026-07-28T23:23:03.444895+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,43.74,11.2,1.07,Gi1/0/3,UP,10.1.5.122
+2026-07-28T23:23:03.445377+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Te0/1/0 went UP - link failure,98.77,10.44,2.19,Te0/1/0,UP,10.1.4.191
+2026-07-28T23:23:03.445845+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.4.81 keepalive received,14.79,5.72,0.0,Fa0/2,UP,10.0.4.81
+2026-07-28T23:23:03.446390+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.87ms on dist-sw-01,37.5,9.87,0.68,Gi1/0/2,UP,10.2.3.156
+2026-07-28T23:23:03.446859+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,41.92,11.93,1.07,Gi1/0/3,UP,10.0.4.197
+2026-07-28T23:23:03.447407+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Packet loss 9.24% exceeds SLO on dist-sw-01,58.61,17.09,9.24,Gi1/0/3,UP,10.2.3.51
+2026-07-28T23:23:03.447910+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,36.52,4.12,0.0,Gi0/0/1,UP,10.0.5.189
+2026-07-28T23:23:03.448466+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.94ms on core-rtr-02,66.26,6.94,1.16,Te0/1/0,UP,10.1.0.108
+2026-07-28T23:23:03.448974+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,20.15,5.36,0.0,Gi1/0/1,UP,10.1.3.91
+2026-07-28T23:23:03.449513+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.4.79 hold-timer expiring,44.77,10.87,1.59,Gi1/0/2,UP,10.1.4.79
+2026-07-28T23:23:03.450003+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.1.5 keepalive received,42.75,3.68,0.0,Gi0/0/0,UP,10.0.1.5
+2026-07-28T23:23:03.450484+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,26.44,5.99,0.0,Gi1/0/24,UP,10.0.2.53
+2026-07-28T23:23:03.451033+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,24.29,6.69,0.0,Gi1/0/1,UP,10.2.2.229
+2026-07-28T23:23:03.451560+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,29.23,7.75,0.0,Gi1/0/2,UP,10.2.2.176
+2026-07-28T23:23:03.452015+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.1.2.141 hold-timer expiring,25.8,14.07,1.5,Fa0/24,UP,10.1.2.141
+2026-07-28T23:23:03.452505+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,20.96,6.96,0.0,Gi1/0/3,UP,10.1.4.150
+2026-07-28T23:23:03.452966+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.51ms on dist-sw-02,41.93,10.51,0.99,Gi1/0/2,UP,10.1.0.191
+2026-07-28T23:23:03.453443+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.44ms on dist-sw-02,43.6,10.44,1.91,Gi1/0/3,UP,10.1.2.32
+2026-07-28T23:23:03.453877+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,48.11,10.97,1.42,Gi1/0/24,UP,10.0.3.251
+2026-07-28T23:23:03.454290+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 72.25% on core-rtr-01,72.25,4.91,0.69,Gi0/0/1,UP,10.2.0.221
+2026-07-28T23:23:03.454799+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 35.06% on dist-sw-02,35.06,10.12,0.67,Gi1/0/3,UP,10.0.1.131
+2026-07-28T23:23:03.455350+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/2 is UP - flapping detected,67.86,4.88,1.8,Gi0/0/2,UP,10.2.0.52
+2026-07-28T23:23:03.455892+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,23.4,5.67,0.0,Gi1/0/1,UP,10.0.4.249
+2026-07-28T23:23:03.456549+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,22.99,6.59,0.0,Gi1/0/1,UP,10.1.3.107
+2026-07-28T23:23:03.457099+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,25.91,4.58,0.0,Gi1/0/1,UP,10.1.5.7
+2026-07-28T23:23:03.457671+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,50.85,2.47,0.0,Gi0/0/0,UP,10.2.3.244
+2026-07-28T23:23:03.458234+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.0.119 keepalive received,40.98,3.16,0.0,Gi0/0/1,UP,10.0.0.119
+2026-07-28T23:23:03.458718+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,44.77,11.8,1.3,Gi1/0/1,UP,10.1.4.56
+2026-07-28T23:23:03.459261+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,31.37,3.82,0.0,Gi1/0/1,UP,10.0.2.225
+2026-07-28T23:23:03.459755+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 83.24% on core-rtr-01,83.24,5.56,1.5,Gi0/0/0,UP,10.2.2.108
+2026-07-28T23:23:03.460217+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: dist-sw-01 unreachable - RTT 22.85ms,100.0,22.85,20.03,Gi1/0/2,DOWN,10.1.0.192
+2026-07-28T23:23:03.460671+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,33.48,11.85,1.09,Gi1/0/3,UP,10.0.1.24
+2026-07-28T23:23:03.461119+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,28.97,3.51,0.0,Gi1/0/1,UP,10.2.4.191
+2026-07-28T23:23:03.461537+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.2.96 keepalive received,45.85,4.75,0.0,Te0/1/0,UP,10.0.2.96
+2026-07-28T23:23:03.461987+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.1.0.184,97.66,6.79,6.72,Te0/1/0,UP,10.1.0.184
+2026-07-28T23:23:03.462411+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,43.2,2.93,0.0,Te0/1/0,UP,10.2.0.27
+2026-07-28T23:23:03.462816+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: CPU at 80.55% - process crash risk,80.55,23.76,18.16,Gi1/0/1,DOWN,10.1.3.135
+2026-07-28T23:23:03.463252+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/2 is UP - flapping detected,22.64,12.43,0.88,Fa0/2,UP,10.1.0.183
+2026-07-28T23:23:03.463816+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.1.0.248,55.67,17.76,2.54,Gi1/0/24,DOWN,10.1.0.248
+2026-07-28T23:23:03.464234+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,40.15,11.7,1.53,Gi1/0/3,UP,10.1.1.187
+2026-07-28T23:23:03.464621+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Interface Gi1/0/1 went DOWN - link failure,56.35,15.76,5.23,Gi1/0/1,DOWN,10.1.2.63
+2026-07-28T23:23:03.465169+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,49.51,3.13,0.0,Gi0/0/2,UP,10.0.1.26
+2026-07-28T23:23:03.465705+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.0.78 keepalive received,25.4,4.67,0.0,Gi1/0/24,UP,10.2.0.78
+2026-07-28T23:23:03.466113+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.2.104 hold-timer expiring,46.16,9.62,1.07,Gi1/0/3,DOWN,10.0.2.104
+2026-07-28T23:23:03.466543+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.5.94 keepalive received,39.45,3.27,0.0,Te0/1/0,UP,10.2.5.94
+2026-07-28T23:23:03.466943+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,21.41,6.18,0.0,Gi1/0/2,UP,10.2.1.8
+2026-07-28T23:23:03.467514+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,14.54,9.2,0.0,Fa0/1,UP,10.2.3.242
+2026-07-28T23:23:03.468040+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.0.147 keepalive received,21.46,5.84,0.0,Gi1/0/2,UP,10.1.0.147
+2026-07-28T23:23:03.468522+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,41.7,11.74,1.56,Gi1/0/2,UP,10.2.3.11
+2026-07-28T23:23:03.468992+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,11.78,30.42,Te0/1/0,UP,10.1.0.133
+2026-07-28T23:23:03.469487+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.2.234 keepalive received,37.33,3.1,0.0,Gi0/0/1,UP,10.2.2.234
+2026-07-28T23:23:03.469994+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,18.59,8.82,0.0,Fa0/3,UP,10.1.2.109
+2026-07-28T23:23:03.470451+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 42.12% on dist-sw-01,42.12,11.94,0.95,Gi1/0/1,UP,10.1.4.236
+2026-07-28T23:23:03.470917+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,18.14,7.41,0.0,Gi1/0/1,UP,10.0.5.247
+2026-07-28T23:23:03.471443+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,41.35,3.42,0.0,Gi0/0/0,UP,10.1.0.136
+2026-07-28T23:23:03.471963+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,18.36,6.3,0.0,Gi1/0/1,UP,10.2.5.98
+2026-07-28T23:23:03.472398+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.2.160 keepalive received,10.17,4.49,0.0,Fa0/24,UP,10.0.2.160
+2026-07-28T23:23:03.472899+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: access-sw-01 unreachable - RTT 34.49ms,55.74,34.49,26.99,Fa0/24,UP,10.1.3.59
+2026-07-28T23:23:03.473347+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,25.37,5.15,0.0,Gi1/0/3,UP,10.2.2.186
+2026-07-28T23:23:03.473868+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,25.29,7.09,0.0,Gi1/0/1,UP,10.0.3.156
+2026-07-28T23:23:03.474287+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,30.65,5.65,0.0,Gi1/0/3,UP,10.2.3.220
+2026-07-28T23:23:03.474714+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.0.44 keepalive received,38.52,1.91,0.0,Te0/1/0,UP,10.2.0.44
+2026-07-28T23:23:03.475232+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,86.0,5.22,1.07,Gi0/0/1,UP,10.1.5.62
+2026-07-28T23:23:03.475776+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.63ms on core-rtr-02,71.62,6.63,0.85,Gi0/0/1,UP,10.2.2.233
+2026-07-28T23:23:03.476359+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.05,8.32,0.0,Fa0/24,UP,10.2.3.242
+2026-07-28T23:23:03.476883+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.2.3.203 keepalive received,37.49,3.19,0.0,Gi0/0/0,UP,10.2.3.203
+2026-07-28T23:23:03.477350+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,38.21,3.89,0.0,Gi0/0/0,UP,10.1.2.60
+2026-07-28T23:23:03.477818+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,40.6,2.73,0.0,Gi0/0/1,UP,10.0.5.30
+2026-07-28T23:23:03.478277+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,27.26,5.93,0.0,Gi1/0/2,UP,10.0.2.179
+2026-07-28T23:23:03.478812+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.4.253 keepalive received,23.06,4.23,0.0,Gi1/0/3,UP,10.1.4.253
+2026-07-28T23:23:03.479354+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,25.68,4.51,0.0,Gi1/0/1,UP,10.2.2.217
+2026-07-28T23:23:03.479839+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,44.61,3.67,0.0,Te0/1/0,UP,10.2.1.24
+2026-07-28T23:23:03.480333+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: dist-sw-01 unreachable - RTT 19.85ms,95.77,19.85,20.68,Gi1/0/1,DOWN,10.0.0.19
+2026-07-28T23:23:03.480759+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,21.74,6.67,0.0,Gi1/0/3,UP,10.0.0.51
+2026-07-28T23:23:03.481162+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/1 is UP - flapping detected,22.82,14.07,0.67,Fa0/1,UP,10.2.1.118
+2026-07-28T23:23:03.481555+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,14.16,9.01,0.0,Fa0/3,UP,10.2.0.235
+2026-07-28T23:23:03.482071+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.1.89 keepalive received,33.79,2.36,0.0,Te0/1/0,UP,10.1.1.89
+2026-07-28T23:23:03.482469+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,23.48,6.4,0.0,Gi1/0/1,UP,10.0.1.148
+2026-07-28T23:23:03.483029+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.1.5.219 hold-timer expiring,75.08,6.74,1.15,Gi0/0/1,UP,10.1.5.219
+2026-07-28T23:23:03.483526+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,39.97,2.85,0.0,Gi0/0/0,UP,10.2.0.87
+2026-07-28T23:23:03.484034+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.5.83 keepalive received,51.93,3.2,0.0,Gi0/0/0,UP,10.0.5.83
+2026-07-28T23:23:03.484511+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,43.73,2.11,0.0,Gi0/0/0,UP,10.2.3.213
+2026-07-28T23:23:03.485017+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.0.5.106 hold-timer expiring,24.31,12.45,0.67,Fa0/24,UP,10.0.5.106
+2026-07-28T23:23:03.485532+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,26.8,7.2,0.0,Gi1/0/1,UP,10.0.2.183
+2026-07-28T23:23:03.485982+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.88ms on dist-sw-01,38.78,10.88,0.53,Gi1/0/1,UP,10.2.5.227
+2026-07-28T23:23:03.486394+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,16.22,6.63,0.0,Fa0/2,UP,10.0.4.116
+2026-07-28T23:23:03.486842+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,40.01,3.5,0.0,Gi0/0/0,UP,10.0.5.197
+2026-07-28T23:23:03.487434+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.3.190 hold-timer expiring,26.19,12.62,1.76,Fa0/24,UP,10.2.3.190
+2026-07-28T23:23:03.487933+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.0.165 keepalive received,20.83,6.04,0.0,Gi1/0/2,UP,10.2.0.165
+2026-07-28T23:23:03.488355+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,11.54,9.77,0.0,Fa0/2,UP,10.0.5.130
+2026-07-28T23:23:03.488934+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.26ms on core-rtr-01,75.11,5.26,0.89,Gi0/0/0,UP,10.1.2.203
+2026-07-28T23:23:03.489441+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,26.86,6.43,0.0,Gi1/0/3,UP,10.2.5.21
+2026-07-28T23:23:03.489987+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,CPU threshold exceeded: 96.78% on core-rtr-02,96.78,7.46,2.41,Gi0/0/1,DOWN,10.0.3.35
+2026-07-28T23:23:03.490455+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.1.5.193,62.2,13.73,4.53,Gi1/0/1,UP,10.1.5.193
+2026-07-28T23:23:03.490923+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,18.38,7.51,0.0,Gi1/0/1,UP,10.0.4.225
+2026-07-28T23:23:03.491391+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 9.26% exceeds SLO on dist-sw-02,54.0,13.33,9.26,Gi1/0/1,UP,10.0.1.41
+2026-07-28T23:23:03.491868+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 29.8% on access-sw-01,29.8,14.14,0.55,Fa0/1,UP,10.1.3.131
+2026-07-28T23:23:03.492372+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,42.57,9.35,1.45,Gi1/0/3,UP,10.0.1.96
+2026-07-28T23:23:03.492901+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.0.202 keepalive received,40.4,3.59,0.0,Gi0/0/0,UP,10.2.0.202
+2026-07-28T23:23:03.493404+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,43.96,4.57,0.0,Gi0/0/0,UP,10.1.1.100
+2026-07-28T23:23:03.493901+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.52,5.71,0.0,Fa0/24,UP,10.0.4.123
+2026-07-28T23:23:03.494464+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,38.12,3.15,0.0,Gi0/0/2,UP,10.0.3.5
+2026-07-28T23:23:03.494945+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: dist-sw-01 unreachable - RTT 23.03ms,100.0,23.03,16.28,Gi1/0/3,DOWN,10.1.5.158
+2026-07-28T23:23:03.495390+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,55.63,2.7,0.0,Te0/1/0,UP,10.0.3.52
+2026-07-28T23:23:03.495825+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.0.1.32 hold-timer expiring,26.64,14.8,0.63,Fa0/3,UP,10.0.1.32
+2026-07-28T23:23:03.496257+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,40.41,10.53,1.44,Gi1/0/2,UP,10.0.5.217
+2026-07-28T23:23:03.496654+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.05ms on core-rtr-01,82.36,5.05,0.92,Te0/1/0,UP,10.0.0.43
+2026-07-28T23:23:03.497058+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,26.43,2.16,0.0,Te0/1/0,UP,10.1.2.209
+2026-07-28T23:23:03.497546+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.98ms on core-rtr-01,69.63,4.98,1.39,Te0/1/0,UP,10.1.5.67
+2026-07-28T23:23:03.498003+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Interface Gi1/0/2 went UP - link failure,53.94,16.01,7.23,Gi1/0/2,UP,10.2.5.12
+2026-07-28T23:23:03.498488+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,43.35,4.16,0.0,Gi0/0/0,UP,10.2.2.15
+2026-07-28T23:23:03.499005+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.4.110 keepalive received,18.43,6.27,0.0,Gi1/0/1,UP,10.0.4.110
+2026-07-28T23:23:03.499529+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,27.03,4.27,0.0,Gi1/0/2,UP,10.2.4.6
+2026-07-28T23:23:03.500034+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.5.168 keepalive received,36.72,4.44,0.0,Gi0/0/1,UP,10.0.5.168
+2026-07-28T23:23:03.500485+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 4.8% exceeds SLO on access-sw-01,30.43,18.01,4.8,Fa0/1,UP,10.0.2.20
+2026-07-28T23:23:03.500990+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 43.18% on dist-sw-01,43.18,10.04,0.86,Gi1/0/3,UP,10.2.4.13
+2026-07-28T23:23:03.501720+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,19.83,8.93,0.0,Fa0/2,UP,10.0.3.1
+2026-07-28T23:23:03.502143+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.3.215 keepalive received,21.62,5.83,0.0,Gi1/0/3,UP,10.2.3.215
+2026-07-28T23:23:03.502573+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.47,9.54,0.0,Fa0/3,UP,10.0.1.82
+2026-07-28T23:23:03.503090+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.2.4.194 hold-timer expiring,78.21,6.83,1.63,Gi0/0/0,UP,10.2.4.194
+2026-07-28T23:23:03.503657+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,67.14,5.37,1.47,Gi0/0/1,UP,10.1.3.36
+2026-07-28T23:23:03.504206+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.1.204 keepalive received,11.39,6.68,0.0,Fa0/3,UP,10.0.1.204
+2026-07-28T23:23:03.504739+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,11.25,13.31,Gi0/0/2,DOWN,10.2.3.173
+2026-07-28T23:23:03.505344+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,19.4,4.75,0.0,Gi1/0/3,UP,10.1.1.114
+2026-07-28T23:23:03.505845+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.1.175 keepalive received,18.54,7.77,0.0,Gi1/0/2,UP,10.2.1.175
+2026-07-28T23:23:03.506346+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,OSPF adjacency lost with 10.0.1.68,36.82,21.8,7.88,Fa0/2,UP,10.0.1.68
+2026-07-28T23:23:03.506869+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,46.71,2.63,0.0,Gi0/0/1,UP,10.0.3.132
+2026-07-28T23:23:03.507449+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.3.253 keepalive received,21.91,7.03,0.0,Gi1/0/2,UP,10.0.3.253
+2026-07-28T23:23:03.507982+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Interface Te0/1/0 went UP - link failure,100.0,6.78,4.82,Te0/1/0,UP,10.1.3.156
+2026-07-28T23:23:03.508471+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.5.125 keepalive received,30.36,4.96,0.0,Gi1/0/2,UP,10.1.5.125
+2026-07-28T23:23:03.508954+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,25.75,6.82,0.0,Gi1/0/2,UP,10.2.2.144
+2026-07-28T23:23:03.509416+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.1.1.72,100.0,6.99,9.48,Gi0/0/2,UP,10.1.1.72
+2026-07-28T23:23:03.509904+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,19.02,6.47,0.0,Gi1/0/2,UP,10.0.5.40
+2026-07-28T23:23:03.510647+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,25.86,5.25,0.0,Gi1/0/3,UP,10.1.4.96
+2026-07-28T23:23:03.511235+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,54.43,1.97,0.0,Te0/1/0,UP,10.1.1.70
+2026-07-28T23:23:03.511681+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.4.84 keepalive received,24.73,6.48,0.0,Gi1/0/1,UP,10.2.4.84
+2026-07-28T23:23:03.512128+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 7.86% exceeds SLO on access-sw-01,38.65,20.84,7.86,Fa0/2,UP,10.0.4.180
+2026-07-28T23:23:03.512577+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,33.42,3.74,0.0,Te0/1/0,UP,10.2.1.205
+2026-07-28T23:23:03.513064+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,35.99,1.21,0.0,Gi0/0/1,UP,10.0.5.237
+2026-07-28T23:23:03.513715+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,59.79,2.32,0.0,Gi0/0/2,UP,10.0.1.183
+2026-07-28T23:23:03.514281+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Packet loss 18.33% - circuit down,100.0,22.18,18.33,Gi1/0/3,UP,10.1.0.58
+2026-07-28T23:23:03.514823+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,26.45,4.21,0.0,Gi1/0/2,UP,10.1.1.13
+2026-07-28T23:23:03.515303+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.2.215 keepalive received,49.53,3.09,0.0,Gi0/0/0,UP,10.1.2.215
+2026-07-28T23:23:03.515860+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Interface Gi1/0/24 went UP - link failure,55.21,15.13,5.87,Gi1/0/24,UP,10.2.0.117
+2026-07-28T23:23:03.516359+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 5.4ms on core-rtr-02,77.34,5.4,0.52,Gi0/0/0,UP,10.0.5.234
+2026-07-28T23:23:03.516861+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,16.33,10.49,0.0,Fa0/3,UP,10.0.0.42
+2026-07-28T23:23:03.517408+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,14.24,9.53,0.0,Fa0/1,UP,10.1.3.146
+2026-07-28T23:23:03.517875+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.1.2 hold-timer expiring,74.92,5.13,1.94,Gi0/0/2,UP,10.2.1.2
+2026-07-28T23:23:03.518348+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 60.85% on core-rtr-02,60.85,6.38,0.51,Gi0/0/0,UP,10.2.1.239
+2026-07-28T23:23:03.518954+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,23.64,8.92,0.0,Gi1/0/2,UP,10.2.5.198
+2026-07-28T23:23:03.519528+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,22.45,5.87,0.0,Gi1/0/24,UP,10.2.1.158
+2026-07-28T23:23:03.520056+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.2.105 keepalive received,30.25,3.31,0.0,Gi0/0/2,UP,10.1.2.105
+2026-07-28T23:23:03.520492+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.5.240 keepalive received,29.5,4.92,0.0,Gi0/0/1,UP,10.2.5.240
+2026-07-28T23:23:03.520964+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.5.47 keepalive received,23.52,4.79,0.0,Gi1/0/3,UP,10.0.5.47
+2026-07-28T23:23:03.521422+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.5.176 hold-timer expiring,42.63,10.16,1.44,Gi1/0/3,UP,10.1.5.176
+2026-07-28T23:23:03.521865+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.1.2.234 hold-timer expiring,70.05,4.66,0.57,Gi0/0/2,DOWN,10.1.2.234
+2026-07-28T23:23:03.522259+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,CPU threshold exceeded: 43.68% on access-sw-01,43.68,19.55,2.67,Fa0/2,UP,10.0.2.185
+2026-07-28T23:23:03.522709+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.2.3 keepalive received,18.53,7.57,0.0,Gi1/0/3,UP,10.0.2.3
+2026-07-28T23:23:03.523156+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,12.22,4.4,0.0,Fa0/3,UP,10.1.4.223
+2026-07-28T23:23:03.523548+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,12.37,6.34,0.0,Gi1/0/1,UP,10.2.5.78
+2026-07-28T23:23:03.523967+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.4.167 keepalive received,30.76,2.92,0.0,Te0/1/0,UP,10.1.4.167
+2026-07-28T23:23:03.524394+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,24.88,8.05,0.0,Gi1/0/1,UP,10.1.1.138
+2026-07-28T23:23:03.524835+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.2.4.185 hold-timer expiring,49.84,9.6,1.43,Gi1/0/24,UP,10.2.4.185
+2026-07-28T23:23:03.525241+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,68.39,2.79,0.0,Gi0/0/1,UP,10.0.5.29
+2026-07-28T23:23:03.525646+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Packet loss 2.86% exceeds SLO on access-sw-01,33.59,22.38,2.86,Fa0/2,UP,10.2.1.14
+2026-07-28T23:23:03.526156+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.0.1.163 hold-timer expiring,66.41,5.81,1.09,Gi0/0/0,UP,10.0.1.163
+2026-07-28T23:23:03.526571+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/2 UP - service impact,98.17,26.35,14.42,Gi1/0/2,UP,10.2.2.82
+2026-07-28T23:23:03.527036+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 33.94% on dist-sw-02,33.94,12.24,1.78,Gi1/0/2,DOWN,10.0.1.104
+2026-07-28T23:23:03.527454+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 12.15ms on dist-sw-02,35.44,12.15,1.4,Gi1/0/1,UP,10.1.4.23
+2026-07-28T23:23:03.527857+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Packet loss 2.53% exceeds SLO on core-rtr-01,93.14,7.4,2.53,Gi0/0/2,UP,10.1.1.164
+2026-07-28T23:23:03.528243+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 41.62% on dist-sw-01,41.62,10.82,1.42,Gi1/0/2,UP,10.1.3.133
+2026-07-28T23:23:03.528626+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Packet loss 7.57% exceeds SLO on dist-sw-01,60.9,15.48,7.57,Gi1/0/24,UP,10.2.1.247
+2026-07-28T23:23:03.529023+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,17.65,11.44,0.0,Fa0/24,UP,10.0.4.57
+2026-07-28T23:23:03.529430+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.3.237 keepalive received,42.47,2.84,0.0,Gi0/0/1,UP,10.1.3.237
+2026-07-28T23:23:03.529840+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,21.56,8.13,0.0,Fa0/24,UP,10.2.5.217
+2026-07-28T23:23:03.530203+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,49.1,2.0,0.0,Gi0/0/1,UP,10.1.3.77
+2026-07-28T23:23:03.530680+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Interface Fa0/24 went DOWN - link failure,37.12,22.27,6.05,Fa0/24,DOWN,10.0.0.64
+2026-07-28T23:23:03.531101+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.11ms on dist-sw-01,45.83,10.11,1.67,Gi1/0/1,UP,10.0.3.29
+2026-07-28T23:23:03.531569+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,10.11,5.42,0.0,Fa0/1,UP,10.1.3.146
+2026-07-28T23:23:03.532053+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.1.2.243,54.36,17.08,5.79,Gi1/0/1,UP,10.1.2.243
+2026-07-28T23:23:03.532577+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,26.99,5.82,0.0,Gi1/0/1,UP,10.0.1.172
+2026-07-28T23:23:03.533045+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,11.65,8.27,0.0,Fa0/1,UP,10.1.0.45
+2026-07-28T23:23:03.533502+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 77.46% on core-rtr-02,77.46,6.24,0.72,Gi0/0/1,UP,10.0.0.143
+2026-07-28T23:23:03.533970+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 66.23% on core-rtr-02,66.23,6.18,1.42,Gi0/0/1,UP,10.0.3.56
+2026-07-28T23:23:03.534410+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,56.01,3.89,0.0,Te0/1/0,UP,10.0.2.14
+2026-07-28T23:23:03.534871+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,10.47,11.76,0.0,Fa0/24,UP,10.1.3.65
+2026-07-28T23:23:03.535297+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.2.3.90,73.85,13.05,5.86,Gi1/0/2,UP,10.2.3.90
+2026-07-28T23:23:03.535763+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.2.4.225 keepalive received,26.91,3.07,0.0,Te0/1/0,UP,10.2.4.225
+2026-07-28T23:23:03.536253+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,12.08,6.32,0.0,Fa0/24,UP,10.1.2.64
+2026-07-28T23:23:03.536691+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.03ms on core-rtr-02,77.04,6.03,1.74,Gi0/0/1,UP,10.0.4.229
+2026-07-28T23:23:03.537108+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.93ms on core-rtr-01,68.52,5.93,1.87,Gi0/0/1,UP,10.2.2.56
+2026-07-28T23:23:03.537590+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.3.14 keepalive received,37.01,3.2,0.0,Gi0/0/1,UP,10.2.3.14
+2026-07-28T23:23:03.538019+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.03ms on dist-sw-01,38.51,9.03,1.64,Gi1/0/1,UP,10.0.0.199
+2026-07-28T23:23:03.538435+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 7.45% exceeds SLO on dist-sw-02,51.98,14.21,7.45,Gi1/0/1,UP,10.0.2.104
+2026-07-28T23:23:03.538871+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/3 is UP,14.59,6.86,0.0,Fa0/3,UP,10.1.3.168
+2026-07-28T23:23:03.539306+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,Interface Fa0/3 went UP - link failure,35.66,22.29,4.7,Fa0/3,UP,10.0.3.85
+2026-07-28T23:23:03.539696+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.1.5.1 hold-timer expiring,42.26,10.19,1.87,Gi1/0/1,UP,10.1.5.1
+2026-07-28T23:23:03.540080+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,35.07,3.75,0.0,Te0/1/0,UP,10.2.4.113
+2026-07-28T23:23:03.540486+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.2.5.151 hold-timer expiring,41.14,12.73,1.3,Gi1/0/3,DOWN,10.2.5.151
+2026-07-28T23:23:03.540897+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,26.19,5.93,0.0,Gi1/0/3,UP,10.2.1.246
+2026-07-28T23:23:03.541285+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,18.91,6.36,0.0,Gi1/0/3,UP,10.2.2.241
+2026-07-28T23:23:03.541940+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.27ms on dist-sw-02,38.8,10.27,1.13,Gi1/0/2,UP,10.1.1.72
+2026-07-28T23:23:03.542333+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/2 is UP - flapping detected,69.88,5.45,1.76,Gi0/0/2,UP,10.1.4.232
+2026-07-28T23:23:03.542845+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/2 is UP,48.07,2.93,0.0,Gi0/0/2,UP,10.1.0.236
+2026-07-28T23:23:03.543272+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.5.28 keepalive received,49.41,4.18,0.0,Gi0/0/1,UP,10.2.5.28
+2026-07-28T23:23:03.543715+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,28.93,5.39,0.0,Gi1/0/24,UP,10.2.5.143
+2026-07-28T23:23:03.544189+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 67.14% on core-rtr-02,67.14,6.48,1.2,Gi0/0/0,UP,10.1.1.197
+2026-07-28T23:23:03.544605+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.3.247 hold-timer expiring,47.7,9.23,1.59,Gi1/0/2,UP,10.1.3.247
+2026-07-28T23:23:03.545016+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,20.66,2.92,0.0,Gi0/0/1,UP,10.2.5.89
+2026-07-28T23:23:03.545393+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 79.37% on core-rtr-02,79.37,5.65,1.26,Gi0/0/1,UP,10.2.3.197
+2026-07-28T23:23:03.545766+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,51.52,3.68,0.0,Gi0/0/0,UP,10.0.3.210
+2026-07-28T23:23:03.546196+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,20.55,3.78,0.0,Gi1/0/1,UP,10.2.1.125
+2026-07-28T23:23:03.546576+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,34.31,6.6,0.0,Gi1/0/2,UP,10.2.2.21
+2026-07-28T23:23:03.546962+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,38.54,3.25,0.0,Te0/1/0,UP,10.1.2.246
+2026-07-28T23:23:03.547370+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.2.231 keepalive received,24.31,4.73,0.0,Gi1/0/3,UP,10.1.2.231
+2026-07-28T23:23:03.547740+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 72.16% on core-rtr-02,72.16,5.52,0.7,Te0/1/0,DOWN,10.1.2.171
+2026-07-28T23:23:03.548119+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,32.46,3.6,0.0,Gi0/0/0,UP,10.1.0.241
+2026-07-28T23:23:03.548660+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,25.86,6.62,0.0,Gi1/0/1,UP,10.1.2.24
+2026-07-28T23:23:03.549109+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.1.150 keepalive received,23.65,8.14,0.0,Gi1/0/1,UP,10.2.1.150
+2026-07-28T23:23:03.549574+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Interface Fa0/1 UP - service impact,67.33,34.13,10.04,Fa0/1,UP,10.1.5.127
+2026-07-28T23:23:03.549973+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.5.200 keepalive received,46.97,3.82,0.0,Te0/1/0,UP,10.1.5.200
+2026-07-28T23:23:03.550391+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,14.72,7.93,0.0,Fa0/1,UP,10.2.5.219
+2026-07-28T23:23:03.550782+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.3.36 keepalive received,27.09,2.38,0.0,Te0/1/0,UP,10.1.3.36
+2026-07-28T23:23:03.551284+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,CPU threshold exceeded: 32.37% on access-sw-01,32.37,22.02,6.91,Fa0/24,UP,10.2.4.45
+2026-07-28T23:23:03.551853+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.2.13 keepalive received,38.99,3.25,0.0,Gi0/0/2,UP,10.1.2.13
+2026-07-28T23:23:03.552256+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,45.33,3.4,0.0,Te0/1/0,UP,10.1.0.2
+2026-07-28T23:23:03.552742+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.3.79 keepalive received,16.15,9.22,0.0,Fa0/1,UP,10.0.3.79
+2026-07-28T23:23:03.553223+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 2.07% exceeds SLO on dist-sw-02,47.34,14.44,2.07,Gi1/0/1,UP,10.2.1.3
+2026-07-28T23:23:03.553710+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.5.221 keepalive received,16.83,10.71,0.0,Gi1/0/1,UP,10.1.5.221
+2026-07-28T23:23:03.554217+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 39.4% on dist-sw-01,39.4,9.4,0.52,Gi1/0/24,UP,10.1.2.167
+2026-07-28T23:23:03.554805+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/1 DOWN - service impact,77.17,19.42,34.68,Gi1/0/1,DOWN,10.2.3.116
+2026-07-28T23:23:03.555414+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: core-rtr-01 unreachable - RTT 9.66ms,100.0,9.66,27.49,Gi0/0/2,DOWN,10.2.3.152
+2026-07-28T23:23:03.555843+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,14.21,4.91,0.0,Fa0/1,UP,10.0.4.248
+2026-07-28T23:23:03.556295+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,25.1,5.54,0.0,Gi1/0/2,UP,10.1.4.63
+2026-07-28T23:23:03.556747+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,OSPF adjacency lost with 10.0.0.82,100.0,10.4,5.35,Gi0/0/1,UP,10.0.0.82
+2026-07-28T23:23:03.557232+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 7.38% exceeds SLO on core-rtr-02,100.0,9.52,7.38,Te0/1/0,UP,10.1.4.167
+2026-07-28T23:23:03.557745+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/2 is UP - flapping detected,24.65,15.53,1.87,Fa0/2,UP,10.2.3.246
+2026-07-28T23:23:03.558196+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Packet loss 30.37% - circuit down,100.0,21.51,30.37,Gi1/0/1,UP,10.0.5.133
+2026-07-28T23:23:03.558601+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/3 UP - service impact,88.67,24.97,11.6,Gi1/0/3,UP,10.0.3.248
+2026-07-28T23:23:03.559004+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.2.207 keepalive received,12.06,9.32,0.0,Fa0/24,UP,10.2.2.207
+2026-07-28T23:23:03.559415+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.0.3.35 hold-timer expiring,38.4,12.06,1.15,Gi1/0/1,UP,10.0.3.35
+2026-07-28T23:23:03.559796+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.3.170 hold-timer expiring,44.42,11.14,1.01,Gi1/0/24,UP,10.1.3.170
+2026-07-28T23:23:03.560193+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.0.141 hold-timer expiring,40.56,11.45,1.84,Gi1/0/1,UP,10.1.0.141
+2026-07-28T23:23:03.560632+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/3,19.46,8.44,0.0,Fa0/3,UP,10.1.1.135
+2026-07-28T23:23:03.561142+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,34.47,2.65,0.0,Gi0/0/0,UP,10.0.2.243
+2026-07-28T23:23:03.561591+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,35.24,12.42,1.53,Gi1/0/1,UP,10.0.2.195
+2026-07-28T23:23:03.562122+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.0.3 keepalive received,24.23,8.75,0.0,Gi1/0/1,UP,10.2.0.3
+2026-07-28T23:23:03.562685+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,35.53,3.81,0.0,Gi0/0/0,UP,10.0.0.226
+2026-07-28T23:23:03.563217+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,12.78,23.77,Te0/1/0,DOWN,10.0.5.63
+2026-07-28T23:23:03.563717+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Packet loss 10.86% - circuit down,100.0,10.23,10.86,Gi0/0/1,UP,10.2.4.139
+2026-07-28T23:23:03.564132+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: core-rtr-01 unreachable - RTT 12.66ms,100.0,12.66,21.9,Gi0/0/2,DOWN,10.0.3.148
+2026-07-28T23:23:03.564652+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,100.0,9.13,9.28,Gi0/0/1,UP,10.1.4.97
+2026-07-28T23:23:03.565048+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.3.66 keepalive received,18.53,7.34,0.0,Gi1/0/24,UP,10.2.3.66
+2026-07-28T23:23:03.565439+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Interface Gi0/0/2 UP - service impact,100.0,12.82,13.2,Gi0/0/2,UP,10.0.3.248
+2026-07-28T23:23:03.565820+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 38.69% on dist-sw-01,38.69,11.79,0.85,Gi1/0/24,UP,10.0.5.91
+2026-07-28T23:23:03.566188+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,38.17,4.05,0.0,Gi0/0/2,UP,10.2.2.233
+2026-07-28T23:23:03.566610+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: dist-sw-01 unreachable - RTT 18.65ms,100.0,18.65,26.63,Gi1/0/24,UP,10.1.2.233
+2026-07-28T23:23:03.567088+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,44.86,2.48,0.0,Te0/1/0,UP,10.0.5.252
+2026-07-28T23:23:03.567639+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,21.2,4.85,0.0,Gi1/0/1,UP,10.2.0.248
+2026-07-28T23:23:03.568197+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.3.190 keepalive received,36.36,3.13,0.0,Gi0/0/0,UP,10.2.3.190
+2026-07-28T23:23:03.568699+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.1.253 hold-timer expiring,82.0,5.45,1.43,Gi0/0/0,UP,10.2.1.253
+2026-07-28T23:23:03.569143+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 28.0% on access-sw-01,28.0,15.56,0.86,Fa0/2,DOWN,10.0.5.89
+2026-07-28T23:23:03.569690+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.5.50 keepalive received,26.28,3.66,0.0,Gi0/0/1,UP,10.0.5.50
+2026-07-28T23:23:03.570217+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,56.71,2.4,0.0,Te0/1/0,UP,10.2.0.208
+2026-07-28T23:23:03.570797+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.0.3.118 hold-timer expiring,24.39,15.3,0.62,Fa0/2,UP,10.0.3.118
+2026-07-28T23:23:03.571288+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,18.69,6.61,0.0,Gi1/0/2,UP,10.2.0.34
+2026-07-28T23:23:03.571728+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,44.86,2.26,0.0,Gi0/0/1,UP,10.1.0.107
+2026-07-28T23:23:03.572167+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,23.26,2.95,0.0,Gi0/0/1,UP,10.1.0.234
+2026-07-28T23:23:03.572800+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,30.99,5.79,0.0,Gi1/0/2,UP,10.0.2.166
+2026-07-28T23:23:03.573332+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,100.0,8.47,6.0,Gi0/0/1,UP,10.1.1.189
+2026-07-28T23:23:03.573846+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.04ms on dist-sw-01,49.59,9.04,1.48,Gi1/0/3,UP,10.1.5.174
+2026-07-28T23:23:03.574369+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,18.4,5.64,0.0,Gi1/0/3,UP,10.2.4.201
+2026-07-28T23:23:03.574887+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.2.3.192,100.0,8.09,6.48,Gi0/0/0,UP,10.2.3.192
+2026-07-28T23:23:03.575432+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,OSPF adjacency lost with 10.2.1.21,92.3,8.29,7.72,Te0/1/0,DOWN,10.2.1.21
+2026-07-28T23:23:03.575962+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/24 UP - service impact,90.08,20.75,17.53,Gi1/0/24,UP,10.1.4.228
+2026-07-28T23:23:03.576617+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.2.51 keepalive received,50.85,3.38,0.0,Gi0/0/1,UP,10.1.2.51
+2026-07-28T23:23:03.577148+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.0.235 keepalive received,49.86,3.06,0.0,Te0/1/0,UP,10.2.0.235
+2026-07-28T23:23:03.577618+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Packet loss 2.66% exceeds SLO on core-rtr-02,99.36,7.46,2.66,Gi0/0/0,DOWN,10.1.4.75
+2026-07-28T23:23:03.578111+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.49ms on dist-sw-01,37.62,10.49,1.46,Gi1/0/24,UP,10.2.3.88
+2026-07-28T23:23:03.578506+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.0.4.30 hold-timer expiring,67.15,5.53,1.18,Te0/1/0,DOWN,10.0.4.30
+2026-07-28T23:23:03.579080+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.1.186 keepalive received,23.79,4.02,0.0,Gi0/0/1,UP,10.1.1.186
+2026-07-28T23:23:03.579634+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,12.08,7.57,0.0,Fa0/24,UP,10.0.2.103
+2026-07-28T23:23:03.580159+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,16.4,9.42,0.0,Fa0/24,UP,10.1.2.76
+2026-07-28T23:23:03.580717+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,30.99,4.89,0.0,Gi0/0/1,UP,10.2.2.169
+2026-07-28T23:23:03.581193+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/24 is DOWN - flapping detected,27.25,12.53,1.11,Fa0/24,DOWN,10.1.3.83
+2026-07-28T23:23:03.581692+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,17.52,7.67,0.0,Gi1/0/3,UP,10.1.1.116
+2026-07-28T23:23:03.582214+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,24.63,4.71,0.0,Gi1/0/1,UP,10.2.2.46
+2026-07-28T23:23:03.582686+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.0.5 keepalive received,26.03,3.79,0.0,Gi1/0/1,UP,10.2.0.5
+2026-07-28T23:23:03.583229+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,54.48,3.49,0.0,Gi0/0/0,UP,10.1.4.146
+2026-07-28T23:23:03.583708+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,OSPF adjacency lost with 10.2.1.34,62.04,18.81,6.35,Gi1/0/1,UP,10.2.1.34
+2026-07-28T23:23:03.584208+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,19.59,8.14,0.0,Fa0/1,UP,10.2.2.194
+2026-07-28T23:23:03.584740+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.1.2.113 hold-timer expiring,37.65,10.8,0.68,Gi1/0/1,UP,10.1.2.113
+2026-07-28T23:23:03.585273+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 48.77% on dist-sw-01,48.77,10.16,1.05,Gi1/0/1,UP,10.1.3.124
+2026-07-28T23:23:03.585766+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 77.82% on core-rtr-02,77.82,6.31,1.26,Te0/1/0,UP,10.0.5.89
+2026-07-28T23:23:03.586208+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,34.82,1.94,0.0,Te0/1/0,UP,10.1.0.236
+2026-07-28T23:23:03.586714+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.1.80 hold-timer expiring,82.64,5.45,1.17,Te0/1/0,UP,10.2.1.80
+2026-07-28T23:23:03.587200+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.4.83 keepalive received,24.95,4.75,0.0,Gi1/0/2,UP,10.0.4.83
+2026-07-28T23:23:03.587746+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.3.188 keepalive received,23.11,5.16,0.0,Gi1/0/3,UP,10.2.3.188
+2026-07-28T23:23:03.588152+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,78.0,6.25,1.84,Gi0/0/1,UP,10.2.0.128
+2026-07-28T23:23:03.588631+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.2.5.106,59.72,13.9,6.6,Gi1/0/1,UP,10.2.5.106
+2026-07-28T23:23:03.589224+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.4.188 keepalive received,13.05,9.02,0.0,Fa0/2,UP,10.2.4.188
+2026-07-28T23:23:03.589741+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Interface Gi1/0/1 went UP - link failure,49.62,14.51,5.02,Gi1/0/1,UP,10.1.4.64
+2026-07-28T23:23:03.590210+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 11.18ms on dist-sw-02,35.11,11.18,1.6,Gi1/0/1,UP,10.1.4.17
+2026-07-28T23:23:03.590681+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,63.39,2.6,0.0,Te0/1/0,UP,10.1.5.187
+2026-07-28T23:23:03.591210+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.2.249 hold-timer expiring,48.27,11.25,0.9,Gi1/0/1,UP,10.1.2.249
+2026-07-28T23:23:03.591806+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/24 is UP - flapping detected,24.44,13.0,1.33,Fa0/24,UP,10.1.2.126
+2026-07-28T23:23:03.592350+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,25.07,8.44,0.0,Gi1/0/3,UP,10.1.0.42
+2026-07-28T23:23:03.592884+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,34.45,7.65,0.0,Gi1/0/3,UP,10.1.1.180
+2026-07-28T23:23:03.593403+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 28.31% on access-sw-01,28.31,13.85,1.3,Fa0/2,UP,10.1.4.60
+2026-07-28T23:23:03.593914+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,44.86,3.67,0.0,Te0/1/0,UP,10.0.5.62
+2026-07-28T23:23:03.594433+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/24,20.73,6.75,0.0,Gi1/0/24,UP,10.1.1.126
+2026-07-28T23:23:03.594946+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,21.96,4.85,0.0,Gi1/0/1,UP,10.0.1.222
+2026-07-28T23:23:03.595463+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,14.4,7.6,0.0,Fa0/2,UP,10.1.0.151
+2026-07-28T23:23:03.595943+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/0 is UP - flapping detected,86.05,5.56,0.57,Gi0/0/0,UP,10.1.3.210
+2026-07-28T23:23:03.596358+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,24.6,7.92,0.0,Gi1/0/3,UP,10.2.5.146
+2026-07-28T23:23:03.596800+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,22.47,7.12,0.0,Gi1/0/1,UP,10.0.4.228
+2026-07-28T23:23:03.597353+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.61ms on core-rtr-02,78.02,6.61,0.58,Te0/1/0,UP,10.0.0.156
+2026-07-28T23:23:03.597885+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,36.07,3.52,0.0,Gi0/0/0,UP,10.1.3.238
+2026-07-28T23:23:03.598354+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,26.83,5.54,0.0,Gi1/0/3,UP,10.0.4.237
+2026-07-28T23:23:03.598787+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,35.63,11.17,1.87,Gi1/0/3,UP,10.0.5.145
+2026-07-28T23:23:03.599177+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 5.28ms on core-rtr-02,62.18,5.28,1.1,Gi0/0/0,UP,10.1.1.149
+2026-07-28T23:23:03.599573+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,41.58,4.02,0.0,Gi0/0/0,UP,10.2.0.28
+2026-07-28T23:23:03.599973+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.02ms on dist-sw-01,39.0,10.02,1.82,Gi1/0/1,UP,10.2.5.194
+2026-07-28T23:23:03.600355+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 38.81% on dist-sw-01,38.81,11.16,1.87,Gi1/0/1,UP,10.2.4.198
+2026-07-28T23:23:03.600779+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,19.8,6.38,0.0,Gi1/0/2,UP,10.0.0.251
+2026-07-28T23:23:03.601237+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,13.63,7.77,0.0,Fa0/2,UP,10.2.1.93
+2026-07-28T23:23:03.601717+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,15.64,6.45,0.0,Fa0/1,UP,10.2.3.225
+2026-07-28T23:23:03.602168+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,94.85,8.69,5.62,Gi0/0/1,UP,10.1.3.107
+2026-07-28T23:23:03.602727+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,44.42,3.27,0.0,Gi0/0/1,UP,10.2.1.188
+2026-07-28T23:23:03.603225+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,47.16,10.56,1.38,Gi1/0/3,UP,10.2.3.230
+2026-07-28T23:23:03.603721+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: Interface Gi0/0/1 DOWN - service impact,100.0,9.29,17.0,Gi0/0/1,DOWN,10.1.2.209
+2026-07-28T23:23:03.604295+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.4.231 keepalive received,32.46,8.24,0.0,Gi1/0/2,UP,10.2.4.231
+2026-07-28T23:23:03.604832+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,83.75,7.39,2.77,Gi0/0/1,UP,10.0.1.38
+2026-07-28T23:23:03.605293+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,13.51,9.21,0.0,Fa0/1,UP,10.2.4.12
+2026-07-28T23:23:03.605726+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,16.02,6.98,0.0,Fa0/24,UP,10.2.2.150
+2026-07-28T23:23:03.606161+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,50.09,3.06,0.0,Gi0/0/1,UP,10.1.3.57
+2026-07-28T23:23:03.606607+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,19.31,6.96,0.0,Gi1/0/1,UP,10.0.1.101
+2026-07-28T23:23:03.607032+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,48.45,2.57,0.0,Te0/1/0,UP,10.0.5.155
+2026-07-28T23:23:03.607465+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,12.72,8.77,0.0,Fa0/1,UP,10.2.5.71
+2026-07-28T23:23:03.607879+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.0.169 hold-timer expiring,24.21,13.44,1.83,Fa0/24,UP,10.2.0.169
+2026-07-28T23:23:03.608262+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,CPU threshold exceeded: 43.38% on access-sw-01,43.38,16.39,2.92,Fa0/1,UP,10.2.3.18
+2026-07-28T23:23:03.608638+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,45.94,3.99,0.0,Gi0/0/1,UP,10.2.2.1
+2026-07-28T23:23:03.609062+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,28.77,7.66,0.0,Gi1/0/1,UP,10.0.0.242
+2026-07-28T23:23:03.609459+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.2.59 keepalive received,23.55,8.01,0.0,Gi1/0/3,UP,10.0.2.59
+2026-07-28T23:23:03.609850+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 26.84% on access-sw-01,26.84,12.35,1.34,Fa0/24,UP,10.0.3.84
+2026-07-28T23:23:03.610249+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.79,7.65,0.0,Fa0/2,UP,10.1.5.168
+2026-07-28T23:23:03.610678+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.2.234 keepalive received,24.65,5.13,0.0,Gi1/0/1,UP,10.1.2.234
+2026-07-28T23:23:03.611092+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Latency spike to 6.39ms on core-rtr-02,60.24,6.39,1.43,Te0/1/0,UP,10.0.1.31
+2026-07-28T23:23:03.611495+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,22.28,6.72,0.0,Gi1/0/2,UP,10.2.5.217
+2026-07-28T23:23:03.611896+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/24,27.16,5.26,0.0,Gi1/0/24,UP,10.2.5.176
+2026-07-28T23:23:03.612277+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.1.5.216 keepalive received,10.38,3.4,0.0,Gi1/0/2,UP,10.1.5.216
+2026-07-28T23:23:03.612677+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,28.29,7.0,0.0,Gi1/0/3,UP,10.2.5.221
+2026-07-28T23:23:03.613100+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,42.68,2.58,0.0,Gi0/0/2,UP,10.1.0.173
+2026-07-28T23:23:03.613558+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,55.95,3.08,0.0,Gi0/0/2,UP,10.0.0.122
+2026-07-28T23:23:03.613973+00:00,core-rtr-01,10.0.0.1,core-router,CRITICAL,CRITICAL: CPU at 100.0% - process crash risk,100.0,10.48,32.93,Gi0/0/2,UP,10.1.0.201
+2026-07-28T23:23:03.614413+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 9.48ms on dist-sw-01,38.96,9.48,1.6,Gi1/0/24,UP,10.2.4.138
+2026-07-28T23:23:03.614856+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Gi0/0/0 is UP - flapping detected,77.65,5.88,1.77,Gi0/0/0,UP,10.0.1.186
+2026-07-28T23:23:03.615314+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.4.88 keepalive received,23.25,6.09,0.0,Gi1/0/24,UP,10.0.4.88
+2026-07-28T23:23:03.615718+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.2.1.149 keepalive received,25.35,5.97,0.0,Gi1/0/24,UP,10.2.1.149
+2026-07-28T23:23:03.616098+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 4.82% exceeds SLO on dist-sw-02,54.37,18.23,4.82,Gi1/0/3,UP,10.0.0.194
+2026-07-28T23:23:03.616554+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,14.16,5.4,0.0,Fa0/1,UP,10.0.5.109
+2026-07-28T23:23:03.617044+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.59ms on core-rtr-01,72.98,4.59,1.22,Gi0/0/1,UP,10.2.0.215
+2026-07-28T23:23:03.617509+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,25.37,4.74,0.0,Gi1/0/1,UP,10.1.5.8
+2026-07-28T23:23:03.617969+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.2.1.91 keepalive received,37.73,3.75,0.0,Gi0/0/1,UP,10.2.1.91
+2026-07-28T23:23:03.618582+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 26.82% on access-sw-01,26.82,15.88,0.59,Fa0/3,UP,10.1.5.52
+2026-07-28T23:23:03.619046+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,26.71,8.15,0.0,Gi1/0/1,UP,10.0.5.22
+2026-07-28T23:23:03.619559+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,41.87,4.37,0.0,Gi0/0/1,UP,10.2.5.240
+2026-07-28T23:23:03.620093+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,18.9,5.49,0.0,Gi1/0/3,UP,10.2.2.168
+2026-07-28T23:23:03.620610+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,23.06,5.21,0.0,Gi1/0/3,UP,10.0.4.236
+2026-07-28T23:23:03.621175+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,49.91,11.97,1.65,Gi1/0/24,UP,10.1.4.202
+2026-07-28T23:23:03.621839+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/2 is UP - flapping detected,82.73,5.42,1.01,Gi0/0/2,UP,10.1.2.71
+2026-07-28T23:23:03.622337+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 12.72ms on dist-sw-02,43.49,12.72,1.15,Gi1/0/3,UP,10.2.1.107
+2026-07-28T23:23:03.622943+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,28.52,7.56,0.0,Gi1/0/1,UP,10.2.0.246
+2026-07-28T23:23:03.623384+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: Packet loss 10.41% - circuit down,95.34,27.23,10.41,Gi1/0/2,UP,10.2.3.176
+2026-07-28T23:23:03.623812+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Interface Gi1/0/24 went UP - link failure,65.41,16.0,6.73,Gi1/0/24,UP,10.2.2.8
+2026-07-28T23:23:03.624213+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,60.7,2.89,0.0,Gi0/0/1,UP,10.1.1.87
+2026-07-28T23:23:03.624642+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,20.87,4.85,0.0,Gi1/0/2,UP,10.1.4.183
+2026-07-28T23:23:03.625088+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,24.86,4.56,0.0,Gi1/0/2,UP,10.1.1.97
+2026-07-28T23:23:03.625484+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,49.32,3.1,0.0,Te0/1/0,UP,10.2.1.233
+2026-07-28T23:23:03.625890+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.1.203 keepalive received,48.52,3.22,0.0,Gi0/0/1,UP,10.1.1.203
+2026-07-28T23:23:03.626281+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 8.42% exceeds SLO on dist-sw-02,52.73,14.83,8.42,Gi1/0/1,DOWN,10.2.1.218
+2026-07-28T23:23:03.626694+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/1 is DOWN - flapping detected,39.15,13.0,0.9,Gi1/0/1,DOWN,10.0.5.9
+2026-07-28T23:23:03.627091+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,27.21,6.78,0.0,Gi1/0/24,UP,10.1.2.114
+2026-07-28T23:23:03.627534+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.1.170 keepalive received,17.65,6.26,0.0,Fa0/1,UP,10.1.1.170
+2026-07-28T23:23:03.628043+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.0.5.162 hold-timer expiring,76.23,5.73,1.12,Gi0/0/2,UP,10.0.5.162
+2026-07-28T23:23:03.628613+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.4.183 keepalive received,36.36,5.43,0.0,Gi0/0/1,UP,10.0.4.183
+2026-07-28T23:23:03.629094+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.2.2.161 keepalive received,52.25,5.62,0.0,Gi0/0/0,UP,10.2.2.161
+2026-07-28T23:23:03.629548+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 26.04% on access-sw-01,26.04,14.55,0.64,Fa0/24,UP,10.0.4.164
+2026-07-28T23:23:03.630033+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Interface Fa0/24 UP - service impact,58.66,28.69,23.76,Fa0/24,UP,10.0.5.253
+2026-07-28T23:23:03.630522+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,52.26,2.67,0.0,Gi0/0/0,UP,10.0.3.190
+2026-07-28T23:23:03.630937+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 23.67% on access-sw-01,23.67,13.36,1.75,Fa0/1,UP,10.2.3.169
+2026-07-28T23:23:03.631363+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.1.3.145 keepalive received,37.93,3.19,0.0,Gi0/0/1,UP,10.1.3.145
+2026-07-28T23:23:03.631798+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,37.66,2.57,0.0,Gi0/0/1,UP,10.0.4.168
+2026-07-28T23:23:03.632273+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.77,8.18,0.0,Fa0/3,UP,10.1.0.165
+2026-07-28T23:23:03.632745+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.93ms on core-rtr-01,70.86,4.93,1.99,Gi0/0/2,DOWN,10.0.0.106
+2026-07-28T23:23:03.633228+00:00,core-rtr-02,10.0.0.2,core-router,ERROR,Interface Gi0/0/1 went UP - link failure,100.0,7.49,3.54,Gi0/0/1,UP,10.2.2.211
+2026-07-28T23:23:03.633820+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/24 is UP,21.78,8.65,0.0,Fa0/24,UP,10.2.4.191
+2026-07-28T23:23:03.634418+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: CPU at 77.19% - process crash risk,77.19,20.21,24.23,Gi1/0/1,UP,10.1.1.244
+2026-07-28T23:23:03.634908+00:00,access-sw-01,10.0.2.1,access-sw,ERROR,OSPF adjacency lost with 10.0.5.249,42.41,17.25,3.54,Fa0/2,UP,10.0.5.249
+2026-07-28T23:23:03.635425+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,31.96,3.25,0.0,Te0/1/0,UP,10.2.1.128
+2026-07-28T23:23:03.635963+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,OSPF adjacency lost with 10.1.4.191,57.78,19.33,4.31,Gi1/0/3,UP,10.1.4.191
+2026-07-28T23:23:03.636490+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 10.75ms on dist-sw-02,38.43,10.75,1.82,Gi1/0/2,UP,10.2.1.14
+2026-07-28T23:23:03.637075+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,51.1,4.04,0.0,Gi0/0/2,UP,10.0.4.118
+2026-07-28T23:23:03.637615+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/1 is UP,31.22,2.69,0.0,Gi0/0/1,UP,10.0.2.233
+2026-07-28T23:23:03.638064+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Te0/1/0 is UP - flapping detected,74.71,5.54,0.97,Te0/1/0,UP,10.0.3.122
+2026-07-28T23:23:03.638521+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,19.94,8.19,0.0,Gi1/0/1,UP,10.0.3.74
+2026-07-28T23:23:03.639059+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.1.110 hold-timer expiring,49.98,10.82,1.9,Gi1/0/1,UP,10.0.1.110
+2026-07-28T23:23:03.639559+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,30.83,3.52,0.0,Gi0/0/0,UP,10.2.0.85
+2026-07-28T23:23:03.639991+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 11.18ms on dist-sw-01,43.07,11.18,0.65,Gi1/0/3,UP,10.0.3.180
+2026-07-28T23:23:03.640396+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Latency spike to 10.41ms on dist-sw-01,47.68,10.41,1.7,Gi1/0/1,UP,10.0.0.42
+2026-07-28T23:23:03.640804+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,42.04,11.22,1.6,Gi1/0/1,UP,10.2.5.214
+2026-07-28T23:23:03.641333+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.2.3.91 hold-timer expiring,36.88,12.99,0.96,Gi1/0/2,UP,10.2.3.91
+2026-07-28T23:23:03.641827+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,50.16,4.47,0.0,Gi0/0/0,UP,10.1.3.190
+2026-07-28T23:23:03.642225+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 34.36% on dist-sw-02,34.36,12.33,0.75,Gi1/0/2,UP,10.1.3.148
+2026-07-28T23:23:03.642666+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.3.216 keepalive received,16.81,9.31,0.0,Fa0/2,UP,10.0.3.216
+2026-07-28T23:23:03.643083+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,26.34,8.0,0.0,Gi1/0/3,UP,10.1.4.113
+2026-07-28T23:23:03.643569+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.3.174 keepalive received,23.17,4.09,0.0,Gi1/0/1,UP,10.0.3.174
+2026-07-28T23:23:03.644031+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: CPU at 55.0% - process crash risk,55.0,35.72,12.67,Fa0/3,DOWN,10.0.0.237
+2026-07-28T23:23:03.644485+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,52.29,2.78,0.0,Gi0/0/2,UP,10.0.2.115
+2026-07-28T23:23:03.644910+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,21.62,6.62,0.0,Gi1/0/1,UP,10.2.4.209
+2026-07-28T23:23:03.645359+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,49.17,2.95,0.0,Te0/1/0,UP,10.1.3.117
+2026-07-28T23:23:03.645892+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,30.7,5.73,0.0,Gi1/0/2,UP,10.1.2.47
+2026-07-28T23:23:03.646344+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,44.69,3.75,0.0,Gi0/0/1,UP,10.2.3.18
+2026-07-28T23:23:03.646886+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/2 is UP,58.63,2.39,0.0,Gi0/0/2,UP,10.2.4.172
+2026-07-28T23:23:03.647428+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.1.23 keepalive received,22.46,8.99,0.0,Fa0/24,UP,10.0.1.23
+2026-07-28T23:23:03.647938+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,40.41,3.4,0.0,Gi0/0/1,UP,10.1.2.72
+2026-07-28T23:23:03.648448+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 34.34% on dist-sw-02,34.34,10.69,0.82,Gi1/0/2,UP,10.2.3.28
+2026-07-28T23:23:03.649009+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,30.37,7.1,0.0,Gi1/0/3,UP,10.1.1.211
+2026-07-28T23:23:03.649546+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/2,55.75,3.21,0.0,Gi0/0/2,UP,10.0.4.225
+2026-07-28T23:23:03.650075+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,35.65,6.01,0.0,Gi1/0/3,UP,10.1.4.229
+2026-07-28T23:23:03.650582+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,21.67,7.17,0.0,Gi1/0/3,UP,10.2.1.137
+2026-07-28T23:23:03.651081+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,16.39,10.46,0.0,Fa0/2,UP,10.1.2.238
+2026-07-28T23:23:03.651612+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/2 is UP,20.68,5.97,0.0,Gi1/0/2,UP,10.0.0.142
+2026-07-28T23:23:03.652247+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.34ms on core-rtr-01,88.39,5.34,1.08,Gi0/0/0,UP,10.0.3.66
+2026-07-28T23:23:03.652764+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.1.3.188 keepalive received,24.04,3.65,0.0,Gi1/0/1,UP,10.1.3.188
+2026-07-28T23:23:03.653272+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/1 is UP - flapping detected,44.47,11.99,1.26,Gi1/0/1,UP,10.0.4.225
+2026-07-28T23:23:03.653792+00:00,core-rtr-01,10.0.0.1,core-router,WARN,High CPU utilization 77.41% on core-rtr-01,77.41,5.41,1.3,Te0/1/0,UP,10.1.4.225
+2026-07-28T23:23:03.654331+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/1 is UP,20.44,8.02,0.0,Gi1/0/1,UP,10.2.1.35
+2026-07-28T23:23:03.654827+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,24.38,6.65,0.0,Gi1/0/3,UP,10.1.5.66
+2026-07-28T23:23:03.655314+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/1,17.25,7.75,0.0,Gi1/0/1,UP,10.2.2.202
+2026-07-28T23:23:03.655810+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Te0/1/0 is UP - flapping detected,80.24,4.85,0.85,Te0/1/0,UP,10.2.4.119
+2026-07-28T23:23:03.656285+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.1.105 keepalive received,13.58,8.19,0.0,Fa0/1,UP,10.2.1.105
+2026-07-28T23:23:03.656831+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,27.41,2.97,0.0,Gi0/0/0,UP,10.2.2.189
+2026-07-28T23:23:03.657338+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,22.46,6.2,0.0,Gi1/0/2,UP,10.0.1.237
+2026-07-28T23:23:03.657854+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,13.84,6.37,0.0,Gi1/0/3,UP,10.2.5.103
+2026-07-28T23:23:03.658313+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/2 DOWN - service impact,81.5,21.51,29.75,Gi1/0/2,DOWN,10.0.5.141
+2026-07-28T23:23:03.658886+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.0.110 keepalive received,26.66,6.37,0.0,Gi1/0/3,UP,10.0.0.110
+2026-07-28T23:23:03.659404+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Gi0/0/0 is UP,34.4,3.22,0.0,Gi0/0/0,UP,10.2.3.152
+2026-07-28T23:23:03.659888+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,39.37,3.77,0.0,Te0/1/0,UP,10.0.3.195
+2026-07-28T23:23:03.660405+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.1.148 keepalive received,18.62,5.99,0.0,Gi1/0/2,UP,10.2.1.148
+2026-07-28T23:23:03.660927+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.1.5.243 hold-timer expiring,45.08,9.93,0.66,Gi1/0/2,UP,10.1.5.243
+2026-07-28T23:23:03.661404+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,32.38,3.54,0.0,Gi0/0/2,UP,10.1.3.63
+2026-07-28T23:23:03.662039+00:00,core-rtr-01,10.0.0.1,core-router,ERROR,OSPF adjacency lost with 10.1.0.171,100.0,6.12,4.47,Gi0/0/1,UP,10.1.0.171
+2026-07-28T23:23:03.662383+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,BGP neighbor 10.1.0.186 hold-timer expiring,34.64,11.77,0.87,Gi1/0/2,UP,10.1.0.186
+2026-07-28T23:23:03.662853+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/1,18.7,7.35,0.0,Fa0/1,UP,10.1.2.209
+2026-07-28T23:23:03.663403+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,12.19,9.0,0.0,Fa0/2,UP,10.0.1.148
+2026-07-28T23:23:03.664025+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,46.26,2.54,0.0,Gi0/0/0,UP,10.0.3.241
+2026-07-28T23:23:03.664510+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/3 is UP - flapping detected,35.7,12.99,0.96,Gi1/0/3,UP,10.0.0.180
+2026-07-28T23:23:03.665413+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,22.32,6.31,0.0,Gi1/0/24,UP,10.2.5.16
+2026-07-28T23:23:03.665929+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.78ms on core-rtr-01,80.79,4.78,1.58,Te0/1/0,UP,10.2.0.225
+2026-07-28T23:23:03.666453+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,17.76,6.56,0.0,Fa0/3,UP,10.0.3.76
+2026-07-28T23:23:03.667014+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/24,21.05,6.47,0.0,Gi1/0/24,UP,10.0.5.168
+2026-07-28T23:23:03.667473+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Latency spike to 14.57ms on access-sw-01,24.95,14.57,0.69,Fa0/2,UP,10.0.5.246
+2026-07-28T23:23:03.667955+00:00,core-rtr-01,10.0.0.1,core-router,WARN,BGP neighbor 10.2.0.25 hold-timer expiring,83.02,5.63,1.77,Gi0/0/0,UP,10.2.0.25
+2026-07-28T23:23:03.668445+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.5.171 keepalive received,10.79,5.19,0.0,Fa0/24,UP,10.2.5.171
+2026-07-28T23:23:03.668976+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.3.2 keepalive received,25.42,7.31,0.0,Gi1/0/1,UP,10.0.3.2
+2026-07-28T23:23:03.669533+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,45.95,2.88,0.0,Gi0/0/0,UP,10.0.1.150
+2026-07-28T23:23:03.670092+00:00,access-sw-01,10.0.2.1,access-sw,WARN,BGP neighbor 10.2.1.200 hold-timer expiring,24.61,15.07,1.85,Fa0/1,UP,10.2.1.200
+2026-07-28T23:23:03.670615+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: Packet loss 26.79% - circuit down,52.17,35.33,26.79,Fa0/3,UP,10.2.5.53
+2026-07-28T23:23:03.671121+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Interface Fa0/24 is UP - flapping detected,29.13,15.38,1.31,Fa0/24,UP,10.1.5.103
+2026-07-28T23:23:03.671598+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,27.18,6.56,0.0,Gi1/0/2,UP,10.0.2.228
+2026-07-28T23:23:03.672076+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,35.82,4.65,0.0,Gi1/0/24,UP,10.0.4.247
+2026-07-28T23:23:03.672524+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Latency spike to 14.62ms on access-sw-01,24.17,14.62,1.31,Fa0/2,UP,10.2.0.160
+2026-07-28T23:23:03.673044+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.2.227 keepalive received,51.83,2.45,0.0,Te0/1/0,UP,10.1.2.227
+2026-07-28T23:23:03.673580+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.3.152 keepalive received,16.98,9.38,0.0,Fa0/1,UP,10.2.3.152
+2026-07-28T23:23:03.674079+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,19.16,5.18,0.0,Gi1/0/3,UP,10.1.5.34
+2026-07-28T23:23:03.674581+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,19.39,7.29,0.0,Fa0/3,UP,10.1.3.59
+2026-07-28T23:23:03.675054+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,46.75,2.35,0.0,Gi0/0/1,UP,10.1.1.147
+2026-07-28T23:23:03.675469+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.0.2.133 keepalive received,17.59,6.24,0.0,Gi1/0/1,UP,10.0.2.133
+2026-07-28T23:23:03.676086+00:00,core-rtr-02,10.0.0.2,core-router,WARN,Interface Gi0/0/0 is UP - flapping detected,61.27,6.96,1.57,Gi0/0/0,UP,10.2.0.15
+2026-07-28T23:23:03.676605+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.4.26 keepalive received,21.92,7.41,0.0,Gi1/0/3,UP,10.2.4.26
+2026-07-28T23:23:03.677055+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.99ms on core-rtr-01,71.88,4.99,1.26,Te0/1/0,UP,10.0.2.80
+2026-07-28T23:23:03.677504+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,19.91,6.72,0.0,Gi1/0/3,UP,10.2.2.153
+2026-07-28T23:23:03.677979+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.0.4.195 keepalive received,15.12,6.76,0.0,Fa0/1,UP,10.0.4.195
+2026-07-28T23:23:03.678475+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,Interface Gi1/0/2 went UP - link failure,59.59,16.59,2.39,Gi1/0/2,UP,10.2.2.196
+2026-07-28T23:23:03.678972+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Latency spike to 11.22ms on dist-sw-02,43.35,11.22,0.76,Gi1/0/3,UP,10.2.5.197
+2026-07-28T23:23:03.679405+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,Interface Gi1/0/2 is UP - flapping detected,37.66,10.04,0.9,Gi1/0/2,UP,10.0.2.71
+2026-07-28T23:23:03.679810+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.4.87 keepalive received,22.12,5.7,0.0,Gi1/0/3,UP,10.2.4.87
+2026-07-28T23:23:03.680220+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: Packet loss 24.26% - circuit down,100.0,20.06,24.26,Gi1/0/2,UP,10.0.5.132
+2026-07-28T23:23:03.680678+00:00,access-sw-01,10.0.2.1,access-sw,WARN,High CPU utilization 23.14% on access-sw-01,23.14,12.6,1.6,Fa0/24,UP,10.0.3.168
+2026-07-28T23:23:03.681049+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,42.09,3.67,0.0,Gi0/0/0,UP,10.1.5.6
+2026-07-28T23:23:03.681406+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,13.56,6.46,0.0,Gi1/0/2,UP,10.2.0.156
+2026-07-28T23:23:03.681849+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Packet loss 2.64% exceeds SLO on dist-sw-02,54.56,17.83,2.64,Gi1/0/2,UP,10.1.3.107
+2026-07-28T23:23:03.682305+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.2.53 keepalive received,22.15,8.97,0.0,Fa0/1,UP,10.1.2.53
+2026-07-28T23:23:03.682783+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/3 is UP,26.49,5.18,0.0,Gi1/0/3,UP,10.1.1.67
+2026-07-28T23:23:03.683220+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/3,25.5,6.25,0.0,Gi1/0/3,UP,10.2.3.141
+2026-07-28T23:23:03.683639+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 41.81% on dist-sw-02,41.81,11.77,0.56,Gi1/0/1,UP,10.1.3.90
+2026-07-28T23:23:03.684035+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,43.14,3.26,0.0,Te0/1/0,UP,10.0.4.6
+2026-07-28T23:23:03.684423+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,43.38,3.87,0.0,Gi0/0/2,UP,10.0.1.53
+2026-07-28T23:23:03.684827+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,13.27,8.26,0.0,Fa0/3,UP,10.1.4.232
+2026-07-28T23:23:03.685239+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,18.06,8.28,0.0,Fa0/2,UP,10.1.3.51
+2026-07-28T23:23:03.685653+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,41.72,3.77,0.0,Te0/1/0,UP,10.2.2.20
+2026-07-28T23:23:03.686147+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/1 is UP,18.89,8.05,0.0,Fa0/1,UP,10.2.1.143
+2026-07-28T23:23:03.686725+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.1.5.145 hold-timer expiring,65.13,5.74,0.59,Te0/1/0,UP,10.1.5.145
+2026-07-28T23:23:03.687271+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.82ms on core-rtr-01,83.82,5.82,1.23,Gi0/0/1,UP,10.2.1.100
+2026-07-28T23:23:03.687826+00:00,access-sw-01,10.0.2.1,access-sw,CRITICAL,CRITICAL: CPU at 50.48% - process crash risk,50.48,29.42,29.53,Fa0/24,UP,10.0.5.22
+2026-07-28T23:23:03.688372+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Interface Gi0/0/1 is UP - flapping detected,87.32,4.94,1.56,Gi0/0/1,UP,10.2.5.12
+2026-07-28T23:23:03.688909+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.61,7.21,0.0,Fa0/3,UP,10.2.2.80
+2026-07-28T23:23:03.689468+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.0.3.46 hold-timer expiring,45.34,9.29,1.8,Gi1/0/3,UP,10.0.3.46
+2026-07-28T23:23:03.689942+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,OSPF adjacency lost with 10.0.3.161,49.88,14.13,8.57,Gi1/0/2,UP,10.0.3.161
+2026-07-28T23:23:03.690382+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 44.85% on dist-sw-01,44.85,9.01,1.11,Gi1/0/2,DOWN,10.2.1.248
+2026-07-28T23:23:03.690872+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.2.50 keepalive received,15.7,6.3,0.0,Fa0/2,UP,10.2.2.50
+2026-07-28T23:23:03.691317+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,32.37,4.44,0.0,Gi1/0/2,UP,10.0.3.226
+2026-07-28T23:23:03.692288+00:00,dist-sw-01,10.0.1.1,distribution-sw,ERROR,OSPF adjacency lost with 10.0.4.170,52.96,14.6,4.67,Gi1/0/3,UP,10.0.4.170
+2026-07-28T23:23:03.692735+00:00,dist-sw-02,10.0.1.2,distribution-sw,ERROR,Interface Gi1/0/1 went UP - link failure,52.94,14.84,4.74,Gi1/0/1,UP,10.0.5.156
+2026-07-28T23:23:03.693159+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 4.69ms on core-rtr-01,71.18,4.69,1.77,Te0/1/0,UP,10.1.0.121
+2026-07-28T23:23:03.693560+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,20.68,6.53,0.0,Gi1/0/24,UP,10.0.1.201
+2026-07-28T23:23:03.694009+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,39.8,3.93,0.0,Gi0/0/0,UP,10.1.1.178
+2026-07-28T23:23:03.694511+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/24 is UP,27.32,6.32,0.0,Gi1/0/24,UP,10.0.2.93
+2026-07-28T23:23:03.694963+00:00,core-rtr-01,10.0.0.1,core-router,INFO,SNMP poll successful on core-rtr-01,31.98,3.54,0.0,Gi0/0/2,UP,10.1.1.11
+2026-07-28T23:23:03.695370+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/0 is UP,50.14,2.6,0.0,Gi0/0/0,UP,10.1.4.212
+2026-07-28T23:23:03.695798+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,31.39,5.4,0.0,Gi1/0/2,UP,10.0.1.168
+2026-07-28T23:23:03.696258+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,11.84,7.99,0.0,Gi1/0/3,UP,10.0.4.231
+2026-07-28T23:23:03.696708+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.0ms on core-rtr-01,84.51,5.0,1.79,Te0/1/0,UP,10.0.3.138
+2026-07-28T23:23:03.697163+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/2 is UP,21.97,5.89,0.0,Gi1/0/2,UP,10.0.3.116
+2026-07-28T23:23:03.697613+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/24,17.77,5.5,0.0,Fa0/24,UP,10.0.0.7
+2026-07-28T23:23:03.698086+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,16.91,7.97,0.0,Fa0/2,UP,10.2.3.46
+2026-07-28T23:23:03.698549+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/1,39.73,4.06,0.0,Gi0/0/1,UP,10.1.4.228
+2026-07-28T23:23:03.699065+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,47.05,3.96,0.0,Te0/1/0,UP,10.0.2.233
+2026-07-28T23:23:03.699579+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,19.02,7.27,0.0,Gi1/0/3,UP,10.0.0.191
+2026-07-28T23:23:03.700189+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,21.82,9.06,0.0,Gi1/0/1,UP,10.1.1.187
+2026-07-28T23:23:03.700670+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,11.4,9.45,0.0,Fa0/1,UP,10.1.0.208
+2026-07-28T23:23:03.701154+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.1.1.251 hold-timer expiring,71.57,5.71,1.41,Gi0/0/1,UP,10.1.1.251
+2026-07-28T23:23:03.701619+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 44.04% on dist-sw-01,44.04,11.8,0.62,Gi1/0/3,DOWN,10.0.0.51
+2026-07-28T23:23:03.702121+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,SNMP poll successful on dist-sw-01,24.23,7.23,0.0,Gi1/0/24,UP,10.0.2.117
+2026-07-28T23:23:03.702694+00:00,core-rtr-02,10.0.0.2,core-router,WARN,BGP neighbor 10.0.1.35 hold-timer expiring,67.51,6.93,1.7,Te0/1/0,UP,10.0.1.35
+2026-07-28T23:23:03.703213+00:00,dist-sw-02,10.0.1.2,distribution-sw,WARN,High CPU utilization 43.7% on dist-sw-02,43.7,12.1,0.57,Gi1/0/1,UP,10.1.5.36
+2026-07-28T23:23:03.703905+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.2.0.191 keepalive received,14.28,10.04,0.0,Fa0/2,UP,10.2.0.191
+2026-07-28T23:23:03.704486+00:00,access-sw-01,10.0.2.1,access-sw,INFO,SNMP poll successful on access-sw-01,15.87,10.6,0.0,Fa0/1,UP,10.1.2.157
+2026-07-28T23:23:03.705070+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.4.45 keepalive received,19.1,5.56,0.0,Gi1/0/3,UP,10.0.4.45
+2026-07-28T23:23:03.705627+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/24,24.48,7.88,0.0,Gi1/0/24,UP,10.2.1.178
+2026-07-28T23:23:03.706248+00:00,access-sw-01,10.0.2.1,access-sw,INFO,BGP neighbor 10.1.4.176 keepalive received,9.93,8.33,0.0,Fa0/2,UP,10.1.4.176
+2026-07-28T23:23:03.706877+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.3.59 keepalive received,37.27,2.42,0.0,Te0/1/0,UP,10.0.3.59
+2026-07-28T23:23:03.707445+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Spanning-tree topology change detected on Fa0/2,12.78,7.35,0.0,Fa0/2,UP,10.2.1.24
+2026-07-28T23:23:03.707980+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,Interface Gi1/0/1 is UP,27.49,5.33,0.0,Gi1/0/1,UP,10.0.0.59
+2026-07-28T23:23:03.708528+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Spanning-tree topology change detected on Te0/1/0,41.61,2.05,0.0,Te0/1/0,UP,10.0.5.67
+2026-07-28T23:23:03.709048+00:00,dist-sw-02,10.0.1.2,distribution-sw,CRITICAL,CRITICAL: Interface Gi1/0/3 UP - service impact,84.96,27.95,34.96,Gi1/0/3,UP,10.2.1.42
+2026-07-28T23:23:03.709508+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Interface Te0/1/0 is UP,31.98,4.01,0.0,Te0/1/0,UP,10.2.4.121
+2026-07-28T23:23:03.709972+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.1.0.24 keepalive received,55.25,2.6,0.0,Gi0/0/1,UP,10.1.0.24
+2026-07-28T23:23:03.710411+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Te0/1/0 is UP,35.17,3.39,0.0,Te0/1/0,UP,10.2.5.141
+2026-07-28T23:23:03.710884+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,25.57,5.62,0.0,Gi1/0/3,UP,10.2.1.48
+2026-07-28T23:23:03.711312+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,High CPU utilization 47.85% on dist-sw-01,47.85,9.19,1.0,Gi1/0/24,UP,10.2.1.47
+2026-07-28T23:23:03.712105+00:00,core-rtr-01,10.0.0.1,core-router,INFO,BGP neighbor 10.0.3.166 keepalive received,44.89,3.61,0.0,Gi0/0/0,UP,10.0.3.166
+2026-07-28T23:23:03.712796+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,BGP neighbor 10.2.1.227 hold-timer expiring,41.36,10.46,1.0,Gi1/0/1,UP,10.2.1.227
+2026-07-28T23:23:03.713222+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 66.5% on core-rtr-02,66.5,6.05,1.71,Te0/1/0,UP,10.2.0.94
+2026-07-28T23:23:03.713956+00:00,core-rtr-02,10.0.0.2,core-router,INFO,Spanning-tree topology change detected on Gi0/0/0,29.41,4.14,0.0,Gi0/0/0,UP,10.1.2.103
+2026-07-28T23:23:03.714568+00:00,core-rtr-02,10.0.0.2,core-router,INFO,SNMP poll successful on core-rtr-02,35.45,4.6,0.0,Te0/1/0,UP,10.2.0.247
+2026-07-28T23:23:03.715116+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Spanning-tree topology change detected on Gi1/0/2,13.22,5.04,0.0,Gi1/0/2,UP,10.1.2.115
+2026-07-28T23:23:03.715629+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.0.0.43 keepalive received,38.39,2.69,0.0,Gi0/0/1,UP,10.0.0.43
+2026-07-28T23:23:03.716116+00:00,dist-sw-01,10.0.1.1,distribution-sw,WARN,Interface Gi1/0/24 is UP - flapping detected,43.22,10.74,0.54,Gi1/0/24,UP,10.1.3.236
+2026-07-28T23:23:03.716643+00:00,core-rtr-01,10.0.0.1,core-router,WARN,Latency spike to 5.18ms on core-rtr-01,79.41,5.18,1.87,Gi0/0/2,UP,10.2.4.186
+2026-07-28T23:23:03.717106+00:00,dist-sw-01,10.0.1.1,distribution-sw,INFO,BGP neighbor 10.0.1.176 keepalive received,29.75,3.47,0.0,Gi1/0/1,UP,10.0.1.176
+2026-07-28T23:23:03.717571+00:00,dist-sw-01,10.0.1.1,distribution-sw,CRITICAL,CRITICAL: CPU at 88.75% - process crash risk,88.75,19.54,21.92,Gi1/0/24,DOWN,10.1.5.18
+2026-07-28T23:23:03.718249+00:00,core-rtr-01,10.0.0.1,core-router,INFO,Interface Gi0/0/1 is UP,52.14,1.68,0.0,Gi0/0/1,UP,10.1.0.236
+2026-07-28T23:23:03.718808+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,Interface Gi1/0/3 is UP,18.95,5.38,0.0,Gi1/0/3,UP,10.2.2.17
+2026-07-28T23:23:03.719320+00:00,access-sw-01,10.0.2.1,access-sw,INFO,Interface Fa0/2 is UP,15.21,7.53,0.0,Fa0/2,UP,10.0.5.18
+2026-07-28T23:23:03.719842+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,BGP neighbor 10.2.3.98 keepalive received,24.23,7.63,0.0,Gi1/0/1,UP,10.2.3.98
+2026-07-28T23:23:03.720300+00:00,core-rtr-02,10.0.0.2,core-router,WARN,High CPU utilization 73.27% on core-rtr-02,73.27,5.58,1.37,Te0/1/0,UP,10.2.1.184
+2026-07-28T23:23:03.720860+00:00,dist-sw-02,10.0.1.2,distribution-sw,INFO,SNMP poll successful on dist-sw-02,24.78,8.9,0.0,Gi1/0/1,UP,10.2.4.146
+2026-07-28T23:23:03.721313+00:00,access-sw-01,10.0.2.1,access-sw,WARN,Latency spike to 12.69ms on access-sw-01,26.73,12.69,1.01,Fa0/1,UP,10.1.3.189
+2026-07-28T23:23:03.721751+00:00,core-rtr-02,10.0.0.2,core-router,INFO,BGP neighbor 10.2.4.209 keepalive received,36.03,4.81,0.0,Gi0/0/1,UP,10.2.4.209

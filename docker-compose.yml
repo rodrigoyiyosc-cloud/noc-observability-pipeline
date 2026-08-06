@@ -1,0 +1,67 @@
+# docker-compose.yml
+# Añade el servicio grafana a tu compose existente.
+# Asume que tu servicio de TimescaleDB se llama "timescaledb" y
+# la red compartida se llama "noc_net". Ajusta los nombres si difieren.
+
+version: "3.8"
+
+services:
+
+  # ── Tu servicio TimescaleDB existente (referencia para la red) ─────────────
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       noc
+      POSTGRES_USER:     noc_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - tsdb_data:/var/lib/postgresql/data
+    networks:
+      - noc_net
+    ports:
+      - "5432:5432"
+
+  # ── Grafana OSS ────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      # Admin credentials (cámbialos en producción)
+      GF_SECURITY_ADMIN_USER:     admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+      # Persistencia de sesión
+      GF_SESSION_PROVIDER: memory
+
+      # Habilita rendering server-side si después quieres alertas con screenshots
+      # GF_RENDERING_SERVER_URL: http://renderer:8081/render
+      # GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+
+      # Timezone del dashboard (ajusta a tu región)
+      GF_DEFAULT_APP_MODE: production
+      TZ: America/Santiago
+
+    volumes:
+      # Persistencia de dashboards, datasources y configuración
+      - grafana_data:/var/lib/grafana
+      # Provisioning automático de datasource (opcional, ver sección 2)
+      - ./grafana/provisioning:/etc/grafana/provisioning
+
+    ports:
+      - "3000:3000"
+
+    networks:
+      - noc_net
+
+networks:
+  noc_net:
+    driver: bridge
+
+volumes:
+  tsdb_data:
+  grafana_data:

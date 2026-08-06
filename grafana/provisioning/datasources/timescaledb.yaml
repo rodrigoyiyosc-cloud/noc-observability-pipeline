@@ -1,0 +1,32 @@
+# grafana/provisioning/datasources/timescaledb.yaml
+#
+# Provisioning automático: Grafana carga este archivo al arrancar.
+# Colócalo en ./grafana/provisioning/datasources/ relativo al docker-compose.yml.
+# Con esto evitas configurar el datasource a mano en la UI en cada redeploy.
+#
+# Si prefieres configurarlo a mano en la UI, usa los valores de este archivo
+# como referencia exacta para rellenar los campos.
+
+apiVersion: 1
+
+datasources:
+  - name:      TimescaleDB-NOC
+    type:      postgres
+    uid:       timescaledb_noc          # UID fijo → las queries de paneles no se rompen al reimportar
+    url:       timescaledb:5432         # nombre del servicio Docker, no localhost
+    database:  noc
+    user:      noc_user
+
+    secureJsonData:
+      password: secret                  # nunca en jsonData plano, siempre en secureJsonData
+
+    jsonData:
+      sslmode:          disable          # dentro de Docker mismo host → sin TLS
+      maxOpenConns:     10
+      maxIdleConns:     2
+      connMaxLifetime:  14400            # segundos (4h) — evita conexiones zombi
+      postgresVersion:  1600             # 1600 = PG 16; TimescaleDB corre sobre PG nativo
+      timescaledb:      true             # activa el query builder optimizado para hypertables
+
+    isDefault:  true
+    editable:   true
