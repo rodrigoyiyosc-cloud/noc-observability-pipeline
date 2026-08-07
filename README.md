@@ -42,13 +42,12 @@ Dashboard interactivo aprovisionado íntegramente vía **Infrastructure as Code*
 ```
 .
 ├── python-simulator/
-│   ├── main.py              # Punto de entrada (CLI con args)
-│   ├── simulator.py         # Bucle principal de generación
-│   ├── config.py            # Dispositivos, base de datos, severidades
-│   ├── log_builder.py       # Construcción de registros de eventos
-│   ├── metrics.py           # Generación de métricas con anomalías
-│   ├── writer.py            # Sinks: CSV, JSONL, PostgreSQL
-│   └── database.py          # Connection pool de PostgreSQL
+│   ├── simulator.py         # Punto de entrada (CLI con args) + bucle principal de generación
+│   ├── config.py             # Dispositivos, base de datos, severidades
+│   ├── log_builder.py        # Construcción de registros de eventos
+│   ├── metrics.py            # Generación de métricas con anomalías
+│   ├── writer.py              # Sinks: CSV, JSONL, PostgreSQL (incluye el connection pool)
+│   └── force_alert_test.py   # Inyector de telemetría CRITICAL sostenida, solo para testing de alertas
 │
 ├── grafana/provisioning/
 │   ├── datasources/
@@ -57,9 +56,9 @@ Dashboard interactivo aprovisionado íntegramente vía **Infrastructure as Code*
 │   │   ├── dashboards.yaml      # Proveedor de dashboards
 │   │   └── noc_telemetry.json   # Dashboard principal (3 paneles)
 │   └── alerting/                # ← NUEVO: Alertas provisioned
-│       ├── alert_rules.yaml          # 3 reglas de alerta
-│       ├── contact_points.yaml       # Configuración de webhooks
-│       └── notification_policies.yaml # Ruteo de notificaciones
+│       ├── alert_rules.yml           # 3 reglas de alerta
+│       ├── contact_points.yml        # Configuración de webhooks
+│       └── notification_policies.yml # Ruteo de notificaciones
 │
 ├── sql/
 │   ├── schema.sql           # DDL: tables, hypertables, índices
@@ -124,6 +123,8 @@ Deberías ver: `network_telemetry`, `devices`, y varias vistas (`v_telemetry_ts`
 
 ### 4. Ejecutar simulador
 
+> ⚠️ El `simulator.py` usa imports planos (`from config import DEVICES`, etc.), por lo que **debes** ejecutarlo desde dentro de `python-simulator/`. Si lo corres desde la raíz del proyecto (ej. `python python-simulator/simulator.py`), fallará con `ModuleNotFoundError: No module named 'config'`.
+
 ```bash
 cd python-simulator
 python simulator.py --fmt postgres --interval 2 --batch 3 \
@@ -162,7 +163,7 @@ Las **alertas se aprovisionan automáticamente** al levantar el contenedor de Gr
 
 ### Archivos de Configuración
 
-#### 1. `alert_rules.yaml`
+#### 1. `alert_rules.yml`
 
 Define **3 reglas de alerta** que evalúan telemetría en tiempo real:
 
@@ -198,7 +199,7 @@ Threshold C (comparar contra límite)
 Fire/Resolve (si supera umbrales por tiempo mínimo)
 ```
 
-#### 2. `contact_points.yaml`
+#### 2. `contact_points.yml`
 
 Define **2 puntos de contacto** (webhooks) para notificaciones:
 
@@ -209,7 +210,7 @@ Define **2 puntos de contacto** (webhooks) para notificaciones:
 
 **⚠️ Placeholders:** Las URLs aún no son válidas. Reemplázalas en **Fase 2** con URLs reales de Slack Incoming Webhooks o Teams Connectors.
 
-#### 3. `notification_policies.yaml`
+#### 3. `notification_policies.yml`
 
 Configura **ruteo inteligente** de alertas por severidad:
 
@@ -245,7 +246,7 @@ lvl=info msg="Provisioned alert rule" uid=packetloss-critical-002 title="Packet 
 
 ### Test 3: Forzar anomalía real
 
-Corre el simulador con `--count` bajo para inyectar eventos rápidamente:
+**Opción A** — Corre el simulador con `--count` bajo para inyectar eventos rápidamente:
 
 ```bash
 cd python-simulator
@@ -254,6 +255,14 @@ python simulator.py --fmt postgres --interval 0.3 --batch 10 --count 500 \
 ```
 
 Esto genera **latencia y packet loss altos** para forzar disparo de alertas en ~1-3 minutos.
+
+**Opción B** — Usa el script dedicado `force_alert_test.py`, que inyecta telemetría CRITICAL sostenida directamente sobre `core-rtr-01` (más rápido y determinístico que el simulador general):
+
+```bash
+cd python-simulator
+python force_alert_test.py --minutes 5 \
+  --pg-dsn "postgresql://noc_user:secret@localhost:5432/noc"
+```
 
 ### Test 4: Observar transición de estado
 
@@ -290,7 +299,7 @@ grafana:
     GF_SMTP_FROM_NAME:    "NOC Alerts"
 ```
 
-Luego añade un contact point de tipo `email` en `contact_points.yaml`.
+Luego añade un contact point de tipo `email` en `contact_points.yml`.
 
 ### Integrar con Slack
 
@@ -300,7 +309,7 @@ Crea un **Incoming Webhook** en Slack:
 2. Haz clic en **Add New Webhook to Workspace**
 3. Selecciona el canal (ej. `#noc-alerts`, `#noc-critical`)
 4. Copia la URL generada
-5. Reemplaza los placeholders en `grafana/provisioning/alerting/contact_points.yaml`:
+5. Reemplaza los placeholders en `grafana/provisioning/alerting/contact_points.yml`:
 
 ```yaml
 contactPoints:
@@ -360,12 +369,12 @@ peer_ip     INET             -- IP del peer remoto
 
 ### "AlertRule has no datasource"
 
-**Causa:** La UID del datasource en `alert_rules.yaml` no coincide con la UID real de TimescaleDB.
+**Causa:** La UID del datasource en `alert_rules.yml` no coincide con la UID real de TimescaleDB.
 
 **Solución:**
 1. Abre Grafana → **Administration → Connections → Datasources**
 2. Copia la UID del datasource PostgreSQL
-3. Reemplaza `timescaledb_noc` en `alert_rules.yaml` con la UID correcta
+3. Reemplaza `timescaledb_noc` en `alert_rules.yml` con la UID correcta
 
 ### "Connection refused" desde Grafana a PostgreSQL
 
@@ -408,7 +417,7 @@ docker logs grafana | grep -i "alert\|error\|datasource" | tail -30
 - [ ] Escalado a múltiples regiones geográficas
 
 ### Fase 4: ML y Anomalía Adaptativa
-- [ ] Detección de anomalías basada en histórico (Prophet/Isolationfor Forest)
+- [ ] Detección de anomalías basada en histórico (Prophet/Isolation Forest)
 - [ ] Baselines dinámicos por hora del día / día de la semana
 - [ ] Deduplicación inteligente de alertas
 
@@ -450,7 +459,7 @@ Este proyecto sigue **Infrastructure as Code** como principio. Cualquier cambio 
 
 ### Webhooks de Alertas
 
-Las URLs de webhooks en `contact_points.yaml` son **públicas por naturaleza** (Slack/Teams los requieren). Usa canales privados/restringidos en Slack/Teams para limitar visibilidad.
+Las URLs de webhooks en `contact_points.yml` son **públicas por naturaleza** (Slack/Teams los requieren). Usa canales privados/restringidos en Slack/Teams para limitar visibilidad.
 
 ---
 
@@ -460,6 +469,6 @@ Las URLs de webhooks en `contact_points.yaml` son **públicas por naturaleza** (
 
 ---
 
-**Mantenido por:** [Tu equipo NOC]  
-**Última actualización:** Agosto 2026  
+**Mantenido por:** [Tu equipo NOC]
+**Última actualización:** Agosto 2026
 **Versión:** 2.0 (con Unified Alerting)
