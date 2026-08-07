@@ -46,6 +46,16 @@ services:
       GF_DEFAULT_APP_MODE: production
       TZ: America/Santiago
 
++     # ── Unified Alerting (IaC) ──────────────────────────────────────
++     GF_UNIFIED_ALERTING_ENABLED: "true"
++     GF_ALERTING_ENABLED: "false"          # deshabilita el motor legacy
++
++     # ── SMTP (placeholder para Fase 2 — notificaciones por email) ───
++     # GF_SMTP_ENABLED:   "true"
++     # GF_SMTP_HOST:      smtp.gmail.com:587
++     # GF_SMTP_USER:      alerts@tudominio.com
++     # GF_SMTP_PASSWORD:  app-password-aqui
++     # GF_SMTP_FROM_ADDRESS: alerts@tudominio.com
     volumes:
       # Persistencia de dashboards, datasources y configuración
       - grafana_data:/var/lib/grafana
