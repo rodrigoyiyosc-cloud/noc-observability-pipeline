@@ -203,12 +203,12 @@ Fire/Resolve (si supera umbrales por tiempo mínimo)
 
 Define **2 puntos de contacto** (webhooks) para notificaciones:
 
-| Nombre | URL | Propósito |
-|--------|-----|----------|
-| `noc-webhook-default` | `https://hooks.slack.com/services/PLACEHOLDER/...` | Notificaciones normales (WARNING) |
-| `noc-webhook-critical` | `https://hooks.slack.com/services/PLACEHOLDER_CRITICAL/...` | Alertas críticas (CRITICAL) → canal dedicado |
+| Nombre | Tipo | Propósito |
+|--------|------|----------|
+| `noc-webhook-default` | `slack` | Notificaciones normales (WARNING) → canal Slack |
+| `noc-webhook-critical` | `slack` | Alertas críticas (CRITICAL) → canal Slack dedicado |
 
-**⚠️ Placeholders:** Las URLs aún no son válidas. Reemplázalas en **Fase 2** con URLs reales de Slack Incoming Webhooks o Teams Connectors.
+**✅ Fase 2 completada:** Las URLs de Slack Incoming Webhook ya están configuradas y validadas end-to-end (ver sección de Troubleshooting para el detalle del `type: slack` vs `type: webhook`). Las URLs reales **no se versionan en texto plano** en este README por seguridad — están en `contact_points.yml`, el cual debe protegerse vía `.env` o secret manager en producción (ver sección 🔐 Seguridad).
 
 #### 3. `notification_policies.yml`
 
@@ -274,11 +274,11 @@ Alternativamente, usa la API:
 curl -u admin:admin http://localhost:3000/api/v1/provisioning/alert-rules | jq '.[] | {uid, title, state}'
 ```
 
-### Test 5: Probar contact point (sin URL real)
+### Test 5: Probar contact point (URL real configurada)
 
 Ve a **Alerting → Contact points** → selecciona `noc-webhook-default` → **Test**.
 
-Verás un error HTTP (porque es un placeholder), pero confirma que el routing de notificaciones funciona correctamente. Cuando tengas la URL real de Slack/Teams, el mensaje llegará al canal.
+Deberías recibir el mensaje de prueba directamente en el canal de Slack configurado. Si ves `Last delivery attempt failed`, revisa la sección **🔍 Troubleshooting → "Last delivery attempt failed" en contact points de Slack**.
 
 ---
 
@@ -317,7 +317,7 @@ contactPoints:
     name: noc-webhook-critical
     receivers:
       - uid: noc-webhook-002
-        type: webhook
+        type: slack   # ⚠️ NO usar "webhook" genérico para URLs hooks.slack.com — ver Troubleshooting
         settings:
           url: https://hooks.slack.com/services/YOUR/ACTUAL/WEBHOOK_URL_HERE
 ```
@@ -401,14 +401,54 @@ Verifica que ambos contenedores estén en la red `noc_net`.
 docker logs grafana | grep -i "alert\|error\|datasource" | tail -30
 ```
 
+### "Last delivery attempt failed" en contact points de Slack
+
+**Síntoma:**
+Los contact points aparecen como `Provisioned` en Grafana, pero el estado
+muestra `Last delivery attempt failed` y no llegan mensajes al canal,
+pese a tener una URL de Slack Incoming Webhook válida.
+
+**Causa raíz:**
+El receiver estaba configurado con `type: webhook` (webhook genérico) en
+lugar de `type: slack` (integración nativa). Grafana envía un payload JSON
+distinto según el tipo:
+
+- `type: webhook` → payload propio de Grafana (`alerts[]`, `status`, etc.)
+- `type: slack` → payload compatible con el formato que Slack Incoming
+  Webhooks espera (`text`, `blocks`, etc.)
+
+Slack rechaza el payload de `type: webhook` con `400 invalid_payload`,
+ya que no reconoce el esquema.
+
+**Solución:**
+Usar `type: slack` en el receiver cuando la URL sea un Slack Incoming
+Webhook:
+
+```yaml
+receivers:
+  - uid: noc-webhook-001
+    type: slack        # NO usar "webhook" para URLs hooks.slack.com
+    settings:
+      url: https://hooks.slack.com/services/XXX/XXX/XXX
+    disableResolveMessage: false
+```
+
+**Verificación:**
+```bash
+docker-compose restart grafana
+docker-compose logs grafana --tail=30 | grep -i "slack\|error\|provision"
+```
+
+Confirmar además desde la UI: **Alerting → Contact points → botón Test**.
+
 ---
 
 ## 📈 Roadmap Futuro
 
 ### Fase 2: Notificaciones Reales
 - ✅ Estructura IaC presente
-- [ ] Reemplazar placeholders con URLs reales de Slack/Teams
-- [ ] Testear flujo end-to-end de notificaciones
+- ✅ Reemplazar placeholders con URLs reales de Slack/Teams
+- ✅ Testear flujo end-to-end de notificaciones
 
 ### Fase 3: Escalado Avanzado
 - [ ] Silenciadores de alertas (mantenimiento programado)
