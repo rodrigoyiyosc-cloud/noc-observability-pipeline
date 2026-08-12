@@ -50,6 +50,15 @@ services:
       - "3000:3000"
     networks:
       - noc_net
+  webhook-service:
+    build:
+      context: ./webhook_service
+    container_name: webhook_service
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - noc_net
 
 networks:
   noc_net:

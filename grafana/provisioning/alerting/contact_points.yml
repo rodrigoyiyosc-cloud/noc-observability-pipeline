@@ -6,16 +6,16 @@ contactPoints:
     name: noc-webhook-default
     receivers:
       - uid: noc-webhook-001
-        type: slack
+        type: webhook
         settings:
-          url: ${SLACK_WEBHOOK_URL}
+          url: http://webhook-service:8000/alert
         disableResolveMessage: false
 
   - orgId: 1
     name: noc-webhook-critical
     receivers:
       - uid: noc-webhook-002
-        type: slack
+        type: webhook
         settings:
-          url: ${SLACK_WEBHOOK_URL}
+          url: http://webhook-service:8000/alert
         disableResolveMessage: false
