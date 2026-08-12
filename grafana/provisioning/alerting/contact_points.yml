@@ -6,22 +6,16 @@ contactPoints:
     name: noc-webhook-default
     receivers:
       - uid: noc-webhook-001
-        type: webhook
+        type: slack
         settings:
-          # ⚠️ PLACEHOLDER — reemplazar por la URL real del webhook de
-          # Slack Incoming Webhook o Teams Connector en la Fase 2
-          url: https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER
-          httpMethod: POST
+          url: ${SLACK_WEBHOOK_URL}
         disableResolveMessage: false
 
   - orgId: 1
     name: noc-webhook-critical
     receivers:
       - uid: noc-webhook-002
-        type: webhook
+        type: slack
         settings:
-          # Canal/endpoint dedicado a severidad CRITICAL (ej. PagerDuty,
-          # OpsGenie o un canal Slack #noc-critical distinto)
-          url: https://hooks.slack.com/services/PLACEHOLDER_CRITICAL/PLACEHOLDER/PLACEHOLDER
-          httpMethod: POST
+          url: ${SLACK_WEBHOOK_URL}
         disableResolveMessage: false

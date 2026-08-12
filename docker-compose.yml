@@ -3,7 +3,7 @@
 # Asume que tu servicio de TimescaleDB se llama "timescaledb" y
 # la red compartida se llama "noc_net". Ajusta los nombres si difieren.
 
-version: "3.8"
+
 
 services:
 
