@@ -1,0 +1,21 @@
+# grafana/provisioning/alerting/contact_points.yaml
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: noc-webhook-default
+    receivers:
+      - uid: noc-webhook-001
+        type: webhook
+        settings:
+          url: http://webhook-service:8000/alert
+        disableResolveMessage: false
+
+  - orgId: 1
+    name: noc-webhook-critical
+    receivers:
+      - uid: noc-webhook-002
+        type: webhook
+        settings:
+          url: http://webhook-service:8000/alert
+        disableResolveMessage: false

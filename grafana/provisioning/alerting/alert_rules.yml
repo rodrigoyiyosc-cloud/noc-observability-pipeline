@@ -1,0 +1,165 @@
+# grafana/provisioning/alerting/alert_rules.yaml
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: noc-critical-alerts
+    folder: NOC Alerts
+    interval: 1m
+    rules:
+
+      # ─────────────────────────────────────────────────────────────
+      # Regla 1: Latencia crítica sostenida
+      # ─────────────────────────────────────────────────────────────
+      - uid: latency-critical-001
+        title: "Latencia Crítica Sostenida (>150ms)"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: timescaledb_noc
+            model:
+              rawSql: |
+                SELECT
+                  time_bucket('1m', ts) AS time,
+                  hostname,
+                  AVG(latency_ms) AS latency_ms
+                FROM network_telemetry
+                WHERE $__timeFilter(ts)
+                GROUP BY 1, 2
+                ORDER BY 1
+              format: time_series
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [150]
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        labels:
+          severity: critical
+          team: noc
+          alert_type: latency
+        annotations:
+          summary: "Latencia promedio > 150ms en {{ $labels.hostname }}"
+          description: "El dispositivo {{ $labels.hostname }} presenta latencia promedio superior a 150ms durante al menos 3 minutos consecutivos. Revisar enlaces upstream y saturación de interfaz."
+
+      # ─────────────────────────────────────────────────────────────
+      # Regla 2: Packet Loss elevado (indicador de degradación de enlace)
+      # ─────────────────────────────────────────────────────────────
+      - uid: packetloss-critical-002
+        title: "Packet Loss Elevado (>10%)"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: timescaledb_noc
+            model:
+              rawSql: |
+                SELECT
+                  time_bucket('1m', ts) AS time,
+                  hostname,
+                  AVG(packet_loss_pct) AS packet_loss_pct
+                FROM network_telemetry
+                WHERE $__timeFilter(ts)
+                GROUP BY 1, 2
+                ORDER BY 1
+              format: time_series
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [10]
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: noc
+          alert_type: packet_loss
+        annotations:
+          summary: "Packet loss > 10% en {{ $labels.hostname }}"
+          description: "El dispositivo {{ $labels.hostname }} registra pérdida de paquetes superior al 10% durante al menos 2 minutos. Posible degradación de enlace o congestión."
+
+      # ─────────────────────────────────────────────────────────────
+      # Regla 3 (bonus): CPU sostenido en umbral WARN
+      # ─────────────────────────────────────────────────────────────
+      - uid: cpu-warning-003
+        title: "CPU Elevado Sostenido (>85%)"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: timescaledb_noc
+            model:
+              rawSql: |
+                SELECT
+                  time_bucket('1m', ts) AS time,
+                  hostname,
+                  AVG(cpu_pct) AS cpu_pct
+                FROM network_telemetry
+                WHERE $__timeFilter(ts)
+                GROUP BY 1, 2
+                ORDER BY 1
+              format: time_series
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [85]
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        labels:
+          severity: warning
+          team: noc
+          alert_type: cpu
+        annotations:
+          summary: "CPU > 85% en {{ $labels.hostname }}"
+          description: "El dispositivo {{ $labels.hostname }} mantiene uso de CPU superior al 85% durante 5 minutos. Riesgo de degradación en plano de control."

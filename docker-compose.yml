@@ -3,7 +3,7 @@
 # Asume que tu servicio de TimescaleDB se llama "timescaledb" y
 # la red compartida se llama "noc_net". Ajusta los nombres si difieren.
 
-version: "3.8"
+
 
 services:
 
@@ -31,30 +31,40 @@ services:
     depends_on:
       - timescaledb
     environment:
-      # Admin credentials (cámbialos en producción)
       GF_SECURITY_ADMIN_USER:     admin
       GF_SECURITY_ADMIN_PASSWORD: admin
-
-      # Persistencia de sesión
       GF_SESSION_PROVIDER: memory
-
-      # Habilita rendering server-side si después quieres alertas con screenshots
-      # GF_RENDERING_SERVER_URL: http://renderer:8081/render
-      # GF_RENDERING_CALLBACK_URL: http://grafana:3000/
-
-      # Timezone del dashboard (ajusta a tu región)
       GF_DEFAULT_APP_MODE: production
       TZ: America/Santiago
 
+      # ← AGREGAR ESTAS LÍNEAS
+      GF_UNIFIED_ALERTING_ENABLED: "true"
+      GF_ALERTING_ENABLED: "false"
+
     volumes:
-      # Persistencia de dashboards, datasources y configuración
       - grafana_data:/var/lib/grafana
-      # Provisioning automático de datasource (opcional, ver sección 2)
       - ./grafana/provisioning:/etc/grafana/provisioning
+      # No se requiere volumen adicional — alerting/ está incluido
 
     ports:
       - "3000:3000"
-
+    networks:
+      - noc_net
+  webhook-service:
+    build:
+      context: ./webhook_service
+    container_name: webhook_service
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      PG_HOST: timescaledb
+      PG_PORT: "5432"
+      PG_DB: noc
+      PG_USER: noc_user
+      PG_PASSWORD: secret
     networks:
       - noc_net
 
