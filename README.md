@@ -58,39 +58,43 @@ El punto de llegada real de cada alerta disparada por Grafana:
 ---
 
 ## 📂 Estructura del Proyecto
+
+```
 .
 ├── python-simulator/
-│ ├── simulator.py # CLI + bucle principal de generación
-│ ├── config.py # Topología de dispositivos (DEVICES)
-│ ├── log_builder.py # Construcción de registros de eventos
-│ ├── metrics.py # Generación de métricas con anomalías
-│ ├── writer.py # Sinks: CSV, JSONL, PostgreSQL (connection pool)
-│ └── force_alert_test.py # Inyector de CRITICAL sostenido, solo testing
+│   ├── simulator.py           # CLI + bucle principal de generación
+│   ├── config.py               # Topología de dispositivos (DEVICES)
+│   ├── log_builder.py          # Construcción de registros de eventos
+│   ├── metrics.py              # Generación de métricas con anomalías
+│   ├── writer.py               # Sinks: CSV, JSONL, PostgreSQL (connection pool)
+│   └── force_alert_test.py     # Inyector de CRITICAL sostenido, solo testing
 │
-├── webhook-service/ # 🆕 Microservicio receptor de alertas
-│ ├── main.py # FastAPI: POST /alert, GET /health
-│ ├── requirements.txt # fastapi, uvicorn[standard], psycopg2-binary
-│ ├── webhook_service.sql # DDL de incident_logs (tabla + índices)
-│ └── Dockerfile
+├── webhook-service/            # 🆕 Microservicio receptor de alertas
+│   ├── main.py                  # FastAPI: POST /alert, GET /health
+│   ├── requirements.txt         # fastapi, uvicorn[standard], psycopg2-binary
+│   ├── webhook_service.sql      # DDL de incident_logs (tabla + índices)
+│   └── Dockerfile
 │
 ├── grafana/provisioning/
-│ ├── datasources/
-│ │ └── timescaledb.yaml # Datasource PostgreSQL (uid fijo: timescaledb_noc)
-│ ├── dashboards/
-│ │ ├── dashboards.yaml # Proveedor de dashboards (file-based)
-│ │ └── noc_telemetry.json # Dashboard principal (3 paneles)
-│ └── alerting/
-│ ├── alert_rules.yml # 3 reglas de alerta
-│ ├── contact_points.yml # Receivers → Webhook Service
-│ ├── notification_policies.yml # Ruteo de notificaciones por severidad
-│ └── mute_timings.yml # 🆕 Ventanas de mantenimiento (Fase 3)
+│   ├── datasources/
+│   │   └── timescaledb.yaml         # Datasource PostgreSQL (uid fijo: timescaledb_noc)
+│   ├── dashboards/
+│   │   ├── dashboards.yaml          # Proveedor de dashboards (file-based)
+│   │   └── noc_telemetry.json       # Dashboard principal (3 paneles)
+│   └── alerting/
+│       ├── alert_rules.yml           # 3 reglas de alerta
+│       ├── contact_points.yml        # Receivers → Webhook Service
+│       ├── notification_policies.yml # Ruteo de notificaciones por severidad
+│       └── mute_timings.yml          # 🆕 Ventanas de mantenimiento (Fase 3)
 │
 ├── sql/
-│ ├── schema.sql # DDL: devices, network_telemetry (hypertable), vistas
-│ └── panels.sql # Queries de referencia para los paneles
+│   ├── schema.sql               # DDL: devices, network_telemetry (hypertable), vistas
+│   └── panels.sql                # Queries de referencia para los paneles
 │
-├── docker-compose.yml # Orquestación: timescaledb + grafana + webhook-service
+├── docker-compose.yml           # Orquestación: timescaledb + grafana + webhook-service
 └── README.md
+```
+
 ---
 
 ## 🚀 Requisitos
@@ -126,10 +130,12 @@ docker-compose ps
 ```
 
 Esperado:
-NAME IMAGE STATUS PORTS
-timescaledb timescale/timescaledb:latest-pg16 Up 0.0.0.0:5432->5432/tcp
-grafana grafana/grafana-oss:latest Up 0.0.0.0:3000->3000/tcp
-webhook_service noc-observability-webhook Up 0.0.0.0:8000->8000/tcp
+```
+NAME              IMAGE                              STATUS         PORTS
+timescaledb       timescale/timescaledb:latest-pg16  Up            0.0.0.0:5432->5432/tcp
+grafana           grafana/grafana-oss:latest         Up            0.0.0.0:3000->3000/tcp
+webhook_service   noc-observability-webhook          Up            0.0.0.0:8000->8000/tcp
+```
 
 ### 3. Inicializar el esquema principal (telemetría)
 
@@ -183,9 +189,11 @@ python simulator.py --fmt postgres --interval 2 --batch 3 \
 ```
 
 Logs esperados:
+```
 [INFO] [SIM] Iniciando simulador → PostgreSQL/TimescaleDB [POSTGRES]
-[INFO] [SIM] [WARN ] dist-sw-01 CPU=62.5% LAT= 45.3ms LOSS= 0.50% eth0 UP
-[INFO] [SIM] [CRITICAL] core-rtr-01 CPU=94.2% LAT= 312.1ms LOSS=12.50% eth1 UP
+[INFO] [SIM]    [WARN    ] dist-sw-01       CPU=62.5%   LAT=  45.3ms  LOSS= 0.50%  eth0 UP
+[INFO] [SIM]    [CRITICAL] core-rtr-01      CPU=94.2%   LAT= 312.1ms  LOSS=12.50%  eth1 UP
+```
 
 ### Acceder a Grafana
 
