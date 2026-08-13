@@ -57,6 +57,14 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      PG_HOST: timescaledb
+      PG_PORT: "5432"
+      PG_DB: noc
+      PG_USER: noc_user
+      PG_PASSWORD: secret
     networks:
       - noc_net
 
