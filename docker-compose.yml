@@ -59,6 +59,8 @@ services:
     restart: unless-stopped
     depends_on:
       - timescaledb
+    env_file:
+      - ./webhook_service/.env
     environment:
       PG_HOST: timescaledb
       PG_PORT: "5432"
