@@ -1,20 +1,5 @@
 """
-simulator.py — Bucle principal del generador de logs de red.
-
-Uso:
-    # Flat-file sinks
-    python simulator.py --fmt csv
-    python simulator.py --fmt jsonl --interval 0.5
-
-    # PostgreSQL/TimescaleDB sink
-    python simulator.py --fmt postgres --pg-dsn "postgresql://noc_user:secret@localhost:5432/noc"
-
-    # Variables de entorno (alternativa al DSN en CLI)
-    export PG_DSN="postgresql://noc_user:secret@localhost:5432/noc"
-    python simulator.py --fmt postgres
-
-    # Opciones comunes
-    python simulator.py --fmt postgres --interval 2 --batch 3 --count 100
+simulator.py — Bucle principal del generador de logs de red (multi-región vía REGION env).
 """
 
 import argparse
@@ -26,19 +11,17 @@ import sys
 import time
 from pathlib import Path
 
-from config import DEVICES
+from config import DEVICES, REGION
 from log_builder import build_log_record
 from writer import get_writer, init_pg_pool, close_pg_pool
 
-# ── Logger de la aplicación ───────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [SIM] %(levelname)s %(message)s",
+    format="%(asctime)s [SIM][" + REGION + "] %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
 )
 log = logging.getLogger(__name__)
 
-# ── Salida limpia con Ctrl+C ──────────────────────────────────────────────────
 _running = True
 
 def _handle_sigint(sig, frame):
@@ -49,12 +32,10 @@ def _handle_sigint(sig, frame):
 signal.signal(signal.SIGINT, _handle_sigint)
 
 
-# ── Generación de un batch de N eventos ──────────────────────────────────────
 def generate_batch(n: int = 1) -> list[dict]:
     return [build_log_record(random.choice(DEVICES)) for _ in range(n)]
 
 
-# ── Bucle principal ───────────────────────────────────────────────────────────
 def run_loop(
     output_path: Path | None,
     fmt: str,
@@ -66,7 +47,7 @@ def run_loop(
     generated = 0
 
     sink_label = str(output_path) if output_path else "PostgreSQL/TimescaleDB"
-    log.info(f"Iniciando simulador → {sink_label} [{fmt.upper()}]")
+    log.info(f"Iniciando simulador [región={REGION}] → {sink_label} [{fmt.upper()}]")
     log.info(f"Intervalo: {interval}s | Batch: {batch_size} | Límite: {count or '∞'}")
 
     while _running:
@@ -74,19 +55,17 @@ def run_loop(
 
         for record in records:
             try:
-                # Los sinks de archivo usan output_path; postgres lo ignora.
                 writer(record, output_path)
                 generated += 1
 
                 log.info(
-                    f"[{record['severity']:8s}] {record['hostname']:15s} "
+                    f"[{record['severity']:8s}] {record['region']:8s} {record['hostname']:20s} "
                     f"CPU={record['cpu_pct']:5.1f}%  "
                     f"LAT={record['latency_ms']:7.1f}ms  "
                     f"LOSS={record['packet_loss_pct']:5.2f}%  "
                     f"{record['interface']} {record['iface_status']}"
                 )
             except Exception as exc:
-                # Log del error pero no se aborta el bucle → resiliencia
                 log.error(f"Error escribiendo registro: {exc}")
 
         if count and generated >= count:
@@ -97,9 +76,7 @@ def run_loop(
             time.sleep(interval)
 
 
-# ── Bootstrap de conexión Postgres ────────────────────────────────────────────
 def _setup_postgres(dsn: str | None) -> None:
-    """Resuelve DSN (arg > env var) e inicializa el pool."""
     resolved_dsn = dsn or os.environ.get("PG_DSN")
     if not resolved_dsn:
         log.error(
@@ -113,37 +90,25 @@ def _setup_postgres(dsn: str | None) -> None:
     log.info("Pool de conexiones inicializado.")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="NOC Network Log Simulator")
-    p.add_argument(
-        "--output", default="network_logs",
-        help="Nombre base del archivo de salida sin extensión (solo para csv/jsonl)"
-    )
-    p.add_argument(
-        "--fmt", default="csv", choices=["csv", "jsonl", "postgres"],
-        help="Sink de salida"
-    )
-    p.add_argument(
-        "--pg-dsn", dest="pg_dsn", default=None,
-        help='DSN de conexión Postgres, ej: "postgresql://user:pass@host:5432/db". '
-             'Alternativa: variable de entorno PG_DSN.'
-    )
-    p.add_argument("--interval", type=float, default=1.0,  help="Segundos entre batches")
-    p.add_argument("--count",    type=int,   default=None, help="Límite de registros (None = infinito)")
-    p.add_argument("--batch",    type=int,   default=1,    help="Registros por batch")
+    p = argparse.ArgumentParser(description="NOC Network Log Simulator (multi-región)")
+    p.add_argument("--output", default="network_logs")
+    p.add_argument("--fmt", default="csv", choices=["csv", "jsonl", "postgres"])
+    p.add_argument("--pg-dsn", dest="pg_dsn", default=None)
+    p.add_argument("--interval", type=float, default=1.0)
+    p.add_argument("--count",    type=int,   default=None)
+    p.add_argument("--batch",    type=int,   default=1)
     return p.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
 
-    # Configuración condicional del sink
     if args.fmt == "postgres":
         _setup_postgres(args.pg_dsn)
-        output_path = None          # el sink postgres no usa path
+        output_path = None
     else:
-        output_path = Path(f"{args.output}.{args.fmt}")
+        output_path = Path(f"{REGION}_{args.output}.{args.fmt}")
 
     try:
         run_loop(

@@ -62,7 +62,7 @@
         {
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS \"Critical events (15m)\"\nFROM network_telemetry\nWHERE ts >= NOW() - INTERVAL '15 minutes'\n  AND (severity = 'CRITICAL' OR iface_status = 'DOWN');",
+          "rawSql": "SELECT COUNT(*) AS \"Critical events (15m)\"\nFROM network_telemetry\nWHERE ts >= NOW() - INTERVAL '15 minutes'\n  AND (severity = 'CRITICAL' OR iface_status = 'DOWN')\n  AND region IN ($region);",
           "refId": "A"
         }
       ],
@@ -118,7 +118,7 @@
         {
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
           "format": "table",
-          "rawSql": "SELECT\n  ts                AS \"Time\",\n  hostname          AS \"Device\",\n  severity          AS \"Severity\",\n  message           AS \"Message\",\n  interface         AS \"Interface\",\n  iface_status      AS \"State\",\n  cpu_pct           AS \"CPU %\",\n  latency_ms        AS \"Latency (ms)\",\n  packet_loss_pct   AS \"Loss %\"\nFROM network_telemetry\nWHERE ts >= NOW() - INTERVAL '15 minutes'\n  AND (severity = 'CRITICAL' OR iface_status = 'DOWN')\nORDER BY ts DESC, severity;",
+          "rawSql": "SELECT\n  ts                AS \"Time\",\n  hostname          AS \"Device\",\n  region            AS \"Region\",\n  severity          AS \"Severity\",\n  message           AS \"Message\",\n  interface         AS \"Interface\",\n  iface_status      AS \"State\",\n  cpu_pct           AS \"CPU %\",\n  latency_ms        AS \"Latency (ms)\",\n  packet_loss_pct   AS \"Loss %\"\nFROM network_telemetry\nWHERE ts >= NOW() - INTERVAL '15 minutes'\n  AND (severity = 'CRITICAL' OR iface_status = 'DOWN')\n  AND region IN ($region)\nORDER BY ts DESC, severity;",
           "refId": "A"
         }
       ],
@@ -169,13 +169,13 @@
         {
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
           "format": "time_series",
-          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS \"time\",\n  hostname,\n  AVG(latency_ms) AS latency_ms\nFROM v_telemetry_ts\nWHERE $__timeFilter(ts)\n  AND hostname IN ($hostname)\nGROUP BY 1, 2\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS \"time\",\n  hostname,\n  AVG(latency_ms) AS latency_ms\nFROM v_telemetry_ts\nWHERE $__timeFilter(ts)\n  AND hostname IN ($hostname)\n  AND region IN ($region)\nGROUP BY 1, 2\nORDER BY 1;",
           "refId": "Latency"
         },
         {
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
           "format": "time_series",
-          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS \"time\",\n  hostname,\n  AVG(cpu_pct) AS cpu_pct\nFROM v_telemetry_ts\nWHERE $__timeFilter(ts)\n  AND hostname IN ($hostname)\nGROUP BY 1, 2\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS \"time\",\n  hostname,\n  AVG(cpu_pct) AS cpu_pct\nFROM v_telemetry_ts\nWHERE $__timeFilter(ts)\n  AND hostname IN ($hostname)\n  AND region IN ($region)\nGROUP BY 1, 2\nORDER BY 1;",
           "refId": "CPU"
         }
       ],
@@ -262,7 +262,7 @@
         {
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
           "format": "table",
-          "rawSql": "SELECT\n  ts               AS \"Last seen\",\n  hostname         AS \"Device\",\n  severity         AS \"Severity\",\n  cpu_pct          AS \"CPU %\",\n  latency_ms       AS \"Latency (ms)\",\n  packet_loss_pct  AS \"Packet loss %\",\n  iface_status     AS \"Last iface state\"\nFROM v_device_latest\nORDER BY\n  CASE severity\n    WHEN 'CRITICAL' THEN 1\n    WHEN 'ERROR'    THEN 2\n    WHEN 'WARN'     THEN 3\n    ELSE                 4\n  END, hostname;",
+          "rawSql": "SELECT\n  ts               AS \"Last seen\",\n  hostname         AS \"Device\",\n  region           AS \"Region\",\n  severity         AS \"Severity\",\n  cpu_pct          AS \"CPU %\",\n  latency_ms       AS \"Latency (ms)\",\n  packet_loss_pct  AS \"Packet loss %\",\n  iface_status     AS \"Last iface state\"\nFROM v_device_latest\nWHERE region IN ($region)\nORDER BY\n  CASE severity\n    WHEN 'CRITICAL' THEN 1\n    WHEN 'ERROR'    THEN 2\n    WHEN 'WARN'     THEN 3\n    ELSE                 4\n  END, hostname;",
           "refId": "A"
         }
       ],
@@ -275,6 +275,21 @@
   "tags": ["noc", "timescaledb", "network", "telemetry"],
   "templating": {
     "list": [
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
+        "definition": "SELECT DISTINCT region FROM devices ORDER BY region;",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "region",
+        "options": [],
+        "query": "SELECT DISTINCT region FROM devices ORDER BY region;",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query",
+        "label": "Region"
+      },
       {
         "current": { "selected": true, "text": "All", "value": "$__all" },
         "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
@@ -299,5 +314,5 @@
   "timezone": "browser",
   "title": "NOC — Network Telemetry",
   "uid": "noc-telemetry-v1",
-  "version": 1
+  "version": 2
 }

@@ -11,13 +11,28 @@
   "graphTooltip": 1,
   "refresh": "1m",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "time": { "from": "now-24h", "to": "now" },
   "timepicker": {
     "refresh_intervals": ["10s", "30s", "1m", "5m", "15m"]
   },
   "templating": {
     "list": [
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "name": "region",
+        "type": "query",
+        "label": "Region",
+        "datasource": { "type": "postgres", "uid": "timescaledb_noc" },
+        "definition": "SELECT DISTINCT region FROM devices ORDER BY region;",
+        "query": "SELECT DISTINCT region FROM devices ORDER BY region;",
+        "hide": 0,
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "options": [],
+        "sort": 1
+      },
       {
         "name": "hostname",
         "type": "query",
@@ -42,7 +57,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT\n    AVG(resolution_seconds) AS \"MTTR (s)\"\nFROM v_incident_mttr\nWHERE\n    $__timeFilter(started_at)\n    AND hostname IN ($hostname);",
+          "rawSql": "SELECT\n    AVG(resolution_seconds) AS \"MTTR (s)\"\nFROM v_incident_mttr\nWHERE\n    $__timeFilter(started_at)\n    AND hostname IN ($hostname)\n    AND region IN ($region);",
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" }
         }
       ],
@@ -79,7 +94,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT\n    COUNT(DISTINCT fingerprint) AS \"Total incidents\"\nFROM v_incident_events\nWHERE\n    status = 'firing'\n    AND $__timeFilter(starts_at)\n    AND hostname IN ($hostname);",
+          "rawSql": "SELECT\n    COUNT(DISTINCT fingerprint) AS \"Total incidents\"\nFROM v_incident_events\nWHERE\n    status = 'firing'\n    AND $__timeFilter(starts_at)\n    AND hostname IN ($hostname)\n    AND region IN ($region);",
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" }
         }
       ],
@@ -115,7 +130,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT\n    hostname                 AS \"Device\",\n    AVG(resolution_seconds)  AS \"MTTR (s)\"\nFROM v_incident_mttr\nWHERE\n    $__timeFilter(started_at)\n    AND hostname IN ($hostname)\nGROUP BY hostname\nORDER BY 2 DESC;",
+          "rawSql": "SELECT\n    hostname                 AS \"Device\",\n    AVG(resolution_seconds)  AS \"MTTR (s)\"\nFROM v_incident_mttr\nWHERE\n    $__timeFilter(started_at)\n    AND hostname IN ($hostname)\n    AND region IN ($region)\nGROUP BY hostname\nORDER BY 2 DESC;",
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" }
         }
       ],
@@ -150,7 +165,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT\n    hostname                        AS \"Device\",\n    COUNT(DISTINCT fingerprint)     AS \"Incident count\"\nFROM v_incident_events\nWHERE\n    status = 'firing'\n    AND $__timeFilter(starts_at)\n    AND hostname IN ($hostname)\nGROUP BY hostname\nORDER BY 2 DESC;",
+          "rawSql": "SELECT\n    hostname                        AS \"Device\",\n    COUNT(DISTINCT fingerprint)     AS \"Incident count\"\nFROM v_incident_events\nWHERE\n    status = 'firing'\n    AND $__timeFilter(starts_at)\n    AND hostname IN ($hostname)\n    AND region IN ($region)\nGROUP BY hostname\nORDER BY 2 DESC;",
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" }
         }
       ],
@@ -175,7 +190,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT\n    f.started_at   AS \"Started\",\n    f.hostname     AS \"Device\",\n    f.severity     AS \"Severity\",\n    f.alert_name   AS \"Alert\",\n    ls.status      AS \"Current status\",\n    r.resolved_at  AS \"Resolved\",\n    CASE WHEN r.resolved_at IS NOT NULL\n         THEN EXTRACT(EPOCH FROM (r.resolved_at - f.started_at))\n    END AS \"MTTR (s)\"\nFROM (\n    SELECT fingerprint, hostname, severity, alert_name, starts_at AS started_at,\n           ROW_NUMBER() OVER (PARTITION BY fingerprint ORDER BY starts_at) AS rn\n    FROM (\n        SELECT DISTINCT fingerprint, hostname, severity, alert_name, starts_at\n        FROM v_incident_events\n        WHERE status = 'firing' AND fingerprint IS NOT NULL\n    ) d\n) f\nLEFT JOIN (\n    SELECT fingerprint, received_at AS resolved_at,\n           ROW_NUMBER() OVER (PARTITION BY fingerprint ORDER BY received_at) AS rn\n    FROM (\n        SELECT DISTINCT fingerprint, received_at\n        FROM v_incident_events\n        WHERE status = 'resolved' AND fingerprint IS NOT NULL\n    ) d\n) r ON r.fingerprint = f.fingerprint AND r.rn = f.rn\nLEFT JOIN v_incident_latest_status ls ON ls.fingerprint = f.fingerprint\nWHERE\n    $__timeFilter(f.started_at)\n    AND f.hostname IN ($hostname)\nORDER BY f.started_at DESC\nLIMIT 100;",
+          "rawSql": "SELECT\n    f.started_at                                        AS \"Started\",\n    f.hostname                                           AS \"Device\",\n    f.region                                              AS \"Region\",\n    f.severity                                            AS \"Severity\",\n    f.alert_name                                           AS \"Alert\",\n    ls.status                                               AS \"Current status\",\n    r.resolved_at                                            AS \"Resolved\",\n    CASE\n        WHEN r.resolved_at IS NOT NULL\n        THEN EXTRACT(EPOCH FROM (r.resolved_at - f.started_at))\n    END                                                        AS \"MTTR (s)\"\nFROM (\n    SELECT fingerprint, hostname, region, severity, alert_name, MIN(starts_at) AS started_at\n    FROM v_incident_events\n    WHERE status = 'firing' AND fingerprint IS NOT NULL\n    GROUP BY fingerprint, hostname, region, severity, alert_name\n) f\nLEFT JOIN (\n    SELECT fingerprint, MIN(received_at) AS resolved_at\n    FROM v_incident_events\n    WHERE status = 'resolved'\n    GROUP BY fingerprint\n) r ON r.fingerprint = f.fingerprint\nLEFT JOIN v_incident_latest_status ls ON ls.fingerprint = f.fingerprint\nWHERE\n    $__timeFilter(f.started_at)\n    AND f.hostname IN ($hostname)\n    AND f.region IN ($region)\nORDER BY f.started_at DESC\nLIMIT 100;",
           "datasource": { "type": "postgres", "uid": "timescaledb_noc" }
         }
       ],

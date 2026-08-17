@@ -8,7 +8,6 @@ from config import NetworkDevice
 from metrics import generate_metrics
 
 
-# Plantillas de mensajes por severidad para dar contexto syslog-like
 _MSG_TEMPLATES = {
     "INFO": [
         "Interface {iface} is {status}",
@@ -38,15 +37,10 @@ _MSG_TEMPLATES = {
 
 
 def _pick_peer() -> str:
-    """Genera una IP de peer BGP/OSPF ficticia."""
     return f"10.{random.randint(0,2)}.{random.randint(0,5)}.{random.randint(1,254)}"
 
 
 def build_log_record(device: NetworkDevice) -> dict:
-    """
-    Combina device + métricas generadas en un dict plano listo para serializar.
-    Todos los campos son tipos primitivos (str, int, float) para CSV/JSON limpio.
-    """
     m    = generate_metrics(device)
     peer = _pick_peer()
     sev  = m["severity"]
@@ -67,6 +61,7 @@ def build_log_record(device: NetworkDevice) -> dict:
         "hostname":          device.hostname,
         "ip":                device.ip,
         "role":              device.role,
+        "region":            device.region,
         "severity":          sev,
         "message":           message,
         "cpu_pct":           m["cpu_pct"],

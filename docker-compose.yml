@@ -4,10 +4,8 @@
 # la red compartida se llama "noc_net". Ajusta los nombres si difieren.
 
 
-
 services:
 
-  # ── Tu servicio TimescaleDB existente (referencia para la red) ─────────────
   timescaledb:
     image: timescale/timescaledb:latest-pg16
     container_name: timescaledb
@@ -23,7 +21,6 @@ services:
     ports:
       - "5432:5432"
 
-  # ── Grafana OSS ────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana
@@ -36,22 +33,18 @@ services:
       GF_SESSION_PROVIDER: memory
       GF_DEFAULT_APP_MODE: production
       TZ: America/Santiago
-      # Bearer token
       GF_ENABLE_ENVVAR_EXPANSION: "true"
       NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
-      # 
       GF_UNIFIED_ALERTING_ENABLED: "true"
       GF_ALERTING_ENABLED: "false"
-
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
-      # No se requiere volumen adicional — alerting/ está incluido
-
     ports:
       - "3000:3000"
     networks:
       - noc_net
+
   webhook-service:
     build:
       context: ./webhook_service
@@ -61,14 +54,53 @@ services:
     restart: unless-stopped
     depends_on:
       - timescaledb
-    env_file:
-      - ./webhook_service/.env
     environment:
       PG_HOST: timescaledb
       PG_PORT: "5432"
       PG_DB: noc
       PG_USER: noc_user
       PG_PASSWORD: secret
+      NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
+    networks:
+      - noc_net
+
+  # ── Fase 4: simuladores por región (mismo build, distinto REGION) ──────────
+  simulator-us-east:
+    build:
+      context: ./python-simulator
+    container_name: simulator_us_east
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      REGION: us-east
+      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+    networks:
+      - noc_net
+
+  simulator-eu-west:
+    build:
+      context: ./python-simulator
+    container_name: simulator_eu_west
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      REGION: eu-west
+      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+    networks:
+      - noc_net
+
+  simulator-sa-south:
+    build:
+      context: ./python-simulator
+    container_name: simulator_sa_south
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    environment:
+      REGION: sa-south
+      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
     networks:
       - noc_net
 
