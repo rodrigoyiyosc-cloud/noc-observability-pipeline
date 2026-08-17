@@ -1,11 +1,13 @@
 import json
 import logging
 import os
+import secrets
 from datetime import datetime, timezone
 
 import psycopg2
 from psycopg2.pool import SimpleConnectionPool
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Security, HTTPException, status
+from fastapi.security import APIKeyHeader
 
 import httpx
 
@@ -28,6 +30,30 @@ JIRA_URL = os.environ.get("JIRA_URL")
 JIRA_USER = os.environ.get("JIRA_USER")
 JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN")
 JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY")
+
+# ── Autenticación del webhook (Bearer Token compartido) ─────────────────────
+NOC_WEBHOOK_TOKEN = os.environ.get("NOC_WEBHOOK_TOKEN")
+if not NOC_WEBHOOK_TOKEN:
+    raise RuntimeError("NOC_WEBHOOK_TOKEN no está configurado en el entorno.")
+
+api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+
+async def verify_token(authorization: str | None = Security(api_key_header)):
+    if authorization is None or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Falta el header Authorization: Bearer <token>",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = authorization.removeprefix("Bearer ").strip()
+    if not secrets.compare_digest(token, NOC_WEBHOOK_TOKEN):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return True
 
 def extract_jira_fields(payload: dict) -> tuple[str, str, str]:
     """
@@ -167,7 +193,7 @@ def insert_incident(status: str | None, alert_name: str | None, payload: dict):
         pool.putconn(conn)
 
 
-@app.post("/alert")
+@app.post("/alert", dependencies=[Security(verify_token)])
 async def receive_alert(request: Request):
     payload = await request.json()
 
@@ -177,10 +203,10 @@ async def receive_alert(request: Request):
         json.dumps(payload, indent=2, ensure_ascii=False),
     )
 
-    status, alert_name = extract_alert_fields(payload)
+    status_, alert_name = extract_alert_fields(payload)
 
     try:
-        insert_incident(status, alert_name, payload)
+        insert_incident(status_, alert_name, payload)
     except Exception as exc:
         logger.error("Fallo al insertar en PostgreSQL: %s", exc)
 

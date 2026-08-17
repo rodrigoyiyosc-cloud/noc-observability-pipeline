@@ -36,8 +36,10 @@ services:
       GF_SESSION_PROVIDER: memory
       GF_DEFAULT_APP_MODE: production
       TZ: America/Santiago
-
-      # ← AGREGAR ESTAS LÍNEAS
+      # Bearer token
+      GF_ENABLE_ENVVAR_EXPANSION: "true"
+      NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
+      # 
       GF_UNIFIED_ALERTING_ENABLED: "true"
       GF_ALERTING_ENABLED: "false"
 

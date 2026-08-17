@@ -1,0 +1,6 @@
+# Normalizar todos los archivos de texto a LF en el repositorio
+* text=auto eol=lf
+
+# Asegurar LF estricto para scripts y dashboards
+*.sh text eol=lf
+*.json text eol=lf

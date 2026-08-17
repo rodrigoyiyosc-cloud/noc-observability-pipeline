@@ -9,6 +9,12 @@ contactPoints:
         type: webhook
         settings:
           url: http://webhook-service:8000/alert
+          httpMethod: POST
+          authorization:
+            type: Bearer
+            credentials: ${NOC_WEBHOOK_TOKEN}
+        secureSettings:
+          authorization: ${NOC_WEBHOOK_TOKEN}
         disableResolveMessage: false
 
   - orgId: 1
@@ -18,4 +24,10 @@ contactPoints:
         type: webhook
         settings:
           url: http://webhook-service:8000/alert
+          httpMethod: POST
+          authorization:
+            type: Bearer
+            credentials: ${NOC_WEBHOOK_TOKEN}
+        secureSettings:
+          authorization: ${NOC_WEBHOOK_TOKEN}
         disableResolveMessage: false
