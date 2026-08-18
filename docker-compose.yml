@@ -63,6 +63,8 @@ services:
       NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
     networks:
       - noc_net
+    env_file:
+      - .env
 
   # ── Fase 4: simuladores por región (mismo build, distinto REGION) ──────────
   simulator-us-east:
