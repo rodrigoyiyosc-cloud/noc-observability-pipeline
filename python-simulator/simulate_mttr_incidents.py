@@ -1,21 +1,24 @@
 """
-simulate_mttr_incidents.py — Chaos Engineering: dispara incidentes concurrentes
-en múltiples dispositivos para validar el cálculo de MTTR (FIRING -> RESOLVED)
-en el Dashboard de Postmortem de Grafana.
+simulate_mttr_incidents.py — Chaos Engineering: dispara alertas concurrentes
+(firing -> resolved) directamente contra el Webhook FastAPI, emulando el
+payload nativo de Grafana Alerting, para validar el cálculo de MTTR en el
+Dashboard de Postmortem multi-región.
 
-Reutiliza la lógica de conexión/pool/casts de writer.py (misma usada por simulator.py).
+Fase 4 — Escalado Multi-región y Autenticación de Webhook:
+    - Auth: Bearer token (NOC_WEBHOOK_TOKEN) cargado desde .env.
+    - Payload: incluye "region" dentro de "labels" por cada alerta.
+    - Dispositivos: pool global (us-east, eu-west, sa-south).
+    - Estructura: payload estándar de Grafana ({"status", "alerts": [...]}).
 
 Uso:
-    python simulate_mttr_incidents.py --pg-dsn "postgresql://noc_user:secret@localhost:5432/noc"
-
-    # o vía variable de entorno
-    $env:PG_DSN = "postgresql://noc_user:secret@localhost:5432/noc"
     python simulate_mttr_incidents.py
+    python simulate_mttr_incidents.py --webhook-url "http://localhost:8000/alert"
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import random
 import sys
@@ -24,12 +27,14 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+import requests
+from dotenv import load_dotenv
+
 # Habilita el procesamiento de secuencias ANSI en consolas Windows (cmd/PowerShell 5.1+).
 if os.name == "nt":
     os.system("")
 
-from writer import init_pg_pool, close_pg_pool, write_postgres  # noqa: E402
-from config import DEVICES  # noqa: E402
+load_dotenv()  # carga .env (NOC_WEBHOOK_TOKEN, WEBHOOK_URL, etc.)
 
 
 # ── Colores / estilo de consola ───────────────────────────────────────────────
@@ -50,172 +55,142 @@ _print_lock = threading.Lock()
 def clog(color: str, tag: str, hostname: str, msg: str) -> None:
     ts = datetime.now().strftime("%H:%M:%S")
     with _print_lock:
-        print(f"{C.GRAY}[{ts}]{C.RESET} {color}{tag} {C.BOLD}{hostname:14s}{C.RESET}{color} {msg}{C.RESET}")
+        print(f"{C.GRAY}[{ts}]{C.RESET} {color}{tag} {C.BOLD}{hostname:20s}{C.RESET}{color} {msg}{C.RESET}")
 
 
-# ── Definición del incidente ──────────────────────────────────────────────────
+# ── Configuración del Webhook ──────────────────────────────────────────────
+DEFAULT_WEBHOOK_URL = "http://localhost:8000/alert"
+NOC_WEBHOOK_TOKEN = os.environ.get("NOC_WEBHOOK_TOKEN")
+
+if not NOC_WEBHOOK_TOKEN:
+    print(f"{C.RED}Falta NOC_WEBHOOK_TOKEN. Defínelo en tu archivo .env.{C.RESET}")
+    sys.exit(1)
+
+_HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {NOC_WEBHOOK_TOKEN}",
+}
+
+_stop_event = threading.Event()  # permite corte limpio con Ctrl+C
+
+
+# ── Definición del incidente (multi-región) ──────────────────────────────────
 @dataclass
 class ChaosIncident:
     hostname: str
     ip: str
-    role: str                 # core-router | distribution-sw | access-sw
+    role: str                  # core-router | distribution-sw | access-sw
+    region: str                 # us-east | eu-west | sa-south
     interface: str
-    metric: str                # "latency" | "packet_loss" | "cpu"
+    metric: str                 # "latency" | "packet_loss" | "cpu"
     bad_value: float
-    baseline_cpu: float
-    baseline_latency: float
-    fire_minutes: float        # duración inyectando valores críticos
-    recovery_minutes: float    # duración sosteniendo baseline sano
-    start_delay_s: float = 0.0 # stagger para que los incidentes se crucen en el tiempo
+    threshold_label: str
+    for_clause: str
+    fire_minutes: float         # duración inyectando estado "firing"
+    recovery_minutes_range: tuple[float, float]  # rango para recovery aleatorio
+    start_delay_s: float = 0.0  # stagger para que los incidentes se crucen en el tiempo
 
 
 INCIDENTS: list[ChaosIncident] = [
     ChaosIncident(
-        hostname="core-rtr-01", ip="10.0.0.1", role="core-router",
+        hostname="core-rtr-01", ip="10.0.0.1", role="core-router", region="us-east",
         interface="Gi0/0/0", metric="latency", bad_value=230.0,
-        baseline_cpu=45.0, baseline_latency=3.0,
-        fire_minutes=4.0, recovery_minutes=3.0,
+        threshold_label="Latencia > 150ms", for_clause="for: 3m",
+        fire_minutes=2.0, recovery_minutes_range=(0.5, 2.0),
         start_delay_s=0,
     ),
     ChaosIncident(
-        hostname="dist-sw-01", ip="10.0.1.1", role="distribution-sw",
-        interface="Gi1/0/1", metric="packet_loss", bad_value=22.0,
-        baseline_cpu=25.0, baseline_latency=6.0,
-        fire_minutes=6.0, recovery_minutes=3.0,
+        hostname="euw1-core-rtr-01", ip="10.20.0.1", role="core-router", region="eu-west",
+        interface="Gi0/0/0", metric="packet_loss", bad_value=22.0,
+        threshold_label="Packet Loss > 10%", for_clause="for: 2m",
+        fire_minutes=3.0, recovery_minutes_range=(1.0, 3.0),
         start_delay_s=20,
     ),
     ChaosIncident(
-        hostname="access-sw-01", ip="10.0.2.1", role="access-sw",
-        interface="Fa0/1", metric="cpu", bad_value=94.0,
-        baseline_cpu=15.0, baseline_latency=8.0,
-        fire_minutes=6.0, recovery_minutes=3.0,
+        hostname="sas1-core-rtr-01", ip="10.30.0.1", role="core-router", region="sa-south",
+        interface="Gi0/0/0", metric="cpu", bad_value=94.0,
+        threshold_label="CPU > 85%", for_clause="for: 5m",
+        fire_minutes=2.5, recovery_minutes_range=(0.5, 2.5),
         start_delay_s=40,
     ),
 ]
 
-# Umbrales de alert_rules.yml — solo para logging informativo
-_THRESHOLDS = {
-    "latency":     ("Latencia > 150ms",   "for: 3m"),
-    "packet_loss": ("Packet Loss > 10%",  "for: 2m"),
-    "cpu":          ("CPU > 85%",         "for: 5m"),
-}
-
-INSERT_INTERVAL_S   = 15   # cadencia de inserción durante cada fase de incidente
-KEEPALIVE_INTERVAL_S = 10  # cadencia del baseline continuo (anti DatasourceNoData)
-WARMUP_SECONDS       = 120 # datos sanos previos antes de disparar el primer incidente
-_write_lock = threading.Lock()   # SimpleConnectionPool no es thread-safe -> serializa el checkout
-_stop_event = threading.Event()  # permite corte limpio con Ctrl+C
-
-# Hosts con un incidente activo (FIRING o RECOVERY) -> el keepalive los ignora
-# para no pisar los valores que el incidente está inyectando deliberadamente.
-_active_incident_hosts: set[str] = set()
-_active_lock = threading.Lock()
+INSERT_INTERVAL_S = 15  # cadencia de reenvío del estado "firing" mientras persiste
 
 
-# ── Construcción e inserción de registros ────────────────────────────────────
-def _build_record(inc: ChaosIncident, severity: str, cpu: float, latency: float,
-                   loss: float, iface_status: str, message: str) -> dict:
+def _fingerprint(inc: ChaosIncident) -> str:
+    raw = f"{inc.hostname}:{inc.metric}:{inc.region}".encode()
+    return hashlib.sha256(raw).hexdigest()[:16]
+
+
+def _metric_value_label(inc: ChaosIncident) -> str:
+    units = {"latency": "ms", "packet_loss": "%", "cpu": "%"}
+    return f"{inc.bad_value:.1f}{units[inc.metric]}"
+
+
+def _build_payload(inc: ChaosIncident, alert_status: str, starts_at: str, ends_at: str) -> dict:
+    """Construye el payload en formato estándar de Grafana Alerting."""
+    alertname = f"{inc.metric.replace('_', ' ').title()}Critical"
+    summary = f"{inc.threshold_label} en {inc.hostname} ({inc.region})"
+    description = (
+        f"El dispositivo {inc.hostname} ({inc.ip}, {inc.role}) en la región {inc.region} "
+        f"reporta {inc.metric}={_metric_value_label(inc)} en la interfaz {inc.interface}. {inc.for_clause}."
+        if alert_status == "firing"
+        else f"El dispositivo {inc.hostname} ({inc.region}) volvió a valores baseline. Alerta resuelta."
+    )
+
+    alert = {
+        "status": alert_status,
+        "labels": {
+            "alertname": alertname,
+            "severity": "critical",
+            "region": inc.region,
+            "hostname": inc.hostname,
+            "instance": inc.ip,
+            "role": inc.role,
+            "interface": inc.interface,
+            "metric": inc.metric,
+        },
+        "annotations": {
+            "summary": summary,
+            "description": description,
+        },
+        "startsAt": starts_at,
+        "endsAt": ends_at,
+        "fingerprint": _fingerprint(inc),
+    }
+
     return {
-        "timestamp":       datetime.now(timezone.utc).isoformat(),
-        "hostname":        inc.hostname,
-        "ip":              inc.ip,
-        "role":            inc.role,
-        "severity":        severity,
-        "message":         message,
-        "cpu_pct":         round(cpu, 2),
-        "latency_ms":      round(latency, 2),
-        "packet_loss_pct": round(loss, 2),
-        "interface":       inc.interface,
-        "iface_status":    iface_status,
-        "peer_ip":         "10.0.0.254",
+        "receiver": "noc-webhook-service",
+        "status": alert_status,
+        "alerts": [alert],
+        "groupLabels": {"alertname": alertname, "region": inc.region},
+        "commonLabels": alert["labels"],
+        "commonAnnotations": alert["annotations"],
+        "title": summary,
+        "ruleName": alertname,
     }
 
 
-def _safe_insert(record: dict, retries: int = 2) -> None:
+# ── Envío HTTP al webhook ─────────────────────────────────────────────────────
+def _send_alert(payload: dict, retries: int = 2, timeout: float = 5.0) -> None:
     for attempt in range(retries + 1):
         try:
-            with _write_lock:
-                write_postgres(record)
+            resp = requests.post(DEFAULT_WEBHOOK_URL if not _webhook_url_override else _webhook_url_override,
+                                  json=payload, headers=_HEADERS, timeout=timeout)
+            if resp.status_code == 401:
+                raise PermissionError(f"401 Unauthorized — revisa NOC_WEBHOOK_TOKEN ({resp.text})")
+            resp.raise_for_status()
             return
-        except Exception:
+        except PermissionError:
+            raise
+        except requests.RequestException:
             if attempt == retries:
                 raise
             time.sleep(0.5)
 
 
-def _jitter(base: float, pct: float = 0.1) -> float:
-    return max(0.0, base + random.uniform(-base * pct, base * pct))
-
-
-def _emit_bad(inc: ChaosIncident) -> None:
-    cpu, latency, loss = inc.baseline_cpu, inc.baseline_latency, 0.2
-    iface_status = "UP"
-
-    if inc.metric == "latency":
-        latency = inc.bad_value
-        msg = f"CRITICAL: {inc.hostname} unreachable - RTT {latency:.1f}ms"
-    elif inc.metric == "packet_loss":
-        loss = inc.bad_value
-        iface_status = "DOWN" if random.random() < 0.3 else "UP"
-        msg = f"CRITICAL: Packet loss {loss:.1f}% - circuit down"
-    else:  # cpu
-        cpu = inc.bad_value
-        msg = f"CRITICAL: CPU at {cpu:.1f}% - process crash risk"
-
-    record = _build_record(inc, "CRITICAL", _jitter(cpu) if inc.metric != "cpu" else cpu,
-                            _jitter(latency) if inc.metric != "latency" else latency,
-                            loss, iface_status, msg)
-    _safe_insert(record)
-
-
-def _emit_healthy(inc: ChaosIncident) -> None:
-    cpu    = _jitter(inc.baseline_cpu)
-    latency = _jitter(inc.baseline_latency)
-    loss    = round(random.uniform(0.0, 0.3), 2)
-    msg     = f"SNMP poll successful on {inc.hostname}"
-    record  = _build_record(inc, "INFO", cpu, latency, loss, "UP", msg)
-    _safe_insert(record)
-
-
-# ── Keepalive: telemetría sana continua para TODOS los dispositivos ──────────
-# Evita que cualquier host quede sin filas recientes en network_telemetry
-# (antes de su incidente, después de resolverlo, o si nunca tiene incidente),
-# que es la causa real de las alertas "DatasourceNoData".
-def keepalive_loop() -> None:
-    clog(C.CYAN, "💓 KEEPALIVE", "ALL", f"Baseline continuo activo cada {KEEPALIVE_INTERVAL_S}s")
-    while not _stop_event.is_set():
-        with _active_lock:
-            busy = set(_active_incident_hosts)
-
-        for device in DEVICES:
-            if device.hostname in busy:
-                continue  # un incidente ya está escribiendo sus propios valores
-            record = {
-                "timestamp":       datetime.now(timezone.utc).isoformat(),
-                "hostname":        device.hostname,
-                "ip":              device.ip,
-                "role":            device.role,
-                "severity":        "INFO",
-                "message":         f"SNMP poll successful on {device.hostname}",
-                "cpu_pct":         round(_jitter(device.cpu_base), 2),
-                "latency_ms":      round(_jitter(device.latency_base), 2),
-                "packet_loss_pct": round(random.uniform(0.0, 0.3), 2),
-                "interface":       "Gi0/0/0",
-                "iface_status":    "UP",
-                "peer_ip":         "10.0.0.254",
-            }
-            try:
-                _safe_insert(record)
-            except Exception as exc:
-                clog(C.RED, "⚠️  ERROR  ", device.hostname, f"Keepalive falló: {exc}")
-
-        _stop_event.wait(KEEPALIVE_INTERVAL_S)
-
-
-def warmup(seconds: int) -> None:
-    clog(C.CYAN, "🌡️  WARMUP  ", "ALL",
-         f"Precalentando {seconds}s de baseline antes de inyectar incidentes (evita NoData inicial)")
-    _stop_event.wait(seconds)
+_webhook_url_override: str | None = None
 
 
 # ── Ciclo de vida completo de un incidente ───────────────────────────────────
@@ -223,90 +198,88 @@ def run_incident(inc: ChaosIncident) -> None:
     if inc.start_delay_s:
         time.sleep(inc.start_delay_s)
 
-    with _active_lock:
-        _active_incident_hosts.add(inc.hostname)
+    starts_at = datetime.now(timezone.utc).isoformat()
 
-    label, for_clause = _THRESHOLDS[inc.metric]
-
-    # Fase 1 + 2: inyectar y sostener la métrica crítica
-    clog(C.RED, "🔥 FIRING  ", inc.hostname,
-         f"Inyectando falla [{inc.metric}] {label} durante {inc.fire_minutes:.0f} min ({for_clause})")
+    clog(C.RED, "🔥 FIRING  ", f"{inc.hostname} [{inc.region}]",
+         f"Inyectando falla [{inc.metric}={_metric_value_label(inc)}] {inc.threshold_label} "
+         f"durante {inc.fire_minutes:.1f} min ({inc.for_clause})")
 
     fire_deadline = time.time() + inc.fire_minutes * 60
     while time.time() < fire_deadline and not _stop_event.is_set():
         try:
-            _emit_bad(inc)
+            payload = _build_payload(inc, "firing", starts_at, "0001-01-01T00:00:00Z")
+            _send_alert(payload)
         except Exception as exc:
-            clog(C.RED, "⚠️  ERROR  ", inc.hostname, f"Fallo insertando métrica crítica: {exc}")
-        clog(C.YELLOW, "🚨 CRITICAL", inc.hostname,
-             f"{inc.metric}={inc.bad_value} — esperando que Grafana evalúe la regla...")
+            clog(C.RED, "⚠️  ERROR  ", f"{inc.hostname} [{inc.region}]", f"Fallo enviando alerta firing: {exc}")
+        clog(C.YELLOW, "🚨 CRITICAL", f"{inc.hostname} [{inc.region}]",
+             f"{inc.metric}={_metric_value_label(inc)} — esperando evaluación de Grafana...")
         time.sleep(INSERT_INTERVAL_S)
 
-    # Fase 3: recuperación -> baseline sano
-    clog(C.CYAN, "🛠️  RECOVERY", inc.hostname,
-         f"Restaurando valores baseline durante {inc.recovery_minutes:.0f} min para forzar RESOLVED")
+    recovery_minutes = random.uniform(*inc.recovery_minutes_range)
+    clog(C.CYAN, "🛠️  RECOVERY", f"{inc.hostname} [{inc.region}]",
+         f"Resolviendo en {recovery_minutes:.1f} min (aleatorio) para forzar RESOLVED")
 
-    recovery_deadline = time.time() + inc.recovery_minutes * 60
-    while time.time() < recovery_deadline and not _stop_event.is_set():
-        try:
-            _emit_healthy(inc)
-        except Exception as exc:
-            clog(C.RED, "⚠️  ERROR  ", inc.hostname, f"Fallo insertando métrica sana: {exc}")
-        clog(C.GREEN, "✅ HEALTHY ", inc.hostname, "Valores dentro de baseline")
-        time.sleep(INSERT_INTERVAL_S)
+    if not _stop_event.is_set():
+        _stop_event.wait(recovery_minutes * 60)
 
-    with _active_lock:
-        _active_incident_hosts.discard(inc.hostname)
+    ends_at = datetime.now(timezone.utc).isoformat()
+    try:
+        payload = _build_payload(inc, "resolved", starts_at, ends_at)
+        _send_alert(payload)
+    except Exception as exc:
+        clog(C.RED, "⚠️  ERROR  ", f"{inc.hostname} [{inc.region}]", f"Fallo enviando alerta resolved: {exc}")
 
-    clog(C.MAGENTA, "🏁 CLOSED  ", inc.hostname,
+    clog(C.GREEN, "✅ RESOLVED", f"{inc.hostname} [{inc.region}]",
+         f"MTTR ≈ {(datetime.fromisoformat(ends_at) - datetime.fromisoformat(starts_at)).total_seconds():.0f}s")
+
+    clog(C.MAGENTA, "🏁 CLOSED  ", f"{inc.hostname} [{inc.region}]",
          "Incidente cerrado — Grafana debería marcar RESOLVED y calcular el MTTR")
 
 
-# ── Bootstrap de conexión ─────────────────────────────────────────────────────
-def setup_pg(dsn: str | None) -> None:
-    resolved = dsn or os.environ.get("PG_DSN")
-    if not resolved:
-        print(f"{C.RED}Falta DSN. Usa --pg-dsn o define $env:PG_DSN.{C.RESET}")
-        sys.exit(1)
-    init_pg_pool(dsn=resolved, minconn=1, maxconn=len(INCIDENTS) + 2)
-
-
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Chaos Engineering — simulación de incidentes para MTTR")
-    p.add_argument("--pg-dsn", dest="pg_dsn", default=None,
-                    help='DSN Postgres, ej: "postgresql://noc_user:secret@localhost:5432/noc"')
+    p = argparse.ArgumentParser(description="Chaos Engineering — simulación de alertas multi-región vía Webhook")
+    p.add_argument("--webhook-url", dest="webhook_url", default=None,
+                    help=f'URL del webhook FastAPI (default: env WEBHOOK_URL o "{DEFAULT_WEBHOOK_URL}")')
     return p.parse_args()
 
 
 def main() -> None:
+    global _webhook_url_override
+
     args = parse_args()
-    setup_pg(args.pg_dsn)
+    _webhook_url_override = args.webhook_url or os.environ.get("WEBHOOK_URL") or DEFAULT_WEBHOOK_URL
 
-    print(f"{C.BOLD}{C.MAGENTA}=== CHAOS ENGINEERING — MTTR SCENARIO ==={C.RESET}")
-    print(f"{C.GRAY}Dispositivos objetivo: {', '.join(i.hostname for i in INCIDENTS)}{C.RESET}")
-    print(f"{C.GRAY}Baseline continuo: {', '.join(d.hostname for d in DEVICES)}{C.RESET}\n")
+    print(f"{C.BOLD}{C.MAGENTA}=== CHAOS ENGINEERING — MTTR MULTI-REGIÓN (WEBHOOK) ==={C.RESET}")
+    print(f"{C.GRAY}Webhook: {_webhook_url_override}{C.RESET}")
+    print(f"{C.GRAY}Regiones/dispositivos objetivo: "
+          f"{', '.join(f'{i.hostname}({i.region})' for i in INCIDENTS)}{C.RESET}\n")
 
-    keepalive_thread = threading.Thread(target=keepalive_loop, name="keepalive", daemon=True)
-    incident_threads = [threading.Thread(target=run_incident, args=(inc,), name=inc.hostname) for inc in INCIDENTS]
+    # Verificación rápida de salud/auth antes de disparar incidentes
+    try:
+        health_url = _webhook_url_override.rsplit("/alert", 1)[0] + "/health"
+        r = requests.get(health_url, timeout=5)
+        r.raise_for_status()
+        clog(C.CYAN, "❤️  HEALTH ", "webhook", f"OK — {health_url}")
+    except Exception as exc:
+        clog(C.YELLOW, "⚠️  WARN   ", "webhook", f"No se pudo verificar /health ({exc}), continuando de todos modos")
+
+    incident_threads = [threading.Thread(target=run_incident, args=(inc,), name=f"{inc.hostname}-{inc.region}")
+                         for inc in INCIDENTS]
 
     try:
-        keepalive_thread.start()
-        warmup(WARMUP_SECONDS)
-
         for t in incident_threads:
             t.start()
         for t in incident_threads:
             t.join()
 
-        print(f"\n{C.BOLD}{C.GREEN}✅ Escenario de caos completado. Revisa el Dashboard de Postmortem en Grafana.{C.RESET}")
+        print(f"\n{C.BOLD}{C.GREEN}✅ Escenario de caos multi-región completado. "
+              f"Revisa el Dashboard de Postmortem en Grafana.{C.RESET}")
     except KeyboardInterrupt:
         print(f"\n{C.YELLOW}Ctrl+C recibido — deteniendo incidentes en curso...{C.RESET}")
     finally:
         _stop_event.set()
         for t in incident_threads:
             t.join(timeout=5)
-        keepalive_thread.join(timeout=5)
-        close_pg_pool()
 
 
 if __name__ == "__main__":
