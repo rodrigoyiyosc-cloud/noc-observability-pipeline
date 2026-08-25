@@ -12,6 +12,11 @@ from fastapi.security import APIKeyHeader
 
 import httpx
 
+from pydantic import BaseModel
+from langchain_core.messages import HumanMessage, AIMessage
+
+from src.orchestrator import orchestrator  # objeto ya compilado (checkpointer=MemorySaver)
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 logger = logging.getLogger("webhook_service")
 
@@ -48,6 +53,18 @@ if not NOC_WEBHOOK_TOKEN:
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
+# ── Esquemas Pydantic ────────────────────────────────────────────────────────
+
+class ChatRequest(BaseModel):
+    message: str
+    thread_id: str = "default-session"  # Streamlit debe enviar un id estable por usuario/sesión
+
+
+class ChatResponse(BaseModel):
+    thread_id: str
+    reply: str
+    next_agent: str | None = None
+    requires_human_approval: bool = False
 
 async def verify_token(authorization: str | None = Security(api_key_header)):
     if authorization is None or not authorization.startswith("Bearer "):
@@ -441,6 +458,47 @@ async def receive_alert(request: Request):
 
     return {"status": "received", "persisted": True, "jira": jira_result}
 
+# ── Endpoint /api/chat ───────────────────────────────────────────────────────
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat(req: ChatRequest):
+    """
+    Invoca el grafo NOC-MAS (LangGraph) manteniendo el estado por thread_id
+    vía el checkpointer (MemorySaver). El grafo puede detenerse en
+    'human_in_the_loop' (interrupt_before); en ese caso se informa igual.
+    """
+    config = {"configurable": {"thread_id": req.thread_id}}
+
+    try:
+        result = orchestrator.invoke(
+            {"messages": [HumanMessage(content=req.message)]},
+            config=config,
+        )
+    except Exception as exc:
+        logger.error("Fallo al invocar el orquestador NOC-MAS: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Error del orquestador: {exc}")
+
+    # Último mensaje del historial (respuesta del agente/supervisor)
+    messages = result.get("messages", [])
+    last_ai_msg = next(
+        (m for m in reversed(messages) if isinstance(m, AIMessage)),
+        None,
+    )
+
+    if last_ai_msg is not None:
+        reply_text = last_ai_msg.content
+    elif result.get("requires_human_approval"):
+        reasoning = result.get("context", {}).get("last_routing_reasoning", "Sin detalle.")
+        reply_text = f"⏸️ Requiere aprobación humana (HITL). Motivo: {reasoning}"
+    else:
+        reply_text = "⚠️ El orquestador no devolvió un mensaje de respuesta."
+
+    return ChatResponse(
+        thread_id=req.thread_id,
+        reply=reply_text,
+        next_agent=result.get("next_agent"),
+        requires_human_approval=result.get("requires_human_approval", False),
+    )
 
 @app.get("/health")
 async def health():

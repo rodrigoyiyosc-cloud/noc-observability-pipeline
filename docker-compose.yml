@@ -66,6 +66,18 @@ services:
     env_file:
       - .env
 
+  chatops-ui:
+    build:
+      context: ./chatops_ui
+    container_name: chatops_ui
+    restart: unless-stopped
+    depends_on:
+      - webhook-service
+    ports:
+      - "8501:8501"
+    networks:
+      - noc_net
+        
   # ── Fase 4: simuladores por región (mismo build, distinto REGION) ──────────
   simulator-us-east:
     build:
