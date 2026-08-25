@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 load_dotenv()
 
 # Importamos el nodo que acabas de crear
-from src.nodes.action_agent import action_agent_node
+from webhook_service.src.nodes.action_agent import action_agent_node
 
 def run_test():
     print("🚀 Iniciando prueba unitaria del Action_Agent...\n")

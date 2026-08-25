@@ -1,6 +1,7 @@
 # src/nodes/data_agent.py
 import os
 import re
+import json
 
 from pydantic import BaseModel, Field
 from langchain_groq import ChatGroq
@@ -37,8 +38,29 @@ parser = PydanticOutputParser(pydantic_object=SQLQuery)
 
 
 def clean_think_tags(ai_message) -> str:
-    """Elimina bloques de razonamiento <think>...</think> antes del parseo Pydantic."""
-    return re.sub(r"<think>.*?</think>", "", ai_message.content, flags=re.DOTALL).strip()
+    """
+    Extrae el bloque JSON de la respuesta del LLM de forma robusta,
+    invulnerable a <think> abiertos, cerrados o ausentes.
+    Estrategia: ignora por completo los tags <think> y localiza el
+    primer '{' y el último '}' del contenido completo. Si no hay un
+    par válido, retorna string vacío para que el parser falle de forma
+    controlada (y active el fallback de human_in_the_loop).
+    """
+    content = ai_message.content
+
+    first_brace = content.find("{")
+    last_brace = content.rfind("}")
+
+    if first_brace == -1 or last_brace == -1 or last_brace <= first_brace:
+        return ""
+
+    candidate = content[first_brace:last_brace + 1].strip()
+
+    try:
+        json.loads(candidate)
+        return candidate
+    except (json.JSONDecodeError, ValueError):
+        return ""
 
 
 # --- Prompt del sistema ---
@@ -68,8 +90,10 @@ data_agent_prompt = ChatPromptTemplate.from_messages(
 ).partial(format_instructions=parser.get_format_instructions())
 
 data_llm = ChatGroq(
-    model=os.getenv("NOC_DATA_AGENT_MODEL", "llama3-8b-8192"),
+    model=os.getenv("NOC_DATA_AGENT_MODEL", "openai/gpt-oss-20b"),
     temperature=0,
+    max_tokens=1024,
+    model_kwargs={"reasoning_format": "hidden"},
 )
 
 data_agent_chain = data_agent_prompt | data_llm | RunnableLambda(clean_think_tags) | parser

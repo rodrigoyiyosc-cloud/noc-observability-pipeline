@@ -16,13 +16,14 @@ from langgraph.checkpoint.memory import MemorySaver
 from src.state import NOCState
 from src.nodes.data_agent import data_agent_node
 from src.nodes.action_agent import action_agent_node
+from src.nodes.responder_agent import responder_agent_node
 
 
 # --- Esquema de enrutamiento estructurado ---
 class RouteResponse(BaseModel):
     """Decisión de enrutamiento del supervisor NOC-MAS."""
 
-    next_agent: Literal["Data_Agent", "Action_Agent", "human_in_the_loop", "END"] = Field(
+    next_agent: Literal["Data_Agent", "Action_Agent", "Responder_Agent", "human_in_the_loop", "END"] = Field(
         description="Siguiente nodo del grafo a ejecutar."
     )
     reasoning: str = Field(
@@ -47,6 +48,7 @@ TAREA:
 Analiza el historial de mensajes y el contexto de la alerta/incidente. Determina cuál es el siguiente paso lógico en el flujo de resolución, seleccionando exactamente uno de los siguientes destinos:
 - "Data_Agent": cuando se requiera consultar o analizar telemetría en TimescaleDB (SQL) para diagnosticar una anomalía.
 - "Action_Agent": cuando exista suficiente diagnóstico y se deba operar sobre Jira/Grafana o sugerir una remediación concreta.
+- "Responder_Agent": cuando ya exista suficiente información (ej. resultado de una consulta SQL del Data_Agent) para responder directamente la pregunta del usuario en lenguaje natural, sin que se requiera crear tickets, alertas ni intervención humana.
 - "human_in_the_loop": cuando la severidad sea crítica (P1), la acción sea irreversible, o exista ambigüedad que exceda tu autoridad de decisión automática.
 - "END": cuando la alerta/incidente esté resuelto o la consulta del usuario haya sido respondida completamente.
 
@@ -56,6 +58,7 @@ Operas dentro de un pipeline de observabilidad que integra TimescaleDB (telemetr
 FORMATO:
 {format_instructions}
 No incluyas texto fuera del JSON. No uses markdown, ni bloques de código, ni explicaciones adicionales.
+Si el último mensaje es de Action_Agent con tipo INFO_QUERY y éxito=True, enruta siempre a "Responder_Agent" para sintetizar la respuesta al usuario.
 """
 
 supervisor_prompt = ChatPromptTemplate.from_messages(
@@ -66,13 +69,29 @@ supervisor_prompt = ChatPromptTemplate.from_messages(
 ).partial(format_instructions=parser.get_format_instructions())
 
 llm = ChatGroq(
-    model=os.getenv("NOC_SUPERVISOR_MODEL", "llama3-8b-8192"),
+    model=os.getenv("NOC_SUPERVISOR_MODEL", "openai/gpt-oss-20b"),
     temperature=0,
+    model_kwargs={"reasoning_format": "hidden"},
 )
 
 def clean_think_tags(ai_message) -> str:
-    """Elimina bloques de razonamiento <think>...</think> antes del parseo Pydantic."""
-    return re.sub(r"<think>.*?</think>", "", ai_message.content, flags=re.DOTALL).strip()
+    """
+    Elimina bloques de razonamiento <think>...</think> antes del parseo Pydantic.
+    Si el tag <think> quedó sin cerrar (truncado por max_tokens), descarta todo
+    lo anterior a la última '{' para intentar rescatar el JSON final igualmente.
+    """
+    content = ai_message.content
+    cleaned = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+
+    if cleaned:
+        return cleaned
+
+    # Fallback: <think> sin cerrar. Busca el último bloque JSON plausible.
+    last_brace = content.rfind("{")
+    if last_brace != -1:
+        return content[last_brace:].strip()
+
+    return content.strip()
 
 supervisor_chain = supervisor_prompt | llm | RunnableLambda(clean_think_tags) | parser
 
@@ -130,6 +149,7 @@ def build_graph() -> StateGraph:
     graph.add_node("human_in_the_loop", human_in_the_loop_node)
     graph.add_node("Data_Agent", data_agent_node)
     graph.add_node("Action_Agent", action_agent_node)
+    graph.add_node("Responder_Agent", responder_agent_node)   # nuevo
 
     graph.set_entry_point("supervisor")
 
@@ -138,7 +158,8 @@ def build_graph() -> StateGraph:
         route_from_supervisor,
         {
             "Data_Agent": "Data_Agent",
-            "Action_Agent": "Action_Agent",   # <- antes: END
+            "Action_Agent": "Action_Agent",
+            "Responder_Agent": "Responder_Agent",   # nuevo
             "human_in_the_loop": "human_in_the_loop",
             END: END,
         },
@@ -147,6 +168,7 @@ def build_graph() -> StateGraph:
     graph.add_edge("human_in_the_loop", END)
     graph.add_edge("Data_Agent", "supervisor")
     graph.add_edge("Action_Agent", "supervisor")
+    graph.add_edge("Responder_Agent", END)   # nuevo: termina el grafo, no vuelve al supervisor
 
     return graph
 

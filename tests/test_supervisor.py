@@ -1,6 +1,6 @@
 from dotenv import load_dotenv; load_dotenv()
 from langchain_core.messages import HumanMessage
-from src.orchestrator import orchestrator
+from webhook_service.src.orchestrator import orchestrator
 
 config = {"configurable": {"thread_id": "test-1"}}
 query = "Muéstrame el CPU máximo de core-rtr-01 en la última hora"
