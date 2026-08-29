@@ -1,3 +1,310 @@
+# 📡 NOC Observability Pipeline
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![TimescaleDB](https://img.shields.io/badge/TimescaleDB-009639?style=for-the-badge&logo=timescaledb&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![Jira](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=jira&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Scikit--Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
+
+Pipeline de observabilidad de extremo a extremo — **multi-región** y ahora **auto-inteligente** — para simular, ingerir, almacenar, visualizar, alertar, **ticketizar**, **analizar con ML** y **operar conversacionalmente** telemetría de red en un entorno de Centro de Operaciones de Red (NOC). Arquitectura 100% contenerizada, gobernada por **Infrastructure as Code**: dashboards, reglas de alerta, ventanas de mantenimiento, el motor de recepción/escalado de incidentes y ahora el propio **sistema multiagente de decisión** viven como código versionado, no como clics en una UI.
+
+---
+
+## 🧭 Acerca del Proyecto
+
+Este repositorio implementa un **loop de alerta cerrado, geográficamente distribuido y con criterio propio**. Tres simuladores regionales (`us-east`, `eu-west`, `sa-south`) alimentan una única hypertable en TimescaleDB. Grafana detecta la anomalía, la enruta según severidad, respeta las ventanas de mantenimiento definidas en código, y un microservicio propio en **FastAPI** — autenticado, con cliente Jira nativo y ahora con **deduplicación inteligente vía JQL** — recibe, registra, prioriza y **escala automáticamente cada incidente a un ticket de Jira**, sin intervención humana y sin generar *ticket storms*.
+
+Con la **Fase 5 completada**, el pipeline deja de ser puramente reactivo (umbral → alerta → ticket) para incorporar una capa de **inteligencia operativa activa**: un modelo `IsolationForest` entrenado sobre la telemetría histórica detecta anomalías dinámicas que los umbrales estáticos no capturan, y un **sistema multiagente (NOC-MAS)** orquestado con **LangGraph** — con un Supervisor, un Data Agent (Text-to-SQL seguro) y un Action Agent (ejecución de remediaciones vía payloads Pydantic), todos bajo una compuerta de seguridad **Human-in-the-Loop** — es capaz de diagnosticar y proponer acciones sobre el propio incidente. Todo esto es accesible en lenguaje natural desde una **ChatOps UI en Streamlit**.
+
+Cinco capas, un solo `docker compose up`.
+
+---
+
+## 🏗️ Arquitectura y Stack
+
+El ecosistema está compuesto por **cinco capas**, todas orquestadas mediante **Docker Compose** sobre una red bridge compartida (`noc_net`):
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│ CAPA 1 · SIMULACIÓN                                                        │
+│  simulator-us-east │ simulator-eu-west │ simulator-sa-south                │
+│  (CPU, latencia, packet loss, iface state — 5 dispositivos c/u)            │
+└───────────────────────────────────┬───────────────────────────────────────┘
+                                     │ INSERT (psycopg2 / SQL sink)
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│ CAPA 2 · ALMACENAMIENTO                                                    │
+│  TimescaleDB (PG16) — hypertable network_telemetry                         │
+│  compresión 7d · retención 90d · vistas telemetría + postmortem            │
+└───────────────┬─────────────────────────────────────────┬─────────────────┘
+                │ SELECT (datasource)                      │ SELECT (Jupyter/psycopg2)
+                ▼                                           ▼
+┌───────────────────────────────────┐   ┌───────────────────────────────────┐
+│ CAPA 3 · VISUALIZACIÓN             │   │ CAPA 3.5 · ML ANALYTICS HUB        │
+│  Grafana OSS (Unified Alerting)    │   │  Jupyter (noc_net) + IsolationForest│
+│  dashboards + alert rules (IaC)    │   │  detección de anomalías dinámicas   │
+└───────────────────┬───────────────┘   └───────────────────┬───────────────┘
+                     │ webhook (Bearer Token)                 │ hallazgos / features
+                     ▼                                        │
+┌───────────────────────────────────────────────────────────◄┘
+│ CAPA 4 · DECISIÓN — FastAPI + NOC-MAS (LangGraph)                          │
+│  POST /alert → dedupe JQL → insert incident_logs                           │
+│  Supervisor ──▶ Data_Agent (Text-to-SQL) ──▶ Action_Agent (Pydantic)       │
+│              └─▶ human_in_the_loop (HITL gate) ─▶ END                     │
+└───────────────────────────────────┬───────────────────────────────────────┘
+                                     │ REST (issue / comment / transition)
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│ CAPA 5 · ESCALADO Y OPERACIÓN — Jira Cloud + ChatOps UI (Streamlit)        │
+│  tickets deduplicados por labels (fingerprint) │ chat operativo NL         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+### Capa 1 — Ingesta Multi-Región (`python-simulator/`)
+Simulador modular, parametrizado por la variable de entorno `REGION`, que genera **métricas de red realistas** para 5 dispositivos por región (core routers, distribution switches, access switches):
+- **3 réplicas concurrentes** vía Docker Compose: `simulator-us-east`, `simulator-eu-west`, `simulator-sa-south` — mismo build, distinto `REGION`
+- **Latencia (RTT):** baseline por región con jitter gaussiano, picos de degradación controlados
+- **Packet Loss:** nominal bajo, picos altos en eventos `CRITICAL`
+- **CPU:** baseline por dispositivo, hasta saturación en sobrecarga
+- Hostnames prefijados por región (`euw1-*`, `sas1-*`) para evitar colisiones; `us-east` se mantiene sin prefijo por retrocompatibilidad
+- Múltiples sinks intercambiables vía `--fmt`: `csv`, `jsonl`, `postgres`
+- Incluye `force_alert_test.py`: inyector determinístico de telemetría `CRITICAL` sostenida sobre `core-rtr-01`
+- Incluye `simulate_mttr_incidents.py`: Chaos Engineering — 3 incidentes concurrentes (`firing`→`resolved`) vía HTTP directo al Webhook, usado también para poblar el dataset de entrenamiento del modelo `IsolationForest`
+
+### Capa 2 — Almacenamiento Multi-Región (TimescaleDB / PostgreSQL 16)
+- **Hypertable** `network_telemetry` particionada por tiempo (chunks de 1 día), con columna `region` indexada y como parte del `compress_segmentby`
+- Tabla de dimensiones `devices` extendida con `region`
+- **Compresión automática** a los 7 días → 85–95% de ahorro típico
+- **Retención automática** de 90 días vía `add_retention_policy`
+- **5 vistas** para Grafana, incluyendo `v_region_health`
+- **Vistas de postmortem sobre JSONB** (`incident_views.sql`): `v_incident_events`, `v_incident_mttr`, `v_incident_latest_status`
+
+### Capa 3 — Visualización e Inteligencia Operativa (Grafana OSS, Unified Alerting)
+Dos dashboards y el sistema de alertas **100% aprovisionados vía IaC** (`grafana/provisioning/`):
+- **Dashboard `NOC — Network Telemetry`**: eventos críticos, time series de latencia/CPU, snapshot por dispositivo — filtrable por `$region`/`$hostname`
+- **Dashboard `NOC - Postmortem & MTTR`**: MTTR general, MTTR por dispositivo, conteo de incidentes, historial
+- **3 reglas de alerta** (`alert_rules.yml`) evaluadas cada minuto
+- **Contact points** con Bearer Token hacia el Webhook Service
+- **Notification policies** con ruteo por severidad
+- **Mute timings** — ventanas de mantenimiento
+
+### 🆕 Capa 3.5 — ML Analytics Hub (`jupyter/`)
+Contenedor **Jupyter** desplegado dentro de `noc_net`, conectado directamente a TimescaleDB, dedicado a analítica avanzada fuera del ciclo de vida operativo de Grafana:
+- **Entrenamiento y validación de `IsolationForest`** (scikit-learn) sobre series históricas de `cpu_pct` y `latency_ms` para detectar picos inusuales que un umbral estático no captura — el modelo se adapta a la dinámica propia de cada dispositivo/región en vez de usar un corte fijo
+- Complementa (no reemplaza) las reglas de alerta de Grafana: sirve como banco de pruebas para calibrar futuros umbrales dinámicos y como fuente de *features* para el Data_Agent del NOC-MAS
+- Acceso vía `http://localhost:8888` protegido con `JUPYTER_TOKEN`
+- Notebooks persistidos en `./jupyter/notebooks` (bind mount)
+
+### 🆕 Capa 4 — Decisión: Webhook Service + NOC-MAS (FastAPI + LangGraph)
+El punto de llegada de cada alerta, ahora con **deduplicación inteligente** y capacidad de **razonamiento multiagente**:
+
+**Deduplicación JQL (anti Ticket Storm)**
+- Antes de crear un ticket, `handle_jira_dedup()` construye una huella determinística (`slugify` de `alertname` + `hostname`) y ejecuta una búsqueda **JQL** contra `POST /rest/api/3/search/jql` (endpoint vigente — el clásico `GET/POST /rest/api/3/search` fue retirado por Atlassian y responde `410 Gone`) filtrando por `resolution = Unresolved` y ambos `labels`
+- Si ya existe un ticket abierto para ese par alerta+dispositivo: se agrega un **comentario** ("⚠️ La anomalía PERSISTE") con las métricas actuales — **no se crea un ticket nuevo**
+- Si el `status` entrante es `resolved`: comenta el cierre y **intenta transicionar** el ticket a `JIRA_RESOLVE_TRANSITION_NAME` (ej. `Done`/`Resolved`)
+- Si no hay ticket abierto y la alerta está `firing`: crea el ticket con los labels de huella (`al-<alertname>`, `dev-<hostname>`) para que la siguiente búsqueda lo encuentre
+
+**NOC-MAS — Sistema Multiagente (`src/`, Clean Architecture)**
+Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamiento determinista:
+- `src/state.py` — `NOCState` (`TypedDict`): repositorio de estado compartido, con `messages: Annotated[Sequence[BaseMessage], operator.add]` para acumulación de historial entre nodos, más `incident_id`, `severity`, `next_agent`, `requires_human_approval`, `human_decision` y `context`
+- `src/orchestrator.py` — nodo **Supervisor**: LLM (`ChatGroq`) con prompt PTCF que enruta a `Data_Agent`, `Action_Agent`, `human_in_the_loop` o `END`, con salida forzada a JSON vía `PydanticOutputParser` (`RouteResponse`)
+- `src/nodes/data_agent.py` — **Data Agent**: Text-to-SQL **seguro** sobre TimescaleDB — solo `SELECT`, bloqueo por regex de `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE`, forzado a referenciar `network_telemetry`, `LIMIT 200` en la ejecución
+- `src/nodes/action_agent.py` — **Action Agent**: genera acciones estructuradas (`CREATE_TICKET`, `SEND_ALERT`, `ACK_ALERT`, `ESCALATE`) con `action_payload` validado como JSON vía Pydantic
+- **Compuerta HITL**: el grafo se compila con `interrupt_before=["human_in_the_loop"]` y `MemorySaver` como checkpointer — cualquier severidad `P1`, acción irreversible o ambigüedad detectada por el Supervisor detiene el flujo hasta aprobación humana
+- **Sanitización para modelos Open Source**: `clean_think_tags()` limpia bloques `<think>...</think>` (típicos de modelos razonadores servidos vía Groq) antes de intentar el parseo Pydantic — con *fallback* seguro a `human_in_the_loop` si el parseo falla
+- Ciclo del grafo: `supervisor → {Data_Agent | Action_Agent} → supervisor → ... → END`, con reentrada al Supervisor tras cada nodo especialista
+
+### 🆕 Capa 5 — ChatOps UI (Streamlit) + Jira
+- Servicio web interactivo en `http://localhost:8501` para interactuar en lenguaje natural con el ecosistema NOC
+- Sidebar con estado de conectividad (Backend FastAPI, TimescaleDB, Orquestador LangGraph, Jira) y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime)
+- Historial de chat en `st.session_state`, listo para conmutar del modo *standalone* actual a la invocación real de `orchestrator.invoke()` del NOC-MAS
+- Los tickets creados/comentados por la deduplicación JQL y por el Action Agent llegan al mismo proyecto Jira, cerrando el loop: **detección → diagnóstico → decisión → registro**
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+.
+├── python-simulator/
+│   ├── simulator.py                 # CLI + bucle principal de generación (lee REGION del entorno)
+│   ├── config.py                    # Topología de dispositivos por región (_REGION_SEEDS)
+│   ├── log_builder.py               # Construcción de registros de eventos
+│   ├── metrics.py                   # Generación de métricas con anomalías
+│   ├── writer.py                    # Sinks: CSV, JSONL, PostgreSQL (connection pool)
+│   ├── force_alert_test.py          # Inyector de CRITICAL sostenido, solo testing
+│   ├── simulate_mttr_incidents.py   # Chaos Engineering: 3 incidentes concurrentes (firing→resolved)
+│   └── requirements.txt
+│
+├── webhook_service/
+│   ├── src/
+│   │   ├── main.py                  # FastAPI: POST /alert (Bearer auth), GET /health, dedupe JQL + Jira
+│   │   ├── state.py                 # 🆕 NOCState (TypedDict) — estado compartido del NOC-MAS
+│   │   ├── orchestrator.py          # 🆕 StateGraph LangGraph + nodo Supervisor (PydanticOutputParser)
+│   │   └── nodes/
+│   │       ├── data_agent.py        # 🆕 Text-to-SQL seguro (solo SELECT) sobre network_telemetry
+│   │       └── action_agent.py      # 🆕 Generación y ejecución de acciones estructuradas (Pydantic)
+│   ├── requirements.txt             # fastapi, uvicorn[standard], psycopg2-binary, httpx, langgraph,
+│   │                                 # langchain-groq, sqlalchemy, pydantic
+│   ├── webhook_service.sql          # DDL de incident_logs (tabla + índices GIN)
+│   └── Dockerfile
+│
+├── chatops-ui/
+│   ├── app.py                       # 🆕 Streamlit — chat NL, sidebar de estado, métricas rápidas
+│   ├── requirements.txt             # streamlit
+│   └── Dockerfile
+│
+├── jupyter/
+│   ├── notebooks/
+│   │   └── anomaly_detection.ipynb  # 🆕 Entrenamiento/validación IsolationForest (CPU/latencia)
+│   ├── requirements.txt             # scikit-learn, pandas, sqlalchemy, psycopg2-binary, matplotlib
+│   └── Dockerfile
+│
+├── grafana/provisioning/
+│   ├── datasources/
+│   │   └── timescaledb.yaml             # Datasource PostgreSQL (uid fijo: timescaledb_noc)
+│   ├── dashboards/
+│   │   ├── dashboards.yaml              # Proveedor de dashboards (file-based)
+│   │   ├── noc_telemetry.json           # Dashboard principal (con $region)
+│   │   └── noc-postmortem-dashboard.json # Dashboard de Postmortem & MTTR
+│   └── alerting/
+│       ├── alert_rules.yml              # 3 reglas de alerta
+│       ├── contact_points.yml           # Receivers → Webhook Service (Bearer Token)
+│       ├── notification_policies.yml    # Ruteo de notificaciones por severidad
+│       └── mute_timings.yml             # Ventanas de mantenimiento
+│
+├── sql/
+│   ├── schema.sql                   # DDL: devices, network_telemetry (hypertable) + region
+│   ├── panels.sql                   # Queries de referencia — dashboard principal
+│   ├── panels_postmortem.sql        # Queries de referencia — dashboard de postmortem
+│   └── incident_views.sql           # Vistas JSONB: v_incident_events, v_incident_mttr, v_incident_latest_status
+│
+├── .env                              # Secretos y configuración (no versionado)
+├── .env.example                      # Plantilla sin valores
+├── .gitignore
+├── .gitattributes
+├── docker-compose.yml                # Orquestación: 9 servicios (ver tabla abajo)
+└── README.md
+```
+
+---
+
+## 🚀 Requisitos
+
+- **Docker** 20.10+
+- **Docker Compose** v2 (`docker compose`, sin guion)
+- **8 GB RAM** mínimo (recomendado 12 GB — 3 simuladores + TimescaleDB + Grafana + Webhook Service/NOC-MAS + Jupyter + ChatOps UI)
+- **3 GB** de espacio en disco para volúmenes de datos
+- Cuenta de **Jira Cloud** con un API Token válido (requerido para auto-ticketing + deduplicación JQL)
+- Cuenta de **Groq** con API Key válida (requerida para el Supervisor, Data Agent y Action Agent del NOC-MAS)
+- Windows: **PowerShell 5.1+** o **PowerShell 7+** (las instrucciones de este README están validadas para ambos)
+
+---
+
+## 🔐 Variables de Entorno (`.env`)
+
+Crea un archivo `.env` en la raíz del repositorio (ya cubierto por `.gitignore`) con las siguientes claves:
+
+```dotenv
+# ── Webhook Service — autenticación ─────────────────────────────────────────
+NOC_WEBHOOK_TOKEN=reemplaza-con-un-token-largo-y-aleatorio
+
+# ── Integración Jira Cloud ───────────────────────────────────────────────────
+JIRA_URL=https://tu-dominio.atlassian.net
+JIRA_USER=tu-email@tudominio.com
+JIRA_API_TOKEN=reemplaza-con-tu-api-token-de-atlassian
+JIRA_PROJECT_KEY=NOC
+JIRA_RESOLVE_TRANSITION_NAME="Done"
+JIRA_ISSUE_TYPE="Incident"
+
+# ── PostgreSQL / TimescaleDB (opcional si difiere del default de compose) ──
+PG_HOST=timescaledb
+PG_PORT=5432
+PG_DB=noc
+PG_USER=noc_user
+PG_PASSWORD=secret
+PG_DSN=postgresql+psycopg2://noc_user:secret@timescaledb:5432/noc
+
+# ── NOC-MAS (LangGraph + Groq) ───────────────────────────────────────────────
+GROQ_API_KEY=reemplaza-con-tu-api-key-de-groq
+NOC_SUPERVISOR_MODEL=llama3-8b-8192
+NOC_DATA_AGENT_MODEL=llama3-8b-8192
+NOC_ACTION_AGENT_MODEL=qwen/qwen3.6-27b
+
+# ── ML Analytics Hub (Jupyter) ───────────────────────────────────────────────
+JUPYTER_TOKEN=reemplaza-con-un-token-de-acceso
+
+# ── Chaos Engineering / simuladores ──────────────────────────────────────────
+WEBHOOK_URL=http://localhost:8000/alert
+```
+
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `NOC_WEBHOOK_TOKEN` | ✅ Sí | Token Bearer compartido entre Grafana (`contact_points.yml`) y el Webhook Service. Sin él, el servicio **no arranca** (`RuntimeError`). |
+| `JIRA_URL` / `JIRA_USER` / `JIRA_API_TOKEN` / `JIRA_PROJECT_KEY` | Opcional* | Credenciales de Jira Cloud. Sin ellas, `handle_jira_dedup()` responde `{"action": "skipped", "reason": "missing_credentials"}` sin romper la ingesta. |
+| `JIRA_RESOLVE_TRANSITION_NAME` | Opcional | Nombre exacto de la transición de workflow usada para cerrar el ticket al recibir `status=resolved`. Default `Done`. |
+| `JIRA_ISSUE_TYPE` | Opcional | Tipo de issue a crear en Jira. Default `Incident`. |
+| `GROQ_API_KEY` | ✅ Sí (para NOC-MAS) | Autentica las llamadas `ChatGroq` del Supervisor, Data Agent y Action Agent. |
+| `NOC_SUPERVISOR_MODEL` / `NOC_DATA_AGENT_MODEL` / `NOC_ACTION_AGENT_MODEL` | Opcional | Override del modelo Groq por nodo del grafo. |
+| `PG_DSN` | ✅ Sí (para Data Agent / Jupyter) | DSN SQLAlchemy de solo lectura usado por `data_agent.py` y los notebooks. |
+| `JUPYTER_TOKEN` | Opcional | Token de acceso al contenedor `jupyter-ml` (`http://localhost:8888`). |
+| `PG_*` | Opcional | Sobrescriben los defaults ya definidos en `docker-compose.yml`. |
+| `WEBHOOK_URL` | Opcional | Usada por `simulate_mttr_incidents.py` para apuntar a un Webhook Service distinto de `http://localhost:8000/alert`. |
+
+\* Si cualquiera de las 4 variables de Jira falta, el servicio sigue funcionando con normalidad.
+
+> ⚠️ Nunca commitees el `.env` real. Usa `.env.example` (sin valores) como plantilla para el equipo.
+
+---
+
+## ⚙️ Instalación y Despliegue
+
+### 1. Clonar el repositorio
+
+```powershell
+git clone <repo-url>
+cd noc-observability-pipeline
+```
+
+### 2. Configurar el `.env`
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+### 3. Levantar la infraestructura completa
+
+`docker compose` levanta **9 servicios**: TimescaleDB, Grafana, Webhook Service (con NOC-MAS embebido), 3 simuladores regionales, Jupyter (ML Analytics Hub) y ChatOps UI (Streamlit).
+
+```powershell
+docker compose up -d --build
+```
+
+Verifica que **los nueve** servicios estén corriendo:
+
+```powershell
+docker compose ps
+```
+
+Esperado:
+```
+NAME                 IMAGE                              STATUS         PORTS
+timescaledb          timescale/timescaledb:latest-pg16  Up            0.0.0.0:5432->5432/tcp
+grafana              grafana/grafana-oss:latest         Up            0.0.0.0:3000->3000/tcp
+webhook_service      noc-observability-webhook          Up            0.0.0.0:8000->8000/tcp
+simulator_us_east    noc-observability-simulator        Up
+simulator_eu_west    noc-observability-simulator        Up
+simulator_sa_south   noc-observability-simulator        Up
+jupyter_ml           noc-observability-jupyter          Up            0.0.0.0:8888->8888/tcp
+chatops_ui           noc-observability-chatops           Up            0.0.0.0:8501->8501/tcp
+```
 
 ### 4. Inicializar el esquema principal (telemetría + regiones)
 
@@ -47,7 +354,7 @@ $headers = @{ Authorization = "Bearer $env:NOC_WEBHOOK_TOKEN" }
 Invoke-RestMethod -Uri "http://localhost:8000/health" -Headers $headers -Method Get
 ```
 
-### 8. 🆕 Poblar datos de entrenamiento y validar el modelo ML
+### 8. Poblar datos de entrenamiento y validar el modelo ML
 
 ```powershell
 cd python-simulator
@@ -57,7 +364,7 @@ cd ..
 
 Abre `http://localhost:8888` (token = `JUPYTER_TOKEN`) y ejecuta `notebooks/anomaly_detection.ipynb` de punta a punta para entrenar y validar el `IsolationForest`.
 
-### 9. 🆕 Verificar el NOC-MAS y la ChatOps UI
+### 9. Verificar el NOC-MAS y la ChatOps UI
 
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8000/health" -Headers $headers -Method Get
@@ -99,11 +406,11 @@ python force_alert_test.py --minutes 5 `
 
 Dispara el mismo `alertname`+`hostname` dos veces seguidas para confirmar que la segunda vez el Webhook Service **comenta** en vez de crear un ticket duplicado (`jira.action == "comment_added"`).
 
-### 🆕 Interactuar con el NOC-MAS desde la ChatOps UI
+### Interactuar con el NOC-MAS desde la ChatOps UI
 
 Abre `http://localhost:8501`. El sidebar muestra el estado de conectividad y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime). Escribe consultas o instrucciones en lenguaje natural en el campo de chat; el Supervisor decide si el flujo debe pasar por `Data_Agent`, `Action_Agent` o detenerse en la compuerta `human_in_the_loop`.
 
-### 🆕 Ejecutar el NOC-MAS directamente (fuera de la UI)
+### Ejecutar el NOC-MAS directamente (fuera de la UI)
 
 ```powershell
 docker exec -it webhook_service python -c "
@@ -192,7 +499,7 @@ payload         JSONB NOT NULL    -- payload completo de Grafana, indexado con G
 ```
 Índices: `received_at DESC`, `status`, `alert_name`, GIN sobre `payload`.
 
-### 🆕 `NOCState` — estado compartido del NOC-MAS (`src/state.py`)
+### `NOCState` — estado compartido del NOC-MAS (`src/state.py`)
 
 ```python
 messages: Annotated[Sequence[BaseMessage], operator.add]  # historial acumulativo
@@ -248,31 +555,31 @@ docker compose up -d --force-recreate grafana webhook-service
 docker logs webhook_service --tail 50 | Select-String "Jira"
 ```
 
-### 🆕 La búsqueda JQL de deduplicación falla o responde `410 Gone`
+### La búsqueda JQL de deduplicación falla o responde `410 Gone`
 **Causa:** se está usando el endpoint clásico `GET/POST /rest/api/3/search`, retirado por Atlassian (CHANGE-2046). **Solución:** confirma que el código apunte a `POST /rest/api/3/search/jql`; revisa logs:
 ```powershell
 docker logs webhook_service --tail 50 | Select-String "búsqueda JQL"
 ```
 
-### 🆕 El Supervisor cae siempre en `human_in_the_loop` (fallback)
+### El Supervisor cae siempre en `human_in_the_loop` (fallback)
 **Causa:** el LLM no está devolviendo JSON parseable por `PydanticOutputParser` (típico en modelos que emiten bloques `<think>` sin cerrarse, o `GROQ_API_KEY` inválida/rate-limited).
 ```powershell
 docker logs webhook_service --tail 100 | Select-String "Fallo de parseo|FALLBACK"
 ```
 Verifica `GROQ_API_KEY` y considera bajar `temperature` o cambiar `NOC_SUPERVISOR_MODEL`.
 
-### 🆕 El Data_Agent rechaza toda consulta con "operaciones no permitidas"
+### El Data_Agent rechaza toda consulta con "operaciones no permitidas"
 **Causa esperada:** el validador (`_validate_query`) bloquea cualquier sentencia que no sea `SELECT` puro sobre `network_telemetry`, o que contenga `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE` — es una medida de seguridad, no un bug. Reformula la pregunta en lenguaje natural para que derive en un `SELECT` válido.
 
-### 🆕 El notebook de Jupyter no conecta a TimescaleDB
+### El notebook de Jupyter no conecta a TimescaleDB
 ```powershell
 docker exec jupyter_ml python -c "import os; print(os.environ['PG_DSN'])"
 docker network inspect noc_net
 ```
 Confirma que `jupyter_ml` esté en `noc_net` y que `PG_DSN` apunte a `timescaledb:5432`.
 
-### 🆕 La ChatOps UI no refleja respuestas reales del NOC-MAS
-**Causa esperada (temporal):** `chatops-ui/app.py` opera en **modo standalone** — la llamada a `orchestrator.invoke()` aún no está cableada al backend HTTP; ver Roadmap Fase 5 pendiente.
+### La ChatOps UI no refleja respuestas reales del NOC-MAS
+**Causa esperada (temporal):** `chatops-ui/app.py` opera en **modo standalone** — la llamada a `orchestrator.invoke()` aún no está cableada al backend HTTP; ver Roadmap Fase 6.
 
 ### El dashboard de Postmortem no muestra datos
 **Causa:** `incident_views.sql` no se ejecutó, o no hay pares `firing`/`resolved` todavía. **Solución:** corre el paso 6 de instalación y `simulate_mttr_incidents.py`.
@@ -295,9 +602,9 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 
 - `POST /alert` **exige** `Authorization: Bearer <NOC_WEBHOOK_TOKEN>`; comparación con `secrets.compare_digest` (mitiga timing attacks)
 - `JIRA_API_TOKEN` y `GROQ_API_KEY` viajan únicamente como variables de entorno del contenedor, nunca hardcodeadas
-- **🆕 Text-to-SQL blindado**: el Data_Agent solo ejecuta `SELECT` validados por regex y forzados a `network_telemetry`, con `LIMIT 200` — el LLM nunca tiene acceso a credenciales de escritura ni a otras tablas
-- **🆕 Compuerta HITL obligatoria**: cualquier severidad `P1`, acción irreversible o fallo de parseo del Supervisor enruta forzosamente a `human_in_the_loop`, deteniendo el grafo (`interrupt_before`) hasta aprobación explícita
-- **🆕 Sanitización de salida de modelos Open Source**: `clean_think_tags()` elimina bloques `<think>` antes de cualquier parseo, evitando inyección de contenido no estructurado en el pipeline de decisión
+- **Text-to-SQL blindado**: el Data_Agent solo ejecuta `SELECT` validados por regex y forzados a `network_telemetry`, con `LIMIT 200` — el LLM nunca tiene acceso a credenciales de escritura ni a otras tablas
+- **Compuerta HITL obligatoria**: cualquier severidad `P1`, acción irreversible o fallo de parseo del Supervisor enruta forzosamente a `human_in_the_loop`, deteniendo el grafo (`interrupt_before`) hasta aprobación explícita
+- **Sanitización de salida de modelos Open Source**: `clean_think_tags()` elimina bloques `<think>` antes de cualquier parseo, evitando inyección de contenido no estructurado en el pipeline de decisión
 
 ### En producción
 
