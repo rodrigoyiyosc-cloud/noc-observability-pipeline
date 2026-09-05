@@ -1,5 +1,7 @@
 # src/orchestrator.py
+import logging
 import os
+import time
 from typing import Literal
 
 import re
@@ -11,12 +13,15 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg_pool import ConnectionPool
 
 from src.state import NOCState
 from src.nodes.data_agent import data_agent_node
 from src.nodes.action_agent import action_agent_node
 from src.nodes.responder_agent import responder_agent_node
+
+logger = logging.getLogger("noc_mas.orchestrator")
 
 
 # --- Esquema de enrutamiento estructurado ---
@@ -173,9 +178,73 @@ def build_graph() -> StateGraph:
     return graph
 
 
+def _build_checkpointer_dsn() -> str:
+    """
+    Construye el DSN de Postgres para el checkpointer (psycopg 3, driver
+    "postgresql://" plano). Prioriza PG_DSN, quitando el sufijo de dialecto
+    SQLAlchemy (+psycopg2) si está presente, ya que psycopg3 no lo entiende.
+    Si PG_DSN no está seteado, arma el DSN desde las variables individuales
+    (mismos defaults que data_agent.py: localhost/noc/noc_user/secret) para
+    facilitar la ejecución fuera de Docker.
+    """
+    raw_dsn = os.getenv("PG_DSN")
+    if raw_dsn:
+        return re.sub(r"^postgresql\+\w+://", "postgresql://", raw_dsn)
+
+    host = os.getenv("PG_HOST", "localhost")
+    port = os.getenv("PG_PORT", "5432")
+    db = os.getenv("PG_DB", "noc")
+    user = os.getenv("PG_USER", "noc_user")
+    password = os.getenv("PG_PASSWORD", "secret")
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+
+def _init_checkpointer(
+    dsn: str, max_attempts: int = 5, retry_seconds: float = 3.0
+) -> tuple[PostgresSaver, ConnectionPool]:
+    """
+    Abre el pool de conexiones hacia TimescaleDB y crea (si no existen) las
+    tablas de LangGraph (checkpoints, checkpoint_writes, checkpoint_blobs).
+    Reintenta con backoff fijo porque webhook_service puede arrancar antes
+    de que timescaledb esté listo para aceptar conexiones (el `depends_on`
+    de Compose no espera un healthcheck).
+    """
+    last_exc: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        pool: ConnectionPool | None = None
+        try:
+            pool = ConnectionPool(
+                conninfo=dsn,
+                max_size=10,
+                kwargs={"autocommit": True, "prepare_threshold": 0},
+            )
+            pool.wait(timeout=10)
+            checkpointer = PostgresSaver(pool)
+            checkpointer.setup()
+            logger.info("Checkpointer Postgres listo (pool + tablas verificadas/creadas).")
+            return checkpointer, pool
+        except Exception as exc:
+            last_exc = exc
+            if pool is not None:
+                pool.close()
+            logger.warning(
+                "Fallo al inicializar el checkpointer Postgres (intento %s/%s): %s",
+                attempt, max_attempts, exc,
+            )
+            if attempt < max_attempts:
+                time.sleep(retry_seconds)
+
+    raise RuntimeError(
+        f"No se pudo inicializar el checkpointer Postgres tras {max_attempts} intentos: {last_exc}"
+    )
+
+
+_CHECKPOINTER_DSN = _build_checkpointer_dsn()
+checkpointer, checkpointer_pool = _init_checkpointer(_CHECKPOINTER_DSN)
+
+
 def compile_orchestrator():
     graph = build_graph()
-    checkpointer = MemorySaver()
     return graph.compile(checkpointer=checkpointer, interrupt_before=["human_in_the_loop"])
 
 

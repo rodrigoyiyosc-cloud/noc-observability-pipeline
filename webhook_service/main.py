@@ -15,7 +15,7 @@ import httpx
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 
-from src.orchestrator import orchestrator  # objeto ya compilado (checkpointer=MemorySaver)
+from src.orchestrator import orchestrator, checkpointer_pool  # objeto ya compilado (checkpointer=PostgresSaver)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 logger = logging.getLogger("webhook_service")
@@ -413,6 +413,7 @@ def startup():
 def shutdown():
     if pool:
         pool.closeall()
+    checkpointer_pool.close()
 
 
 def insert_incident(status_: str | None, alert_name: str | None, payload: dict):
