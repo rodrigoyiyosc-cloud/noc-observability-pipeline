@@ -1,0 +1,20 @@
+# k8s/timescaledb-service.yaml
+#
+# ClusterIP: TimescaleDB solo debe ser alcanzable desde dentro del cluster
+# (webhook-service, y a futuro jupyter-ml si se migra). Nombre del Service
+# ("timescaledb") es el hostname que usa webhook-deployment.yaml en PG_HOST
+# vía DNS interno de Kubernetes.
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb
+  labels:
+    app: timescaledb
+spec:
+  type: ClusterIP
+  selector:
+    app: timescaledb
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

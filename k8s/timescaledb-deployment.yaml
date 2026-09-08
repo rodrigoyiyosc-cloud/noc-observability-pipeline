@@ -1,0 +1,87 @@
+# k8s/timescaledb-deployment.yaml
+#
+# Traducción del servicio `timescaledb` de docker-compose.yml a AKS.
+# Nota: para una DB de producción real, un StatefulSet es más idiomático que
+# un Deployment (identidad estable, volumeClaimTemplates por réplica). Se usa
+# Deployment aquí porque es de una sola réplica (igual que en compose) y para
+# mantener el mismo tipo de recurso que webhook-deployment.yaml; con
+# `strategy: Recreate` para evitar que un rolling update intente montar el
+# mismo PVC ReadWriteOnce desde dos pods a la vez.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: timescaledb-pvc
+  labels:
+    app: timescaledb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  # storageClassName omitido a propósito: usa el StorageClass default del
+  # cluster (en AKS, "default" sobre Azure Disk). Fijar uno explícito si el
+  # cluster no tiene default o se necesita otra clase (ej. Premium_LRS).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescaledb
+  labels:
+    app: timescaledb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: timescaledb
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+    spec:
+      containers:
+        - name: timescaledb
+          image: timescale/timescaledb:latest-pg16
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "noc"
+            - name: POSTGRES_USER
+              value: "noc_user"
+            - name: POSTGRES_PASSWORD
+              # Reusa la misma clave que ya consume webhook-service, en vez
+              # de duplicar la contraseña en otro Secret.
+              valueFrom:
+                secretKeyRef:
+                  name: webhook-service-secrets
+                  key: PG_PASSWORD
+          volumeMounts:
+            - name: timescaledb-data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "noc_user", "-d", "noc"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "noc_user", "-d", "noc"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+      volumes:
+        - name: timescaledb-data
+          persistentVolumeClaim:
+            claimName: timescaledb-pvc

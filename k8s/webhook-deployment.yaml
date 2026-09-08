@@ -1,10 +1,10 @@
 # k8s/webhook-deployment.yaml
 #
 # Traducción del servicio `webhook-service` de docker-compose.yml a AKS.
-# Alcance de esta fase: SOLO el webhook. TimescaleDB y Grafana siguen fuera
-# de Kubernetes por ahora — PG_HOST abajo es un placeholder que debe apuntar
-# a donde sea que TimescaleDB termine viviendo (host externo, VM, o un
-# Service futuro), no a un nombre de servicio de compose.
+# TimescaleDB ahora vive también en el cluster (ver timescaledb-deployment.yaml
+# / timescaledb-service.yaml) — PG_HOST apunta al Service "timescaledb", que
+# resuelve vía DNS interno de Kubernetes dentro del mismo namespace. Grafana
+# sigue fuera de Kubernetes por ahora.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,7 +36,7 @@ spec:
             # Variables no sensibles (equivalente al bloque `environment:`
             # de compose). El resto viene del Secret vía envFrom.
             - name: PG_HOST
-              value: "REEMPLAZAR_PG_HOST"
+              value: "timescaledb"
             - name: PG_PORT
               value: "5432"
             - name: PG_DB
