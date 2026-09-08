@@ -52,6 +52,12 @@ spec:
               value: "noc"
             - name: POSTGRES_USER
               value: "noc_user"
+            - name: PGDATA
+              # Azure Disk monta un directorio "lost+found" en la raíz del
+              # volumen, y Postgres se niega a inicializar un data dir no
+              # vacío. Se aisla en un subdirectorio para sortear esa
+              # restricción.
+              value: "/var/lib/postgresql/data/pgdata"
             - name: POSTGRES_PASSWORD
               # Reusa la misma clave que ya consume webhook-service, en vez
               # de duplicar la contraseña en otro Secret.
