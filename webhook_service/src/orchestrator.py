@@ -181,21 +181,17 @@ def build_graph() -> StateGraph:
 def _build_checkpointer_dsn() -> str:
     """
     Construye el DSN de Postgres para el checkpointer (psycopg 3, driver
-    "postgresql://" plano). Prioriza PG_DSN, quitando el sufijo de dialecto
-    SQLAlchemy (+psycopg2) si está presente, ya que psycopg3 no lo entiende.
-    Si PG_DSN no está seteado, arma el DSN desde las variables individuales
-    (mismos defaults que data_agent.py: localhost/noc/noc_user/secret) para
-    facilitar la ejecución fuera de Docker.
+    "postgresql://" plano) leyendo directamente PG_USER, PG_PASSWORD,
+    PG_HOST, PG_PORT y PG_DB del entorno. Sin PG_DSN ni defaults estáticos:
+    estas variables ya vienen inyectadas (env/secretKeyRef en el Deployment
+    de AKS), así que su ausencia debe fallar alto y explícito en vez de
+    caer silenciosamente a un host/credencial equivocados.
     """
-    raw_dsn = os.getenv("PG_DSN")
-    if raw_dsn:
-        return re.sub(r"^postgresql\+\w+://", "postgresql://", raw_dsn)
-
-    host = os.getenv("PG_HOST", "localhost")
-    port = os.getenv("PG_PORT", "5432")
-    db = os.getenv("PG_DB", "noc")
-    user = os.getenv("PG_USER", "noc_user")
-    password = os.getenv("PG_PASSWORD", "secret")
+    user = os.environ["PG_USER"]
+    password = os.environ["PG_PASSWORD"]
+    host = os.environ["PG_HOST"]
+    port = os.environ["PG_PORT"]
+    db = os.environ["PG_DB"]
     return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
