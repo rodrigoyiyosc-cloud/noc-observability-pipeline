@@ -1,0 +1,22 @@
+# k8s/webhook-service.yaml
+#
+# ClusterIP por defecto: el webhook queda alcanzable dentro del cluster
+# (ej. desde un futuro pod de chatops-ui) pero no expuesto a internet. Grafana
+# y cualquier caller externo (Jira no aplica, es el webhook el que llama a
+# Jira) necesitarían un Ingress/API Gateway con TLS — deliberadamente fuera
+# de alcance en esta fase (solo se aísla el webhook). Cambiar `type` a
+# `LoadBalancer` si se necesita una IP pública directa antes de tener Ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  labels:
+    app: webhook-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webhook-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

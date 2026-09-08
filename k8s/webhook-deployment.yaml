@@ -1,0 +1,69 @@
+# k8s/webhook-deployment.yaml
+#
+# Traducción del servicio `webhook-service` de docker-compose.yml a AKS.
+# Alcance de esta fase: SOLO el webhook. TimescaleDB y Grafana siguen fuera
+# de Kubernetes por ahora — PG_HOST abajo es un placeholder que debe apuntar
+# a donde sea que TimescaleDB termine viviendo (host externo, VM, o un
+# Service futuro), no a un nombre de servicio de compose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-service
+  labels:
+    app: webhook-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-service
+  template:
+    metadata:
+      labels:
+        app: webhook-service
+    spec:
+      # Requerido salvo que el AKS cluster ya tenga el ACR adjunto vía
+      # `az aks update --attach-acr nocacr` (en cuyo caso este pull secret
+      # es innecesario, pero no estorba dejarlo).
+      imagePullSecrets:
+        - name: acr-auth
+      containers:
+        - name: webhook-service
+          image: nocacr.azurecr.io/noc-webhook-service:latest
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            # Variables no sensibles (equivalente al bloque `environment:`
+            # de compose). El resto viene del Secret vía envFrom.
+            - name: PG_HOST
+              value: "REEMPLAZAR_PG_HOST"
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_DB
+              value: "noc"
+            - name: PG_USER
+              value: "noc_user"
+          envFrom:
+            - secretRef:
+                name: webhook-service-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
