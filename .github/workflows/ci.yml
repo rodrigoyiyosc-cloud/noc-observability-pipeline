@@ -99,6 +99,8 @@ jobs:
           namespace: default
           action: deploy
           manifests: |
-            k8s/*.yaml
+            k8s/webhook-secret.yaml
+            k8s/webhook-deployment.yaml
+            k8s/webhook-service.yaml
           images: |
             nocacr.azurecr.io/noc-webhook-service:${{ github.sha }}
