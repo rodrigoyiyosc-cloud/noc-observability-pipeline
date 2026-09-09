@@ -13,7 +13,7 @@ metadata:
   labels:
     app: webhook-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: webhook-service
   ports:
