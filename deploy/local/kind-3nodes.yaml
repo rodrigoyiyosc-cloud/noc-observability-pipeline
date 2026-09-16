@@ -1,0 +1,13 @@
+﻿kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: noc-local-cluster
+nodes:
+  - role: control-plane
+    labels:
+      node-role.kubernetes.io/control-plane: ""
+  - role: worker
+    labels:
+      node-role.kubernetes.io/worker: "worker-1"
+  - role: worker
+    labels:
+      node-role.kubernetes.io/worker: "worker-2"
