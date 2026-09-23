@@ -1,0 +1,63 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-service
+  namespace: default
+  labels:
+    app: webhook-service
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: webhook-service
+  template:
+    metadata:
+      labels:
+        app: webhook-service
+    spec:
+      containers:
+        - name: webhook-service
+          image: noc-webhook-service:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: GROQ_API_KEY
+              value: "gsk_GROQ_API_KEY_LOCAL_DEV_PLACEHOLDER"
+            - name: NOC_WEBHOOK_TOKEN
+              value: "local-dev-dummy-token"
+            - name: PG_HOST
+              value: "host.docker.internal"
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_DB
+              value: "noc"
+            - name: PG_USER
+              value: "noc_user"
+            - name: PG_PASSWORD
+              value: "secret"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
