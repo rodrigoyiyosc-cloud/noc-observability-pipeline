@@ -27,21 +27,11 @@ spec:
           ports:
             - containerPort: 8000
               name: http
-          env:
-            - name: GROQ_API_KEY
-              value: "gsk_GROQ_API_KEY_LOCAL_DEV_PLACEHOLDER"
-            - name: NOC_WEBHOOK_TOKEN
-              value: "local-dev-dummy-token"
-            - name: PG_HOST
-              value: "host.docker.internal"
-            - name: PG_PORT
-              value: "5432"
-            - name: PG_DB
-              value: "noc"
-            - name: PG_USER
-              value: "noc_user"
-            - name: PG_PASSWORD
-              value: "secret"
+          envFrom:
+            - configMapRef:
+                name: webhook-config
+            - secretRef:
+                name: webhook-secrets
           resources:
             requests:
               cpu: "100m"
