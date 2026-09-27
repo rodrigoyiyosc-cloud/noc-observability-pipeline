@@ -20,7 +20,9 @@ Pipeline de observabilidad de extremo a extremo — **multi-región** y ahora **
 
 Este repositorio implementa un **loop de alerta cerrado, geográficamente distribuido y con criterio propio**. Tres simuladores regionales (`us-east`, `eu-west`, `sa-south`) alimentan una única hypertable en TimescaleDB. Grafana detecta la anomalía, la enruta según severidad, respeta las ventanas de mantenimiento definidas en código, y un microservicio propio en **FastAPI** — autenticado, con cliente Jira nativo y ahora con **deduplicación inteligente vía JQL** — recibe, registra, prioriza y **escala automáticamente cada incidente a un ticket de Jira**, sin intervención humana y sin generar *ticket storms*.
 
-Con la **Fase 5 completada**, el pipeline deja de ser puramente reactivo (umbral → alerta → ticket) para incorporar una capa de **inteligencia operativa activa**: un modelo `IsolationForest` entrenado sobre la telemetría histórica detecta anomalías dinámicas que los umbrales estáticos no capturan, y un **sistema multiagente (NOC-MAS)** orquestado con **LangGraph** — con un Supervisor, un Data Agent (Text-to-SQL seguro) y un Action Agent (ejecución de remediaciones vía payloads Pydantic), todos bajo una compuerta de seguridad **Human-in-the-Loop** — es capaz de diagnosticar y proponer acciones sobre el propio incidente. Todo esto es accesible en lenguaje natural desde una **ChatOps UI en Streamlit**.
+Con la **Fase 5 completada**, el pipeline deja de ser puramente reactivo (umbral → alerta → ticket) para incorporar una capa de **inteligencia operativa activa**: un modelo `IsolationForest` entrenado sobre la telemetría histórica detecta anomalías dinámicas que los umbrales estáticos no capturan, y un **sistema multiagente (NOC-MAS)** orquestado con **LangGraph** — con un Supervisor, un Data Agent (Text-to-SQL seguro), un Action Agent (ejecución de remediaciones vía payloads Pydantic) y un Responder Agent (síntesis en lenguaje natural), todos bajo una compuerta de seguridad **Human-in-the-Loop** — es capaz de diagnosticar y proponer acciones sobre el propio incidente. Todo esto es accesible en lenguaje natural desde una **ChatOps UI en Streamlit**, ya cableada de punta a punta contra el backend.
+
+Con la **Fase 6 completada**, el estado del NOC-MAS (mensajes, decisiones de enrutamiento, aprobaciones HITL) sobrevive a un reinicio del Webhook Service — persiste en PostgreSQL/TimescaleDB en vez de vivir solo en RAM — y el proyecto suma su primera suite de pruebas unitarias automatizadas más un pipeline de CI. La **Fase 7**, en curso, empieza a llevar el Webhook Service desde Docker Compose hacia Kubernetes, con una prueba de concepto en Azure (AKS + ACR) y un clúster local multinodo con `kind` para iterar sin costo de nube.
 
 Cinco capas, un solo `docker compose up`.
 
@@ -110,20 +112,22 @@ El punto de llegada de cada alerta, ahora con **deduplicación inteligente** y c
 - Si el `status` entrante es `resolved`: comenta el cierre y **intenta transicionar** el ticket a `JIRA_RESOLVE_TRANSITION_NAME` (ej. `Done`/`Resolved`)
 - Si no hay ticket abierto y la alerta está `firing`: crea el ticket con los labels de huella (`al-<alertname>`, `dev-<hostname>`) para que la siguiente búsqueda lo encuentre
 
-**NOC-MAS — Sistema Multiagente (`src/`, Clean Architecture)**
+**NOC-MAS — Sistema Multiagente (`webhook_service/src/`, Clean Architecture)**
 Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamiento determinista:
 - `src/state.py` — `NOCState` (`TypedDict`): repositorio de estado compartido, con `messages: Annotated[Sequence[BaseMessage], operator.add]` para acumulación de historial entre nodos, más `incident_id`, `severity`, `next_agent`, `requires_human_approval`, `human_decision` y `context`
-- `src/orchestrator.py` — nodo **Supervisor**: LLM (`ChatGroq`) con prompt PTCF que enruta a `Data_Agent`, `Action_Agent`, `human_in_the_loop` o `END`, con salida forzada a JSON vía `PydanticOutputParser` (`RouteResponse`)
+- `src/orchestrator.py` — nodo **Supervisor**: LLM (`ChatGroq`) con prompt PTCF que enruta a `Data_Agent`, `Action_Agent`, `Responder_Agent`, `human_in_the_loop` o `END`, con salida forzada a JSON vía `PydanticOutputParser` (`RouteResponse`)
 - `src/nodes/data_agent.py` — **Data Agent**: Text-to-SQL **seguro** sobre TimescaleDB — solo `SELECT`, bloqueo por regex de `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE`, forzado a referenciar `network_telemetry`, `LIMIT 200` en la ejecución
-- `src/nodes/action_agent.py` — **Action Agent**: genera acciones estructuradas (`CREATE_TICKET`, `SEND_ALERT`, `ACK_ALERT`, `ESCALATE`) con `action_payload` validado como JSON vía Pydantic
-- **Compuerta HITL**: el grafo se compila con `interrupt_before=["human_in_the_loop"]` y `MemorySaver` como checkpointer — cualquier severidad `P1`, acción irreversible o ambigüedad detectada por el Supervisor detiene el flujo hasta aprobación humana
-- **Sanitización para modelos Open Source**: `clean_think_tags()` limpia bloques `<think>...</think>` (típicos de modelos razonadores servidos vía Groq) antes de intentar el parseo Pydantic — con *fallback* seguro a `human_in_the_loop` si el parseo falla
-- Ciclo del grafo: `supervisor → {Data_Agent | Action_Agent} → supervisor → ... → END`, con reentrada al Supervisor tras cada nodo especialista
+- `src/nodes/action_agent.py` — **Action Agent**: genera acciones estructuradas (`CREATE_TICKET`, `SEND_ALERT`, `ACK_ALERT`, `ESCALATE`, `INFO_QUERY`) con `action_payload` validado como JSON vía Pydantic; para `CREATE_TICKET`/`INFO_QUERY` ejecuta la llamada real a Jira
+- 🆕 `src/nodes/responder_agent.py` — **Responder Agent**: nodo de cierre que sintetiza los resultados crudos del Data Agent (filas SQL) o del Action Agent (datos de Jira) en una respuesta breve en lenguaje natural para el operador, sin pasar por HITL; termina el grafo (`END`)
+- **Compuerta HITL**: el grafo se compila con `interrupt_before=["human_in_the_loop"]` — cualquier severidad `P1`, acción irreversible o ambigüedad detectada por el Supervisor detiene el flujo hasta aprobación humana
+- 🆕 **Checkpointer persistente**: `MemorySaver` fue reemplazado por `PostgresSaver` (`langgraph-checkpoint-postgres`), reutilizando el mismo contenedor `timescaledb` — el historial de mensajes, `next_agent` y la decisión HITL sobreviven a un reinicio del Webhook Service (tablas `checkpoints`/`checkpoint_writes`/`checkpoint_blobs`, creadas automáticamente al arrancar)
+- **Sanitización para modelos Open Source**: `clean_think_tags()`/`strip_think_tags()` limpian bloques `<think>...</think>` (típicos de modelos razonadores servidos vía Groq) antes de intentar el parseo Pydantic — con *fallback* seguro a `human_in_the_loop` (o un mensaje controlado en el Responder) si el parseo falla
+- Ciclo del grafo: `supervisor → {Data_Agent | Action_Agent} → supervisor → ... → {Responder_Agent | human_in_the_loop | END}`, con reentrada al Supervisor tras cada nodo especialista salvo el Responder, que siempre termina el grafo
 
 ### 🆕 Capa 5 — ChatOps UI (Streamlit) + Jira
 - Servicio web interactivo en `http://localhost:8501` para interactuar en lenguaje natural con el ecosistema NOC
-- Sidebar con estado de conectividad (Backend FastAPI, TimescaleDB, Orquestador LangGraph, Jira) y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime)
-- Historial de chat en `st.session_state`, listo para conmutar del modo *standalone* actual a la invocación real de `orchestrator.invoke()` del NOC-MAS
+- Sidebar con estado de conectividad (Backend FastAPI, TimescaleDB, Orquestador LangGraph, Jira) y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime) — estos widgets del sidebar son valores de demostración fijos, no están cableados a métricas en vivo
+- ✅ Conexión real de punta a punta: `chatops_ui/app.py` llama por HTTP a `POST /api/chat` en el Webhook Service (`http://webhook-service:8000/api/chat` dentro de `noc_net`), con un `thread_id` estable por sesión de navegador (`st.session_state`) que mantiene la memoria conversacional gracias al checkpointer persistente
 - Los tickets creados/comentados por la deduplicación JQL y por el Action Agent llegan al mismo proyecto Jira, cerrando el loop: **detección → diagnóstico → decisión → registro**
 
 ---
@@ -143,26 +147,28 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   └── requirements.txt
 │
 ├── webhook_service/
+│   ├── main.py                      # FastAPI: POST /alert (Bearer auth), POST /api/chat, GET /health, dedupe JQL + Jira
 │   ├── src/
-│   │   ├── main.py                  # FastAPI: POST /alert (Bearer auth), GET /health, dedupe JQL + Jira
-│   │   ├── state.py                 # 🆕 NOCState (TypedDict) — estado compartido del NOC-MAS
-│   │   ├── orchestrator.py          # 🆕 StateGraph LangGraph + nodo Supervisor (PydanticOutputParser)
+│   │   ├── state.py                 # NOCState (TypedDict) — estado compartido del NOC-MAS
+│   │   ├── orchestrator.py          # StateGraph LangGraph + nodo Supervisor + checkpointer PostgresSaver
 │   │   └── nodes/
-│   │       ├── data_agent.py        # 🆕 Text-to-SQL seguro (solo SELECT) sobre network_telemetry
-│   │       └── action_agent.py      # 🆕 Generación y ejecución de acciones estructuradas (Pydantic)
+│   │       ├── data_agent.py        # Text-to-SQL seguro (solo SELECT) sobre network_telemetry
+│   │       ├── action_agent.py      # Generación y ejecución de acciones estructuradas (Pydantic)
+│   │       └── responder_agent.py   # 🆕 Síntesis en lenguaje natural para el operador (nodo final)
 │   ├── requirements.txt             # fastapi, uvicorn[standard], psycopg2-binary, httpx, langgraph,
-│   │                                 # langchain-groq, sqlalchemy, pydantic
+│   │                                 # langchain-groq, sqlalchemy, pydantic, langgraph-checkpoint-postgres, psycopg
 │   ├── webhook_service.sql          # DDL de incident_logs (tabla + índices GIN)
 │   └── Dockerfile
 │
-├── chatops-ui/
-│   ├── app.py                       # 🆕 Streamlit — chat NL, sidebar de estado, métricas rápidas
+├── chatops_ui/
+│   ├── app.py                       # Streamlit — chat NL conectado a POST /api/chat, sidebar de estado
 │   ├── requirements.txt             # streamlit
 │   └── Dockerfile
 │
 ├── jupyter/
 │   ├── notebooks/
-│   │   └── anomaly_detection.ipynb  # 🆕 Entrenamiento/validación IsolationForest (CPU/latencia)
+│   │   ├── IsolationForest.ipynb    # Entrenamiento/validación IsolationForest (CPU/latencia)
+│   │   └── RandomForest2.ipynb
 │   ├── requirements.txt             # scikit-learn, pandas, sqlalchemy, psycopg2-binary, matplotlib
 │   └── Dockerfile
 │
@@ -184,6 +190,33 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   ├── panels.sql                   # Queries de referencia — dashboard principal
 │   ├── panels_postmortem.sql        # Queries de referencia — dashboard de postmortem
 │   └── incident_views.sql           # Vistas JSONB: v_incident_events, v_incident_mttr, v_incident_latest_status
+│
+├── 🆕 tests/
+│   ├── test_webhook_endpoints.py    # Unit tests (TestClient) — GET /health, auth de POST /alert; corren en CI
+│   ├── test_checkpointer_persistence.py # Integración: persistencia del checkpointer PostgresSaver entre "reinicios"
+│   ├── test_supervisor.py           # Script manual (no pytest) — invoca el grafo real, requiere GROQ_API_KEY
+│   └── test_action_agent.py         # Script manual (no pytest) — idem, sobre el Action Agent
+│
+├── 🆕 .github/workflows/
+│   └── ci.yml                       # pytest sobre tests/test_webhook_endpoints.py + build de la imagen Docker en cada push/PR
+│
+├── 🆕 k8s/                          # PoC de despliegue en Azure AKS (ver sección Kubernetes)
+│   ├── webhook-deployment.yaml
+│   ├── webhook-service.yaml         # type: LoadBalancer
+│   ├── webhook-secret.yaml
+│   ├── timescaledb-deployment.yaml  # PVC 10Gi + PGDATA en subdirectorio (workaround Azure Disk)
+│   └── timescaledb-service.yaml
+│
+├── 🆕 deploy/local/                 # Clúster local con kind (ver sección Kubernetes)
+│   ├── kind-3nodes.yaml             # 1 control-plane + 2 workers
+│   ├── setup-local-cluster.ps1
+│   ├── webhook-deployment.yaml      # 2 réplicas, RollingUpdate
+│   ├── webhook-configmap.yaml       # PG_HOST=host.docker.internal
+│   ├── webhook-secrets.yaml.example # plantilla — el real está gitignored
+│   ├── grafana-deployment.yaml      # 🚧 sin datasource/dashboards provisionados aún
+│   └── grafana-pvc.yaml
+│
+├── 🆕 deploy-azure-infra.ps1        # az login / group create / acr create / aks create / attach-acr
 │
 ├── .env                              # Secretos y configuración (no versionado)
 ├── .env.example                      # Plantilla sin valores
@@ -578,9 +611,6 @@ docker network inspect noc_net
 ```
 Confirma que `jupyter_ml` esté en `noc_net` y que `PG_DSN` apunte a `timescaledb:5432`.
 
-### La ChatOps UI no refleja respuestas reales del NOC-MAS
-**Causa esperada (temporal):** `chatops-ui/app.py` opera en **modo standalone** — la llamada a `orchestrator.invoke()` aún no está cableada al backend HTTP; ver Roadmap Fase 6.
-
 ### El dashboard de Postmortem no muestra datos
 **Causa:** `incident_views.sql` no se ejecutó, o no hay pares `firing`/`resolved` todavía. **Solución:** corre el paso 6 de instalación y `simulate_mttr_incidents.py`.
 
@@ -604,15 +634,39 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 - `JIRA_API_TOKEN` y `GROQ_API_KEY` viajan únicamente como variables de entorno del contenedor, nunca hardcodeadas
 - **Text-to-SQL blindado**: el Data_Agent solo ejecuta `SELECT` validados por regex y forzados a `network_telemetry`, con `LIMIT 200` — el LLM nunca tiene acceso a credenciales de escritura ni a otras tablas
 - **Compuerta HITL obligatoria**: cualquier severidad `P1`, acción irreversible o fallo de parseo del Supervisor enruta forzosamente a `human_in_the_loop`, deteniendo el grafo (`interrupt_before`) hasta aprobación explícita
-- **Sanitización de salida de modelos Open Source**: `clean_think_tags()` elimina bloques `<think>` antes de cualquier parseo, evitando inyección de contenido no estructurado en el pipeline de decisión
+- **Sanitización de salida de modelos Open Source**: `clean_think_tags()`/`strip_think_tags()` eliminan bloques `<think>` antes de cualquier parseo, evitando inyección de contenido no estructurado en el pipeline de decisión
+- ✅ **Checkpointer persistente en Postgres**: el estado del NOC-MAS (`PostgresSaver`) ya no vive solo en RAM (`MemorySaver`) — sobrevive a un reinicio del Webhook Service, condición necesaria para poder escalar a múltiples réplicas sin perder sesiones en curso
 
 ### En producción
 
-- Usa `.env` (nunca lo commitees) o un secret manager (Vault, AWS/GCP Secrets Manager)
+- Usa `.env` (nunca lo commitees) o un secret manager (Vault, AWS/GCP Secrets Manager, Azure Key Vault)
 - Cambia la contraseña de Grafana Admin y el token de Jupyter inmediatamente tras el despliegue
 - Rota `NOC_WEBHOOK_TOKEN`, `JIRA_API_TOKEN` y `GROQ_API_KEY` periódicamente
 - No publiques los puertos `8000`, `8888` fuera del host — restringe a `noc_net` y usa reverse proxy con TLS para exposición externa
-- Considera fijar el checkpointer del NOC-MAS a un backend persistente (Postgres/Redis) en vez de `MemorySaver` antes de escalar a múltiples réplicas del Webhook Service
+- `k8s/webhook-secret.yaml` documenta las claves esperadas con placeholders `REEMPLAZAR_*` — nunca commitear ese archivo con valores reales; poblarlo vía `kubectl create secret --from-env-file` o un CSI driver de secretos (Azure Key Vault) en el clúster real
+
+---
+
+## ☸️ Despliegue Cloud-Native (Kubernetes) — Fase 7, en curso
+
+El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker Compose salvo donde se indica) tiene dos rutas paralelas de migración a Kubernetes, ambas como prueba de concepto:
+
+### Prueba de concepto en Azure (AKS + ACR) — `k8s/`
+
+- `webhook-deployment.yaml`: imagen `nocacr.azurecr.io/noc-webhook-service:latest`, variables no sensibles (`PG_HOST=timescaledb`, `PG_PORT`, `PG_DB`, `PG_USER`) inline y el resto vía `envFrom: secretRef` contra `webhook-service-secrets`; sondas `readinessProbe`/`livenessProbe` sobre `/health`
+- `webhook-service.yaml`: `type: LoadBalancer` (IP pública directa; sin Ingress/TLS todavía)
+- `webhook-secret.yaml`: plantilla con placeholders `REEMPLAZAR_*` para `NOC_WEBHOOK_TOKEN`, `PG_PASSWORD`, `PG_DSN`, credenciales de Jira y `GROQ_API_KEY` — **nunca** commitear con valores reales
+- `timescaledb-deployment.yaml`: también migrado a AKS — `PersistentVolumeClaim` (10Gi, `ReadWriteOnce`) + `Deployment` (`strategy: Recreate`, para no chocar con el PVC RWO en un rolling update); variable `PGDATA=/var/lib/postgresql/data/pgdata` para sortear la restricción de Azure Disk, que monta un `lost+found` en la raíz del volumen y hace que Postgres se niegue a inicializar
+- `deploy-azure-infra.ps1`: aprovisiona Resource Group + Azure Container Registry + clúster AKS y adjunta el ACR al clúster (`az aks update --attach-acr`) vía Azure CLI
+- El job `docker-build` de `ci.yml` **sí** corre en cada push/PR (build de la imagen, sin push). Los pasos de login a ACR, build+push y despliegue a AKS (`azure/login`, `azure/aks-set-context`, `azure/k8s-deploy`) ya están escritos en el workflow pero **están comentados/pausados** mientras se prioriza validar Kubernetes en un clúster local — no se ejecutan automáticamente todavía
+
+### Clúster local con `kind` — `deploy/local/`
+
+- `kind-3nodes.yaml` + `setup-local-cluster.ps1`: clúster multinodo (1 control-plane, 2 workers) para probar cargas distribuidas sin costo de nube
+- `webhook-deployment.yaml`: 2 réplicas con `strategy: RollingUpdate` (`maxSurge: 1`, `maxUnavailable: 0` — sin downtime), config no sensible en `webhook-configmap.yaml` y credenciales en `webhook-secrets.yaml` (gitignored; plantilla versionada en `webhook-secrets.yaml.example`)
+- **Red híbrida Docker ↔ Kubernetes**: TimescaleDB no se migró aquí — sigue en `docker-compose`/`noc_net` — y los pods del clúster `kind` la alcanzan vía `PG_HOST=host.docker.internal`, el gateway que expone el host Docker Desktop hacia los contenedores
+- 🚧 Grafana también tiene manifiestos locales (`grafana-deployment.yaml` + `grafana-pvc.yaml`), pero sin el `grafana/provisioning/` (datasources/dashboards/alerting) montado — es una instancia en blanco, y ni ella ni `webhook-service` tienen todavía un `Service` que las exponga fuera del clúster (pendiente `kubectl port-forward` o un `Service`/Ingress)
+- **Nota de brecha conocida**: `data_agent.py` (Text-to-SQL del NOC-MAS) sigue leyendo `PG_DSN` vía SQLAlchemy, y ningún manifiesto de `k8s/` ni `deploy/local/` lo inyecta todavía (solo cubren `PG_HOST`/`PG_PORT`/`PG_DB`/`PG_USER`/`PG_PASSWORD`, que alcanzan para `main.py` y el checkpointer). El Data Agent no funcionará correctamente corriendo sobre Kubernetes hasta agregar esa variable.
 
 ---
 
@@ -647,13 +701,24 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 - ✅ **ChatOps UI en Streamlit** (`http://localhost:8501`) con sidebar de estado y métricas rápidas
 - ✅ Nuevo árbol de infraestructura: `webhook_service/src/`, `jupyter/`, servicios `chatops-ui` y `jupyter-ml` en `docker-compose.yml`
 
-### 🔮 Fase 6 — Cierre del loop conversacional y checkpointer persistente (próxima)
-- [ ] Cablear `chatops-ui/app.py` a `orchestrator.invoke()` vía llamada HTTP real al Webhook Service (hoy en modo standalone)
-- [ ] Reemplazar `MemorySaver` por un checkpointer persistente (Postgres/Redis) para sobrevivir reinicios del contenedor
+### ✅ Fase 6 — Cierre del loop conversacional, persistencia y CI (completada)
+- ✅ **ChatOps UI cableada de punta a punta**: `chatops_ui/app.py` llama `POST /api/chat` del Webhook Service vía HTTP real, con `thread_id` estable por sesión de navegador
+- ✅ **`Responder_Agent`** (`src/nodes/responder_agent.py`): nodo que sintetiza resultados crudos de SQL/Jira en una respuesta ejecutiva en lenguaje natural, sin pasar por Jira ni HITL cuando no hace falta
+- ✅ **Checkpointer persistente**: `MemorySaver` reemplazado por `PostgresSaver` (`langgraph-checkpoint-postgres`) sobre el mismo contenedor `timescaledb` — mensajes, `next_agent` y decisión HITL sobreviven a un reinicio del Webhook Service
+- ✅ **Suite de pruebas unitarias + CI**: `tests/test_webhook_endpoints.py` (`TestClient` sobre `/health` y auth de `/alert`) corriendo en `.github/workflows/ci.yml` en cada push/PR, junto a la validación del build de la imagen Docker
 - [ ] Exponer los hallazgos del `IsolationForest` como feature adicional del Data_Agent (contexto enriquecido para el Supervisor)
 - [ ] Endpoint dedicado `POST /noc-mas/invoke` en el Webhook Service, desacoplado de `/alert`
 - [ ] Exportación de métricas de MTTR + decisiones del NOC-MAS a un dashboard ejecutivo (SLA/SLO tracking)
 - [ ] Autenticación de la ChatOps UI (hoy expuesta sin login en `8501`)
+
+### 🚧 Fase 7 — Cloud-Native / Kubernetes (en curso, PoC — ver sección dedicada arriba)
+- ✅ Manifiestos declarativos para AKS (`k8s/`) y script de aprovisionamiento de infraestructura Azure (`deploy-azure-infra.ps1`)
+- ✅ Clúster local multinodo con `kind` (`deploy/local/`) y `webhook-service` migrado a 2 réplicas con `RollingUpdate`
+- ⏸️ Push a ACR y despliegue automático a AKS ya escritos en `ci.yml`, pausados mientras se valida Kubernetes en local
+- [ ] Inyectar `PG_DSN` en los manifiestos de Kubernetes (falta para que el Data_Agent funcione ahí)
+- [ ] `Service`/Ingress para `webhook-service` y `grafana` en el clúster local
+- [ ] Provisionar `grafana/provisioning/` (datasources, dashboards, alerting) también en el Grafana de `deploy/local/`
+- [ ] Reactivar el push a ACR + despliegue a AKS en `ci.yml` una vez validado el flujo en local
 
 ---
 
@@ -693,5 +758,5 @@ Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier 
 ---
 
 **Mantenido por:** [Tu equipo NOC]
-**Última actualización:** Agosto 2026
-**Versión:** 5.0 (ML Analytics + NOC-MAS LangGraph + Deduplicación JQL + ChatOps Streamlit)
+**Última actualización:** Septiembre 2026
+**Versión:** 6.0 (Checkpointer PostgresSaver + ChatOps E2E + Responder Agent + CI/CD + Kubernetes PoC)
