@@ -2,9 +2,12 @@
 kind: Deployment
 metadata:
   name: webhook-service
-  namespace: default
+  namespace: dev
   labels:
-    app: webhook-service
+    app.kubernetes.io/name: webhook-receiver
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: noc-observability-pipeline
+    environment: dev
 spec:
   replicas: 2
   strategy:
@@ -14,14 +17,18 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: webhook-service
+      app.kubernetes.io/name: webhook-receiver
+      environment: dev
   template:
     metadata:
       labels:
-        app: webhook-service
+        app.kubernetes.io/name: webhook-receiver
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/part-of: noc-observability-pipeline
+        environment: dev
     spec:
       containers:
-        - name: webhook-service
+        - name: webhook-receiver
           image: noc-webhook-service:v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
@@ -31,7 +38,7 @@ spec:
             - configMapRef:
                 name: webhook-config
             - secretRef:
-                name: webhook-secrets
+                name: webhook-secret
           resources:
             requests:
               cpu: "100m"

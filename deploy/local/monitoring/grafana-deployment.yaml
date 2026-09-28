@@ -2,27 +2,31 @@
 kind: Deployment
 metadata:
   name: grafana
-  namespace: default
+  namespace: monitoring
   labels:
-    app: grafana
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: noc-observability-pipeline
+    environment: monitoring
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: grafana
+      app.kubernetes.io/name: grafana
+      environment: monitoring
   template:
     metadata:
       labels:
-        app: grafana
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: monitoring
+        app.kubernetes.io/part-of: noc-observability-pipeline
+        environment: monitoring
     spec:
-      securityContext:
-        fsGroup: 472
       containers:
         - name: grafana
-          image: grafana/grafana:10.4.0
-          imagePullPolicy: IfNotPresent
+          image: grafana/grafana-oss:latest
           ports:
             - containerPort: 3000
               name: http
@@ -41,18 +45,6 @@ spec:
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
-          readinessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 15
       volumes:
         - name: grafana-storage
           persistentVolumeClaim:

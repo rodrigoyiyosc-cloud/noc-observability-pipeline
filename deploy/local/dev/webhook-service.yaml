@@ -1,0 +1,20 @@
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: webhook-receiver
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: noc-observability-pipeline
+    environment: dev
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: webhook-receiver
+    environment: dev
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      name: http

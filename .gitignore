@@ -1,2 +1,4 @@
 **/.env
 deploy/local/webhook-secrets.yaml
+
+deploy/local/dev/webhook-secret.yaml
