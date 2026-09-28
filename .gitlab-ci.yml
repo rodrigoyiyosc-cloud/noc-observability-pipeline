@@ -1,0 +1,37 @@
+# Definición de las etapas del pipeline
+stages:
+  - test
+  - build
+
+# Configuración global para los disparadores (reemplaza el "on:" de GitHub)
+workflow:
+  rules:
+    # Se ejecuta en ramas específicas ante un push
+    - if: $CI_COMMIT_BRANCH =~ /^(main|Fase_3|Fase_6|Fase_de_IA_y_ML|kubernetes)$/
+    # Se ejecuta ante un Merge Request (equivalente a pull_request) dirigido a main
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+
+# 1. Job de Tests Unitarios
+unit-tests:
+  stage: test
+  image: python:3.12-slim
+  variables:
+    # Token de prueba temporal (reemplaza la sección env:)
+    NOC_WEBHOOK_TOKEN: "ci-test-token-temporal"
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -r webhook_service/requirements.txt
+    - pip install pytest httpx
+    - python -m pytest tests/test_webhook_endpoints.py -v
+
+# 2. Job de Validación de Docker
+docker-build:
+  stage: build
+  image: docker:24.0.9 # Imagen base con el cliente de Docker instalado
+  services:
+    - docker:24.0.9-dind # Activa Docker-in-Docker para poder compilar imágenes
+  needs:
+    - unit-tests # Asegura que corra solo si el job 'unit-tests' pasa exitosamente
+  script:
+    # Comando estándar de Docker para compilar localmente sin subir (no push)
+    - docker build -t noc-webhook-service:ci ./webhook_service
