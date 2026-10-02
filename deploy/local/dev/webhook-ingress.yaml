@@ -1,0 +1,23 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-ingress
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: webhook-receiver
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: noc-observability-pipeline
+    environment: dev
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: webhook.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webhook-service
+                port:
+                  number: 8000
