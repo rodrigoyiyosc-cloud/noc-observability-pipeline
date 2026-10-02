@@ -1,0 +1,42 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-and-monitoring-to-webhook
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: webhook-receiver
+      environment: dev
+  policyTypes:
+    - Ingress
+  ingress:
+    # 1. Tráfico L7 desde el Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: controller
+      ports:
+        - protocol: TCP
+          port: 8000
+    # 2. Tráfico interno desde el namespace monitoring (Grafana/Alertmanager)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              environment: monitoring
+      ports:
+        - protocol: TCP
+          port: 8000

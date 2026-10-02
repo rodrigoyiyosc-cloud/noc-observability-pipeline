@@ -14,6 +14,13 @@ spec:
     - host: webhook.local
       http:
         paths:
+          - path: /health
+            pathType: Exact                 # healthcheck: solo esta ruta exacta
+            backend:
+              service:
+                name: webhook-service
+                port:
+                  number: 8000
           - path: /
             pathType: Prefix
             backend:
@@ -21,3 +28,4 @@ spec:
                 name: webhook-service
                 port:
                   number: 8000
+          
