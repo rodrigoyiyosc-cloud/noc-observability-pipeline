@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb-service
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: timescaledb
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: noc-observability-pipeline
+    environment: dev
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: timescaledb
+    environment: dev
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
