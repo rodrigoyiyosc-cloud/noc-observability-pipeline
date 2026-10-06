@@ -74,7 +74,7 @@ async def verify_token(authorization: str | None = Security(api_key_header)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     token = authorization.removeprefix("Bearer ").strip()
-    if not secrets.compare_digest(token, NOC_WEBHOOK_TOKEN):
+    if not secrets.compare_digest(token.encode("utf-8"), NOC_WEBHOOK_TOKEN.encode("utf-8")):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido",
@@ -461,7 +461,7 @@ async def receive_alert(request: Request):
 
 # ── Endpoint /api/chat ───────────────────────────────────────────────────────
 
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post("/api/chat", response_model=ChatResponse, dependencies=[Security(verify_token)])
 async def chat(req: ChatRequest):
     """
     Invoca el grafo NOC-MAS (LangGraph) manteniendo el estado por thread_id
