@@ -157,7 +157,6 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   │       └── responder_agent.py   # 🆕 Síntesis en lenguaje natural para el operador (nodo final)
 │   ├── requirements.txt             # fastapi, uvicorn[standard], psycopg2-binary, httpx, langgraph,
 │   │                                 # langchain-groq, sqlalchemy, pydantic, langgraph-checkpoint-postgres, psycopg
-│   ├── webhook_service.sql          # DDL de incident_logs (tabla + índices GIN)
 │   └── Dockerfile
 │
 ├── chatops_ui/
@@ -197,8 +196,11 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   ├── test_supervisor.py           # Script manual (no pytest) — invoca el grafo real, requiere GROQ_API_KEY
 │   └── test_action_agent.py         # Script manual (no pytest) — idem, sobre el Action Agent
 │
+├── 🆕 webhook_service.sql           # DDL de incident_logs (tabla + índices GIN) — en la raíz del repo; idempotente, ya incluido en sql/schema.sql
+│
 ├── 🆕 .github/workflows/
 │   └── ci.yml                       # pytest sobre tests/test_webhook_endpoints.py + build de la imagen Docker en cada push/PR
+├── 🆕 .gitlab-ci.yml                # Mismo pipeline en GitLab CI: stages test (pytest) y build (docker build vía dind)
 │
 ├── 🆕 k8s/                          # PoC de despliegue en Azure AKS (ver sección Kubernetes)
 │   ├── webhook-deployment.yaml
@@ -210,11 +212,22 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 ├── 🆕 deploy/local/                 # Clúster local con kind (ver sección Kubernetes)
 │   ├── kind-3nodes.yaml             # 1 control-plane + 2 workers
 │   ├── setup-local-cluster.ps1
-│   ├── webhook-deployment.yaml      # 2 réplicas, RollingUpdate
-│   ├── webhook-configmap.yaml       # PG_HOST=host.docker.internal
-│   ├── webhook-secrets.yaml.example # plantilla — el real está gitignored
-│   ├── grafana-deployment.yaml      # 🚧 sin datasource/dashboards provisionados aún
-│   └── grafana-pvc.yaml
+│   ├── namespaces.yaml              # namespaces dev y monitoring con labels estándar
+│   ├── dev/                         # namespace dev
+│   │   ├── webhook-deployment.yaml  # 2 réplicas, RollingUpdate
+│   │   ├── webhook-config.yaml      # ConfigMap (PG_HOST, PG_PORT, PG_DB, PG_USER)
+│   │   ├── webhook-secret.yaml.example # plantilla — el real está gitignored
+│   │   ├── webhook-service.yaml     # ClusterIP
+│   │   ├── webhook-ingress.yaml     # NGINX Ingress, host webhook.local
+│   │   ├── network-policy.yaml      # default-deny ingress + allow desde ingress-nginx y monitoring
+│   │   ├── timescaledb-statefulset.yaml # StatefulSet + volumeClaimTemplate RWO 2Gi
+│   │   ├── timescaledb-service.yaml
+│   │   └── timescaledb-secret.yaml  # gitignored
+│   └── monitoring/                  # namespace monitoring
+│       ├── grafana-deployment.yaml  # 🚧 sin datasource/dashboards provisionados aún
+│       ├── grafana-pvc.yaml
+│       ├── grafana-service.yaml
+│       └── grafana-ingress.yaml     # NGINX Ingress, host grafana.local
 │
 ├── 🆕 deploy-azure-infra.ps1        # az login / group create / acr create / aks create / attach-acr
 │
@@ -360,7 +373,7 @@ docker exec -i timescaledb psql -U noc_user -d noc `
 ### 5. Inicializar el esquema del Webhook Service
 
 ```powershell
-Get-Content webhook_service/webhook_service.sql | docker exec -i timescaledb psql -U noc_user -d noc
+Get-Content webhook_service.sql | docker exec -i timescaledb psql -U noc_user -d noc
 ```
 
 ```powershell
@@ -663,9 +676,13 @@ El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker 
 ### Clúster local con `kind` — `deploy/local/`
 
 - `kind-3nodes.yaml` + `setup-local-cluster.ps1`: clúster multinodo (1 control-plane, 2 workers) para probar cargas distribuidas sin costo de nube
-- `webhook-deployment.yaml`: 2 réplicas con `strategy: RollingUpdate` (`maxSurge: 1`, `maxUnavailable: 0` — sin downtime), config no sensible en `webhook-configmap.yaml` y credenciales en `webhook-secrets.yaml` (gitignored; plantilla versionada en `webhook-secrets.yaml.example`)
-- **Red híbrida Docker ↔ Kubernetes**: TimescaleDB no se migró aquí — sigue en `docker-compose`/`noc_net` — y los pods del clúster `kind` la alcanzan vía `PG_HOST=host.docker.internal`, el gateway que expone el host Docker Desktop hacia los contenedores
-- 🚧 Grafana también tiene manifiestos locales (`grafana-deployment.yaml` + `grafana-pvc.yaml`), pero sin el `grafana/provisioning/` (datasources/dashboards/alerting) montado — es una instancia en blanco, y ni ella ni `webhook-service` tienen todavía un `Service` que las exponga fuera del clúster (pendiente `kubectl port-forward` o un `Service`/Ingress)
+- **Namespaces** (`namespaces.yaml`): `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`
+- `dev/webhook-deployment.yaml`: 2 réplicas con `strategy: RollingUpdate` (`maxSurge: 1`, `maxUnavailable: 0` — sin downtime), config no sensible en `webhook-config.yaml` (ConfigMap) y credenciales en `webhook-secret.yaml` (gitignored; plantilla versionada en `webhook-secret.yaml.example`)
+- **Exposición**: `webhook-service` es un `Service` ClusterIP publicado por **NGINX Ingress** (`webhook-ingress.yaml`, host virtual `webhook.local`; `/health` como ruta exacta y `/` como prefijo). Grafana se expone igual en `grafana.local` (`monitoring/grafana-ingress.yaml`). Requiere el Ingress Controller instalado en el clúster y las entradas en el archivo `hosts`
+- **Seguridad de red** (`dev/network-policy.yaml`): `NetworkPolicy` *default-deny* de ingreso en `dev`, más una regla que solo permite al pod `webhook-receiver` (puerto 8000) recibir tráfico del controller `ingress-nginx` y del namespace `monitoring`
+- **TimescaleDB en Kubernetes** (`dev/timescaledb-statefulset.yaml`): `StatefulSet` de 1 réplica (`timescale/timescaledb:2.17.2-pg16`) con `volumeClaimTemplate` RWO de 2Gi (`storageClassName: standard`, aprovisionamiento dinámico) y credenciales vía `timescaledb-secret` (gitignored). Tras desplegarlo hay que cargar el esquema (`sql/schema.sql`, `sql/incident_views.sql`) igual que en Compose
+- **Red híbrida Docker ↔ Kubernetes**: `webhook-config.yaml` aún apunta a `PG_HOST=host.docker.internal` (TimescaleDB de `docker-compose`) en lugar de `timescaledb-service` — queda pendiente repuntarlo al StatefulSet del clúster
+- 🚧 Grafana tiene manifiestos locales (`grafana-deployment.yaml`, `grafana-pvc.yaml`, `grafana-service.yaml`, `grafana-ingress.yaml`), pero sin el `grafana/provisioning/` (datasources/dashboards/alerting) montado — es una instancia en blanco
 - **Nota de brecha conocida**: `data_agent.py` (Text-to-SQL del NOC-MAS) sigue leyendo `PG_DSN` vía SQLAlchemy, y ningún manifiesto de `k8s/` ni `deploy/local/` lo inyecta todavía (solo cubren `PG_HOST`/`PG_PORT`/`PG_DB`/`PG_USER`/`PG_PASSWORD`, que alcanzan para `main.py` y el checkpointer). El Data Agent no funcionará correctamente corriendo sobre Kubernetes hasta agregar esa variable.
 
 ---
@@ -714,9 +731,14 @@ El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker 
 ### 🚧 Fase 7 — Cloud-Native / Kubernetes (en curso, PoC — ver sección dedicada arriba)
 - ✅ Manifiestos declarativos para AKS (`k8s/`) y script de aprovisionamiento de infraestructura Azure (`deploy-azure-infra.ps1`)
 - ✅ Clúster local multinodo con `kind` (`deploy/local/`) y `webhook-service` migrado a 2 réplicas con `RollingUpdate`
+- ✅ Namespaces `dev`/`monitoring` con labels estándar
+- ✅ `webhook-service` y Grafana expuestos vía NGINX Ingress (`webhook.local`, `grafana.local`)
+- ✅ `NetworkPolicy` default-deny + regla inter-namespace hacia `webhook-service`
+- ✅ TimescaleDB como `StatefulSet` con provisionamiento dinámico de volumen RWO
+- ✅ Pipeline equivalente en GitLab CI (`.gitlab-ci.yml`: pytest + docker build)
 - ⏸️ Push a ACR y despliegue automático a AKS ya escritos en `ci.yml`, pausados mientras se valida Kubernetes en local
+- [ ] Repuntar `PG_HOST` del webhook-service al `timescaledb-service` del clúster (hoy usa `host.docker.internal`)
 - [ ] Inyectar `PG_DSN` en los manifiestos de Kubernetes (falta para que el Data_Agent funcione ahí)
-- [ ] `Service`/Ingress para `webhook-service` y `grafana` en el clúster local
 - [ ] Provisionar `grafana/provisioning/` (datasources, dashboards, alerting) también en el Grafana de `deploy/local/`
 - [ ] Reactivar el push a ACR + despliegue a AKS en `ci.yml` una vez validado el flujo en local
 
@@ -751,12 +773,6 @@ Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier 
 
 ---
 
-## 📄 Licencia
-
-[Especifica tu licencia aquí — ej. MIT, Apache 2.0]
-
----
-
-**Mantenido por:** [Tu equipo NOC]
-**Última actualización:** Septiembre 2026
+**Mantenido por:** Rodrigo Codoceo.
+**Última actualización:** Octubre 2026
 **Versión:** 6.0 (Checkpointer PostgresSaver + ChatOps E2E + Responder Agent + CI/CD + Kubernetes PoC)

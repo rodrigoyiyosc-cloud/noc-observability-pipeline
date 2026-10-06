@@ -26,6 +26,14 @@ Five layers, one `docker compose up`, all on a shared bridge network `noc_net`:
 
 5. **Escalation & ops** (`chatops_ui/`) — Streamlit app (`app.py`) calling the webhook service's `/api/chat` over the internal Docker network (`http://webhook-service:8000/api/chat`), with a per-browser-session `thread_id` (`st.session_state`) so LangGraph memory persists across turns. Sidebar connectivity/metrics widgets are currently hardcoded display values, not live-wired.
 
+### Kubernetes & CI (Fase 7, in progress)
+
+- `k8s/` — PoC manifests for Azure AKS (webhook-service LoadBalancer, TimescaleDB Deployment+PVC). `deploy-azure-infra.ps1` provisions RG/ACR/AKS.
+- `deploy/local/` — local 3-node `kind` cluster (`kind-3nodes.yaml`, `setup-local-cluster.ps1`). Manifests are split by namespace: `namespaces.yaml` (`dev`, `monitoring`), `dev/` (webhook-service Deployment ×2 + ConfigMap/Secret + ClusterIP Service + NGINX Ingress `webhook.local`, `network-policy.yaml` default-deny + allow from ingress-nginx/monitoring, TimescaleDB StatefulSet with RWO 2Gi volumeClaimTemplate), `monitoring/` (Grafana Deployment/PVC/Service/Ingress `grafana.local`, no provisioning mounted yet). Real secrets (`webhook-secret.yaml`, `timescaledb-secret.yaml`) are gitignored; use the `.example` template.
+- Known gaps: the webhook ConfigMap still uses `PG_HOST=host.docker.internal` (not the in-cluster `timescaledb-service`), and `PG_DSN` (needed by the Data Agent) is not injected in any manifest.
+- CI: `.github/workflows/ci.yml` and `.gitlab-ci.yml` both run `tests/test_webhook_endpoints.py` (pytest, needs `NOC_WEBHOOK_TOKEN`) then a `docker build` of `webhook_service/`. `tests/test_webhook_endpoints.py` and `tests/test_checkpointer_persistence.py` are the real pytest tests (unlike the manual scripts below). ACR push/AKS deploy steps in `ci.yml` are commented out.
+- `webhook_service.sql` lives at the **repo root** (not inside `webhook_service/`); it only defines `incident_logs`, which `sql/schema.sql` already creates, so it is redundant but idempotent.
+
 ### README vs. code drift
 
 The README (v5.0, Roadmap "Fase 6") describes the ChatOps UI as still in *standalone mode*, not yet calling the real orchestrator. That is stale — `chatops_ui/app.py` already POSTs to `/api/chat` and renders the real reply, `next_agent`, and HITL flag. The README's file tree also shows `webhook_service/src/main.py`; in the actual tree `main.py` lives at `webhook_service/main.py` (top level), with `src/` holding only `state.py`, `orchestrator.py`, `nodes/`. The README also doesn't mention the `Responder_Agent` node (`src/nodes/responder_agent.py`) or `python-simulator/ml_continuous_simulator.py`, both of which exist in code. Trust the code over the README's Roadmap/file-tree sections; the architecture narrative and setup/troubleshooting sections are otherwise accurate.
@@ -45,7 +53,7 @@ docker compose ps
 
 # Initialize schema (run once, in order, after first startup)
 Get-Content sql/schema.sql | docker exec -i timescaledb psql -U noc_user -d noc
-Get-Content webhook_service/webhook_service.sql | docker exec -i timescaledb psql -U noc_user -d noc
+Get-Content webhook_service.sql | docker exec -i timescaledb psql -U noc_user -d noc
 Get-Content sql/incident_views.sql | docker exec -i timescaledb psql -U noc_user -d noc
 
 # Redeploy after a code/config change
@@ -74,7 +82,7 @@ python tests/test_action_agent.py
 docker exec -it webhook_service python -c "from src.orchestrator import orchestrator; ..."
 ```
 
-There is no linter, formatter, or automated test runner configured (no `pytest.ini`/`pyproject.toml`, no CI). Validate changes by exercising the running services (`docker compose up`, then hit `/health`, `/alert`, `/api/chat`, or the Grafana/Streamlit UIs) — see README §Troubleshooting for common failure modes and their log signatures (Jira `410 Gone` on the old search endpoint, `401` from a token mismatch between `.env` and `contact_points.yml`, Supervisor falling back to `human_in_the_loop` due to unparseable LLM output, etc.).
+There is no linter or formatter configured (no `pyproject.toml`); CI (GitHub Actions + GitLab CI) only runs `python -m pytest tests/test_webhook_endpoints.py` and a Docker build. Validate changes by exercising the running services (`docker compose up`, then hit `/health`, `/alert`, `/api/chat`, or the Grafana/Streamlit UIs) — see README §Troubleshooting for common failure modes and their log signatures (Jira `410 Gone` on the old search endpoint, `401` from a token mismatch between `.env` and `contact_points.yml`, Supervisor falling back to `human_in_the_loop` due to unparseable LLM output, etc.).
 
 ## Key environment variables
 
