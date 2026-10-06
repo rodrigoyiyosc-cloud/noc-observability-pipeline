@@ -2,7 +2,7 @@
 ChatOps UI - NOC-MAS Frontend
 Interfaz conversacional conectada al Orquestador LangGraph vía FastAPI.
 """
-
+import os
 import uuid
 from datetime import datetime
 
@@ -22,6 +22,12 @@ st.set_page_config(
 # Debe coincidir con el "service name" del docker-compose.yml, NO con localhost.
 BACKEND_URL = "http://webhook-service:8000/api/chat"
 BACKEND_TIMEOUT = 30  # segundos; el grafo LangGraph puede tardar por el LLM
+
+# Token compartido con el webhook (viene del docker-compose / .env)
+NOC_WEBHOOK_TOKEN = os.environ.get("NOC_WEBHOOK_TOKEN")
+if not NOC_WEBHOOK_TOKEN:
+    st.error("NOC_WEBHOOK_TOKEN no está configurado en el contenedor de Streamlit.")
+    st.stop()
 
 # ──────────────────────────────────────────────────────────────────────────
 # STATE
@@ -95,7 +101,10 @@ def call_orchestrator(user_message: str) -> dict:
         "message": user_message,
         "thread_id": st.session_state.thread_id,
     }
-    response = requests.post(BACKEND_URL, json=payload, timeout=BACKEND_TIMEOUT)
+    headers = {"Authorization": f"Bearer {NOC_WEBHOOK_TOKEN}"}
+    response = requests.post(
+        BACKEND_URL, json=payload, headers=headers, timeout=BACKEND_TIMEOUT  # <- headers
+    )
     response.raise_for_status()
     return response.json()
 
@@ -133,7 +142,10 @@ if prompt := st.chat_input("Escribe un comando o consulta para el NOC..."):
             except requests.exceptions.Timeout:
                 reply_text = "⏱️ Timeout esperando respuesta del Orquestador."
             except requests.exceptions.HTTPError as exc:
-                reply_text = f"❌ Error del backend ({exc.response.status_code}): {exc.response.text}"
+                if exc.response.status_code == 401:
+                    reply_text = "🔒 El backend rechazó el token (401). Revisa NOC_WEBHOOK_TOKEN."
+                else:
+                    reply_text = f"❌ Error del backend ({exc.response.status_code})"                    
             except Exception as exc:
                 reply_text = f"❌ Error inesperado: {exc}"
 
