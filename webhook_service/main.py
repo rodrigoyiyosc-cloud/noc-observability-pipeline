@@ -9,6 +9,7 @@ import psycopg2
 from psycopg2.pool import SimpleConnectionPool
 from fastapi import FastAPI, Request, Security, HTTPException, status
 from fastapi.security import APIKeyHeader
+from fastapi.responses import JSONResponse
 
 import httpx
 
@@ -126,7 +127,6 @@ def extract_device_name(payload: dict) -> str:
 
     return "desconocido"
 
-
 def extract_jira_fields(payload: dict) -> tuple[str, str]:
     """
     Extrae título y severidad del payload de Grafana para construir el ticket.
@@ -143,6 +143,35 @@ def extract_jira_fields(payload: dict) -> tuple[str, str]:
 
     return title, severity
 
+def split_alerts(payload: dict) -> list[dict]:
+    """
+    Convierte un POST de Grafana con N alertas en N payloads de 1 alerta,
+    cada uno con el status de ESA alerta. Así las funciones extract_* y
+    handle_jira_dedup siguen funcionando sin cambios.
+    """
+    alerts = payload.get("alerts")
+    if not isinstance(alerts, list) or not alerts:
+        return [payload]  # formato antiguo o sin lista: se procesa tal cual
+
+    views = []
+    for alert in alerts:
+        if not isinstance(alert, dict):
+            continue
+        view = {k: v for k, v in payload.items() if k not in ("alerts", "title")}
+        view["alerts"] = [alert]
+        view["status"] = alert.get("status") or payload.get("status")
+        views.append(view)
+    return views or [payload]
+
+def jira_failed(result: dict) -> bool:
+    action = result.get("action")
+    if action in ("jira_unavailable", "skipped"):
+        return True
+    if action == "ticket_created":
+        return not result.get("created")
+    if action in ("comment_added", "resolved"):
+        return not result.get("commented")
+    return False
 
 def map_priority(severity: str) -> str:
     mapping = {
@@ -167,22 +196,14 @@ def slugify(value: str, prefix: str) -> str:
 
 
 # ── Integración con Jira: búsqueda JQL, comentarios, creación y resolución ──
+class JiraLookupError(Exception):
+    """Jira no pudo responder la búsqueda: NO sabemos si existe un ticket."""
 
 async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | None:
     """
-    Busca vía JQL si ya existe un ticket ABIERTO para la misma combinación
-    alerta+dispositivo, usando los labels como huella de deduplicación.
-
-    NOTA (Jira Cloud, CHANGE-2046): el endpoint clásico GET/POST
-    /rest/api/3/search fue RETIRADO por Atlassian y ahora responde 410 Gone.
-    El reemplazo soportado es POST /rest/api/3/search/jql, que además cambia
-    el modelo de paginación (nextPageToken/isLast en vez de startAt/total;
-    no afecta este caso porque solo pedimos 1 resultado).
-
-    Se usa 'resolution = Unresolved' en lugar de 'statusCategory != Done'
-    porque statusCategory puede venir traducido/renombrado según el idioma
-    o el esquema de workflow del proyecto, mientras que 'resolution' es un
-    campo de sistema estable independiente del idioma de la instancia.
+    Devuelve la key del ticket abierto, o None si de verdad NO existe.
+    Si Jira falla (timeout, 401, 500...) lanza JiraLookupError: devolver None
+    ahí haría creer que no hay ticket y crearía duplicados.
     """
     jql = (
         f'project = "{JIRA_PROJECT_KEY}" '
@@ -192,11 +213,7 @@ async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | No
         f'ORDER BY created DESC'
     )
     url = f"{JIRA_URL}/rest/api/3/search/jql"
-    body = {
-        "jql": jql,
-        "maxResults": 1,
-        "fields": ["key", "status", "resolution"],
-    }
+    body = {"jql": jql, "maxResults": 1, "fields": ["key", "status", "resolution"]}
 
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -207,20 +224,19 @@ async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | No
                 headers={"Content-Type": "application/json"},
             )
         response.raise_for_status()
-        issues = response.json().get("issues", [])
-        if issues:
-            key = issues[0]["key"]
-            logger.info("Ticket abierto existente encontrado: %s", key)
-            return key
-        return None
     except httpx.HTTPStatusError as exc:
-        logger.error(
-            "Error Jira %s en búsqueda JQL: %s", exc.response.status_code, exc.response.text
-        )
-        return None
+        logger.error("Error Jira %s en búsqueda JQL: %s", exc.response.status_code, exc.response.text)
+        raise JiraLookupError(f"HTTP {exc.response.status_code}") from exc
     except Exception as exc:
         logger.error("Fallo en búsqueda JQL de Jira: %s", exc)
-        return None
+        raise JiraLookupError(str(exc)) from exc
+
+    issues = response.json().get("issues", [])
+    if issues:
+        key = issues[0]["key"]
+        logger.info("Ticket abierto existente encontrado: %s", key)
+        return key
+    return None
 
 
 async def add_jira_comment(issue_key: str, text: str) -> bool:
@@ -447,17 +463,41 @@ async def receive_alert(request: Request):
         json.dumps(payload, indent=2, ensure_ascii=False),
     )
 
-    status_, alert_name = extract_alert_fields(payload)
-    device_name = extract_device_name(payload)
+    results = []
+    all_ok = True
 
-    try:
-        insert_incident(status_, alert_name, payload)
-    except Exception as exc:
-        logger.error("Fallo al insertar en PostgreSQL: %s", exc)
+    for view in split_alerts(payload):
+        status_, alert_name = extract_alert_fields(view)
+        device_name = extract_device_name(view)
 
-    jira_result = await handle_jira_dedup(status_, alert_name, device_name, payload)
+        persisted = True
+        try:
+            insert_incident(status_, alert_name, view)
+        except Exception as exc:
+            persisted = False
+            logger.error("Fallo al insertar en PostgreSQL (%s): %s", alert_name, exc)
 
-    return {"status": "received", "persisted": True, "jira": jira_result}
+        try:
+            jira_result = await handle_jira_dedup(status_, alert_name, device_name, view)
+        except JiraLookupError as exc:
+            logger.error("Jira no disponible para %s / %s: %s", alert_name, device_name, exc)
+            jira_result = {"action": "jira_unavailable"}
+
+        if not persisted or jira_failed(jira_result):
+            all_ok = False
+
+        results.append({
+            "alert": alert_name,
+            "device": device_name,
+            "persisted": persisted,
+            "jira": jira_result,
+        })
+
+    body = {"status": "received" if all_ok else "partial_failure",
+            "total": len(results), "results": results}
+
+    # 503 -> Grafana reintenta. Los tickets ya creados no se duplican en el reintento.
+    return JSONResponse(content=body, status_code=200 if all_ok else 503)
 
 # ── Endpoint /api/chat ───────────────────────────────────────────────────────
 
