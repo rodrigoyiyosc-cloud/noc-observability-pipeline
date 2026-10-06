@@ -68,10 +68,18 @@ services:
       - .env
 
   chatops-ui:
+    environment:
+      NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
     build:
       context: ./chatops_ui
     container_name: chatops_ui
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     depends_on:
       - webhook-service
     ports:

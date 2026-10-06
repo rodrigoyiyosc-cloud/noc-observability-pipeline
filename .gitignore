@@ -1,4 +1,6 @@
 **/.env
 deploy/local/webhook-secrets.yaml
-
 deploy/local/dev/webhook-secret.yaml
+deploy/local/dev/timescaledb-secret.yaml
+/__pycache__/
+/backups/
