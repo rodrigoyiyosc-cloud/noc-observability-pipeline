@@ -129,38 +129,53 @@ def extract_device_name(payload: dict) -> str:
 
 def extract_jira_fields(payload: dict) -> tuple[str, str]:
     """
-    Extrae título y severidad del payload de Grafana para construir el ticket.
+    Título del ticket, en orden de prioridad:
+    1. title del payload (solo presente cuando el POST trae una única alerta)
+    2. annotations.summary de la alerta
+    3. "<alertname> en <equipo>"
     """
-    title = payload.get("title") or payload.get("ruleName") or "Alerta NOC sin título"
     severity = "critical"
+    title = payload.get("title")
 
     alerts = payload.get("alerts")
     if isinstance(alerts, list) and alerts:
-        labels = alerts[0].get("labels", {})
+        alert = alerts[0]
+        labels = alert.get("labels", {}) or {}
+        annotations = alert.get("annotations", {}) or {}
         severity = labels.get("severity", severity)
-        if not payload.get("title"):
-            title = labels.get("alertname", title)
 
+        if not title:
+            title = annotations.get("summary")
+        if not title and labels.get("alertname"):
+            device = extract_device_name(payload)
+            name = labels["alertname"]
+            title = name if device == "desconocido" else f"{name} en {device}"
+
+    title = title or payload.get("ruleName") or "Alerta NOC sin título"
     return title, severity
 
 def split_alerts(payload: dict) -> list[dict]:
     """
     Convierte un POST de Grafana con N alertas en N payloads de 1 alerta,
-    cada uno con el status de ESA alerta. Así las funciones extract_* y
-    handle_jira_dedup siguen funcionando sin cambios.
+    cada uno con el status de ESA alerta.
+    Si el POST trae una sola alerta se conserva el 'title' original.
     """
     alerts = payload.get("alerts")
     if not isinstance(alerts, list) or not alerts:
         return [payload]  # formato antiguo o sin lista: se procesa tal cual
 
     views = []
+    single = len(alerts) == 1
+    skip = ("alerts",) if single else ("alerts", "title")
+
     for alert in alerts:
         if not isinstance(alert, dict):
             continue
-        view = {k: v for k, v in payload.items() if k not in ("alerts", "title")}
+        view = {k: v for k, v in payload.items() if k not in skip}
         view["alerts"] = [alert]
         view["status"] = alert.get("status") or payload.get("status")
         views.append(view)
+
     return views or [payload]
 
 def jira_failed(result: dict) -> bool:
@@ -455,7 +470,12 @@ def insert_incident(status_: str | None, alert_name: str | None, payload: dict):
 
 @app.post("/alert", dependencies=[Security(verify_token)])
 async def receive_alert(request: Request):
-    payload = await request.json()
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Body inválido: se espera JSON UTF-8")
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Body inválido: se espera un objeto JSON")
 
     logger.info(
         "ALERT RECEIVED at %s\n%s",
