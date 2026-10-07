@@ -180,7 +180,7 @@ def split_alerts(payload: dict) -> list[dict]:
 
 def jira_failed(result: dict) -> bool:
     action = result.get("action")
-    if action in ("jira_unavailable", "skipped"):
+    if action in ("jira_unavailable", "skipped", "jira_create_failed"):
         return True
     if action == "ticket_created":
         return not result.get("created")
@@ -220,6 +220,8 @@ async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | No
     Si Jira falla (timeout, 401, 500...) lanza JiraLookupError: devolver None
     ahí haría creer que no hay ticket y crearía duplicados.
     """
+    await verify_jira_auth()
+
     jql = (
         f'project = "{JIRA_PROJECT_KEY}" '
         f'AND resolution = Unresolved '
@@ -253,7 +255,21 @@ async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | No
         return key
     return None
 
-
+async def verify_jira_auth() -> None:
+    """Lanza JiraLookupError si las credenciales no son válidas para Jira."""
+    url = f"{JIRA_URL}/rest/api/3/myself"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url, auth=(JIRA_USER, JIRA_API_TOKEN))
+        response.raise_for_status()
+        if not response.json().get("accountId"):
+            raise JiraLookupError("Jira respondió sin identidad: credenciales no válidas")
+    except JiraLookupError:
+        raise
+    except Exception as exc:
+        logger.error("Fallo de autenticación con Jira: %s", exc)
+        raise JiraLookupError(f"autenticación: {exc}") from exc
+    
 async def add_jira_comment(issue_key: str, text: str) -> bool:
     url = f"{JIRA_URL}/rest/api/3/issue/{issue_key}/comment"
     comment_payload = {
@@ -419,7 +435,7 @@ async def handle_jira_dedup(
 
     title, severity = extract_jira_fields(payload)
     result = await create_jira_ticket(title, severity, payload, [alert_label, device_label])
-    result["action"] = "ticket_created"
+    result["action"] = "ticket_created" if result.get("created") else "jira_create_failed"
     return result
 
 
