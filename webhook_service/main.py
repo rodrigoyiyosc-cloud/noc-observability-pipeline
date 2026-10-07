@@ -129,29 +129,33 @@ def extract_device_name(payload: dict) -> str:
 
 def extract_jira_fields(payload: dict) -> tuple[str, str]:
     """
-    Título del ticket, en orden de prioridad:
-    1. title del payload (solo presente cuando el POST trae una única alerta)
-    2. annotations.summary de la alerta
-    3. "<alertname> en <equipo>"
+    Título del ticket, siempre con el mismo criterio:
+    1. annotations.summary de la alerta (texto definido en la regla de Grafana)
+    2. "<alertname> en <equipo>"
+    El 'title' del payload NO se usa: Grafana lo genera con [FIRING:n] y
+    las etiquetas, y cambia según el número de alertas en el POST.
     """
     severity = "critical"
-    title = payload.get("title")
+    summary = None
+    alertname = None
 
     alerts = payload.get("alerts")
-    if isinstance(alerts, list) and alerts:
+    if isinstance(alerts, list) and alerts and isinstance(alerts[0], dict):
         alert = alerts[0]
-        labels = alert.get("labels", {}) or {}
-        annotations = alert.get("annotations", {}) or {}
+        labels = alert.get("labels") or {}
+        annotations = alert.get("annotations") or {}
         severity = labels.get("severity", severity)
+        summary = (annotations.get("summary") or "").strip() or None
+        alertname = labels.get("alertname")
 
-        if not title:
-            title = annotations.get("summary")
-        if not title and labels.get("alertname"):
-            device = extract_device_name(payload)
-            name = labels["alertname"]
-            title = name if device == "desconocido" else f"{name} en {device}"
+    if summary:
+        title = summary
+    elif alertname:
+        device = extract_device_name(payload)
+        title = alertname if device == "desconocido" else f"{alertname} en {device}"
+    else:
+        title = payload.get("ruleName") or "Alerta NOC sin título"
 
-    title = title or payload.get("ruleName") or "Alerta NOC sin título"
     return title, severity
 
 def split_alerts(payload: dict) -> list[dict]:
@@ -165,13 +169,10 @@ def split_alerts(payload: dict) -> list[dict]:
         return [payload]  # formato antiguo o sin lista: se procesa tal cual
 
     views = []
-    single = len(alerts) == 1
-    skip = ("alerts",) if single else ("alerts", "title")
-
     for alert in alerts:
         if not isinstance(alert, dict):
             continue
-        view = {k: v for k, v in payload.items() if k not in skip}
+        view = {k: v for k, v in payload.items() if k not in ("alerts", "title")}
         view["alerts"] = [alert]
         view["status"] = alert.get("status") or payload.get("status")
         views.append(view)
