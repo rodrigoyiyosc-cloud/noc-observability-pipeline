@@ -6,7 +6,7 @@ import secrets
 from datetime import datetime, timezone
 
 import psycopg2
-from psycopg2.pool import SimpleConnectionPool
+from psycopg2.pool import ThreadedConnectionPool
 from fastapi import FastAPI, Request, Security, HTTPException, status
 from fastapi.security import APIKeyHeader
 from fastapi.responses import JSONResponse
@@ -30,7 +30,7 @@ PG_DB = os.environ.get("PG_DB", "noc_db")
 PG_USER = os.environ.get("PG_USER", "noc_user")
 PG_PASSWORD = os.environ.get("PG_PASSWORD", "secret")
 
-pool: SimpleConnectionPool | None = None
+pool: ThreadedConnectionPool | None = None
 
 # ── Configuración Jira desde variables de entorno ───────────────────────────
 JIRA_URL = os.environ.get("JIRA_URL")
@@ -183,7 +183,7 @@ def split_alerts(payload: dict) -> list[dict]:
 
 def jira_failed(result: dict) -> bool:
     action = result.get("action")
-    if action in ("jira_unavailable", "skipped", "jira_create_failed"):
+    if action in ("jira_unavailable", "skipped", "jira_create_failed", "dedup_store_unavailable"):
         return True
     if action == "ticket_created":
         return not result.get("created")
@@ -292,7 +292,51 @@ async def verify_jira_auth() -> None:
     except Exception as exc:
         logger.error("Fallo de autenticación con Jira: %s", exc)
         raise JiraLookupError(f"autenticación: {exc}") from exc
-    
+
+
+async def jira_issue_closed(issue_key: str) -> bool:
+    """
+    Consulta directa por key: es consistente, a diferencia de la búsqueda JQL,
+    que depende del índice de Jira y puede no ver un ticket recién creado.
+    """
+    await verify_jira_auth()
+    url = f"{JIRA_URL}/rest/api/3/issue/{issue_key}?fields=status"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url, auth=(JIRA_USER, JIRA_API_TOKEN))
+        if response.status_code == 404:
+            return True  # credenciales ya verificadas: 404 = ticket eliminado
+        response.raise_for_status()
+        category = response.json()["fields"]["status"]["statusCategory"]["key"]
+        return category == "done"
+    except Exception as exc:
+        logger.error("Fallo al consultar %s: %s", issue_key, exc)
+        raise JiraLookupError(f"consulta {issue_key}: {exc}") from exc
+
+
+async def resolve_open_key(fp: str, alert_label: str, device_label: str) -> str | None:
+    """
+    Ticket abierto para la huella. Primero Postgres (consistente e inmediato);
+    si no hay registro, respaldo JQL para adoptar tickets creados antes de
+    que existiera la tabla jira_dedup.
+    Todo ticket candidato se verifica por key (statusCategory), porque la JQL
+    usa 'resolution', que el workflow puede no rellenar al cerrar, y además
+    depende del índice de Jira.
+    """
+    key = db_get_open_key(fp)
+    if key:
+        if not await jira_issue_closed(key):
+            return key
+        db_mark_closed(fp)  # alguien lo cerró a mano en Jira
+        return None
+
+    key = await find_open_jira_ticket(alert_label, device_label)
+    if key and not await jira_issue_closed(key):
+        db_set_open(fp, key)
+        return key
+    return None
+
+
 async def add_jira_comment(issue_key: str, text: str) -> bool:
     url = f"{JIRA_URL}/rest/api/3/issue/{issue_key}/comment"
     comment_payload = {
@@ -413,10 +457,12 @@ async def handle_jira_dedup(
 ) -> dict:
     """
     Orquesta la lógica de Deduplicación Inteligente:
-    1. Busca por JQL un ticket abierto para el par (alerta, dispositivo).
-    2. Si status == "resolved": comenta y trata de cerrar el ticket existente.
+    1. Busca el ticket abierto de la huella (alerta, dispositivo) en Postgres,
+       con respaldo JQL.
+    2. Si status == "resolved": comenta, trata de cerrar y marca la huella cerrada.
     3. Si existe ticket abierto: comenta "la anomalía persiste" (sin crear).
-    4. Si no existe ticket abierto: crea uno nuevo con los labels de huella.
+    4. Si no existe: reserva la huella de forma atómica (UNIQUE) y solo el
+       proceso que la obtiene crea el ticket. Evita duplicados en paralelo.
     """
     if not all([JIRA_URL, JIRA_USER, JIRA_API_TOKEN, JIRA_PROJECT_KEY]):
         logger.error("Credenciales de Jira no configuradas; se omite la integración.")
@@ -431,8 +477,9 @@ async def handle_jira_dedup(
     origen = device_name if device_name != "desconocido" else f"sin equipo (regla: {identity})"
     alert_label = slugify(alert_name or "sin-alerta", "al")
     device_label = slugify(identity or "sin-dispositivo", "dev")
+    fp = f"{alert_label}|{device_label}"
 
-    existing_key = await find_open_jira_ticket(alert_label, device_label)
+    existing_key = await resolve_open_key(fp, alert_label, device_label)
     now_iso = datetime.now(timezone.utc).isoformat()
 
     if status_ == "resolved":
@@ -446,6 +493,8 @@ async def handle_jira_dedup(
         )
         commented = await add_jira_comment(existing_key, resolved_text)
         transitioned = await try_resolve_jira_ticket(existing_key)
+        if transitioned:
+            db_mark_closed(fp)
         return {
             "action": "resolved",
             "key": existing_key,
@@ -463,9 +512,18 @@ async def handle_jira_dedup(
         commented = await add_jira_comment(existing_key, persist_text)
         return {"action": "comment_added", "key": existing_key, "commented": commented, "created": False}
 
+    if not db_claim(fp):
+        logger.info("Creación en curso para %s por otra petición; se omite duplicado", fp)
+        return {"action": "dedup_in_progress"}
+
     title, severity = extract_jira_fields(payload)
     result = await create_jira_ticket(title, severity, payload, [alert_label, device_label])
-    result["action"] = "ticket_created" if result.get("created") else "jira_create_failed"
+    if result.get("created"):
+        db_set_open(fp, result["key"])
+        result["action"] = "ticket_created"
+    else:
+        db_release(fp)  # libera la reserva para que el reintento pueda crear
+        result["action"] = "jira_create_failed"
     return result
 
 
@@ -474,7 +532,7 @@ async def handle_jira_dedup(
 @app.on_event("startup")
 def startup():
     global pool
-    pool = SimpleConnectionPool(
+    pool = ThreadedConnectionPool(
         minconn=1,
         maxconn=10,
         host=PG_HOST,
@@ -484,6 +542,7 @@ def startup():
         password=PG_PASSWORD,
     )
     logger.info("Pool de conexiones PostgreSQL inicializado (%s:%s/%s)", PG_HOST, PG_PORT, PG_DB)
+    ensure_schema()
 
 
 @app.on_event("shutdown")
@@ -510,6 +569,83 @@ def insert_incident(status_: str | None, alert_name: str | None, payload: dict):
         raise
     finally:
         pool.putconn(conn)
+
+
+class DedupStoreError(Exception):
+    """Postgres no respondió: no sabemos si la huella ya tiene ticket."""
+
+
+def db_exec(sql: str, params: tuple = (), fetch: bool = False):
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            row = cur.fetchone() if fetch else None
+        conn.commit()
+        return row
+    except Exception as exc:
+        conn.rollback()
+        raise DedupStoreError(str(exc)) from exc
+    finally:
+        pool.putconn(conn)
+
+
+def ensure_schema():
+    # PRIMARY KEY = UNIQUE: dos procesos no pueden registrar la misma huella.
+    db_exec("""
+        CREATE TABLE IF NOT EXISTS jira_dedup (
+            fingerprint TEXT PRIMARY KEY,
+            issue_key   TEXT,
+            state       TEXT NOT NULL CHECK (state IN ('creating', 'open', 'closed')),
+            updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """)
+    logger.info("Tabla jira_dedup verificada")
+
+
+def db_get_open_key(fp: str) -> str | None:
+    row = db_exec(
+        "SELECT issue_key FROM jira_dedup WHERE fingerprint = %s AND state = 'open'",
+        (fp,), fetch=True,
+    )
+    return row[0] if row else None
+
+
+def db_set_open(fp: str, key: str):
+    db_exec("""
+        INSERT INTO jira_dedup (fingerprint, issue_key, state, updated_at)
+        VALUES (%s, %s, 'open', now())
+        ON CONFLICT (fingerprint) DO UPDATE
+        SET issue_key = EXCLUDED.issue_key, state = 'open', updated_at = now()
+    """, (fp, key))
+
+
+def db_mark_closed(fp: str):
+    db_exec(
+        "UPDATE jira_dedup SET state = 'closed', updated_at = now() WHERE fingerprint = %s",
+        (fp,),
+    )
+
+
+def db_claim(fp: str) -> bool:
+    """
+    Reserva atómica de la creación. Solo UN proceso obtiene True.
+    Se puede reclamar si no existe, si estaba cerrada, o si una reserva
+    quedó colgada más de 2 minutos (proceso caído a mitad de creación).
+    """
+    row = db_exec("""
+        INSERT INTO jira_dedup (fingerprint, state) VALUES (%s, 'creating')
+        ON CONFLICT (fingerprint) DO UPDATE
+        SET state = 'creating', issue_key = NULL, updated_at = now()
+        WHERE jira_dedup.state = 'closed'
+           OR (jira_dedup.state = 'creating' AND jira_dedup.updated_at < now() - interval '2 minutes')
+        RETURNING fingerprint
+    """, (fp,), fetch=True)
+    return row is not None
+
+
+def db_release(fp: str):
+    db_exec("DELETE FROM jira_dedup WHERE fingerprint = %s AND state = 'creating'", (fp,))
 
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
@@ -548,6 +684,9 @@ async def receive_alert(request: Request):
         except JiraLookupError as exc:
             logger.error("Jira no disponible para %s / %s: %s", alert_name, device_name, exc)
             jira_result = {"action": "jira_unavailable"}
+        except DedupStoreError as exc:
+            logger.error("Postgres no disponible para deduplicar %s / %s: %s", alert_name, device_name, exc)
+            jira_result = {"action": "dedup_store_unavailable"}
 
         if not persisted or jira_failed(jira_result):
             all_ok = False
@@ -609,4 +748,20 @@ async def chat(req: ChatRequest):
 
 @app.get("/health")
 async def health():
+    """Liveness: el proceso responde."""
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def ready():
+    """
+    Readiness: ¿puede este proceso atender alertas? Solo verifica Postgres.
+    Jira NO se verifica: si Jira cae y todos los pods quedan "no listos",
+    tampoco se podrían guardar las alertas en incident_logs.
+    """
+    try:
+        db_exec("SELECT 1", fetch=True)
+    except Exception as exc:
+        logger.error("Readiness fallida: %s", exc)
+        return JSONResponse({"status": "not_ready", "postgres": "down"}, status_code=503)
+    return {"status": "ready", "postgres": "ok"}
