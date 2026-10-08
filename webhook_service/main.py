@@ -147,6 +147,8 @@ def extract_jira_fields(payload: dict) -> tuple[str, str]:
         severity = labels.get("severity", severity)
         summary = (annotations.get("summary") or "").strip() or None
         alertname = labels.get("alertname")
+        if alertname == "DatasourceNoData":
+            return f"Sin datos de telemetría: {rule_identity(payload)}", severity
 
     if summary:
         title = summary
@@ -162,7 +164,7 @@ def split_alerts(payload: dict) -> list[dict]:
     """
     Convierte un POST de Grafana con N alertas en N payloads de 1 alerta,
     cada uno con el status de ESA alerta.
-    Si el POST trae una sola alerta se conserva el 'title' original.
+    El 'title' del payload se descarta siempre (ver extract_jira_fields).
     """
     alerts = payload.get("alerts")
     if not isinstance(alerts, list) or not alerts:
@@ -214,6 +216,26 @@ def slugify(value: str, prefix: str) -> str:
 # ── Integración con Jira: búsqueda JQL, comentarios, creación y resolución ──
 class JiraLookupError(Exception):
     """Jira no pudo responder la búsqueda: NO sabemos si existe un ticket."""
+
+def rule_identity(payload: dict) -> str:
+    """
+    Identidad de la regla de origen para alertas sin equipo (DatasourceNoData).
+    Usa la etiqueta 'rulename', que Grafana sí envía en esas alertas.
+    """
+    alerts = payload.get("alerts")
+    if isinstance(alerts, list) and alerts and isinstance(alerts[0], dict):
+        labels = alerts[0].get("labels") or {}
+        if labels.get("rulename"):
+            return str(labels["rulename"])
+
+        match = re.search(r"/alerting/grafana/([^/?]+)/view", alerts[0].get("generatorURL") or "")
+        if match:
+            return match.group(1)
+
+        if alerts[0].get("fingerprint"):
+            return str(alerts[0]["fingerprint"])
+
+    return "sin-regla"
 
 async def find_open_jira_ticket(alert_label: str, device_label: str) -> str | None:
     """
@@ -400,8 +422,15 @@ async def handle_jira_dedup(
         logger.error("Credenciales de Jira no configuradas; se omite la integración.")
         return {"action": "skipped", "reason": "missing_credentials"}
 
+    # Sin equipo (DatasourceNoData), la regla de origen es la identidad.
+    # Sin esto, todas las reglas sin datos comparten la misma huella y un solo ticket.
+    identity = device_name
+    if device_name == "desconocido":
+        identity = rule_identity(payload)
+
+    origen = device_name if device_name != "desconocido" else f"sin equipo (regla: {identity})"
     alert_label = slugify(alert_name or "sin-alerta", "al")
-    device_label = slugify(device_name or "sin-dispositivo", "dev")
+    device_label = slugify(identity or "sin-dispositivo", "dev")
 
     existing_key = await find_open_jira_ticket(alert_label, device_label)
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -412,7 +441,7 @@ async def handle_jira_dedup(
 
         resolved_text = (
             f"✅ Alerta RESUELTA ({now_iso}).\n"
-            f"Dispositivo: {device_name}\nAlerta: {alert_name}\n\n"
+            f"Dispositivo: {origen}\nAlerta: {alert_name}\n\n"
             f"Payload:\n{json.dumps(payload, ensure_ascii=False)}"
         )
         commented = await add_jira_comment(existing_key, resolved_text)
@@ -428,7 +457,7 @@ async def handle_jira_dedup(
     if existing_key:
         persist_text = (
             f"⚠️ La anomalía PERSISTE ({now_iso}).\n"
-            f"Dispositivo: {device_name}\nAlerta: {alert_name}\n\n"
+            f"Dispositivo: {origen}\nAlerta: {alert_name}\n\n"
             f"Payload actual:\n{json.dumps(payload, ensure_ascii=False)}"
         )
         commented = await add_jira_comment(existing_key, persist_text)
