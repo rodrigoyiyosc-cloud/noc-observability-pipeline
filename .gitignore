@@ -1,8 +1,15 @@
+# Credenciales
 **/.env
-deploy/local/webhook-secrets.yaml
-deploy/local/dev/webhook-secret.yaml
-deploy/local/dev/timescaledb-secret.yaml
-/__pycache__/
-backups/
+**/.env.*
+!**/.env.example
 
-backups/
+# Secrets de Kubernetes (los *.example.yaml sí se versionan)
+deploy/**/*secret*.yaml
+!deploy/**/*secret*.example.yaml
+
+# Python
+__pycache__/
+*.pyc
+
+# Respaldos
+/backups/
