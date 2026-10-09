@@ -13,7 +13,7 @@ services:
     environment:
       POSTGRES_DB:       noc
       POSTGRES_USER:     noc_user
-      POSTGRES_PASSWORD: secret
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Falta PG_PASSWORD en .env}
     volumes:
       - tsdb_data:/var/lib/postgresql/data
     networks:
@@ -37,6 +37,7 @@ services:
       NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
       GF_UNIFIED_ALERTING_ENABLED: "true"
       GF_ALERTING_ENABLED: "false"
+      PG_PASSWORD: ${PG_PASSWORD:?Falta PG_PASSWORD en .env}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -59,8 +60,8 @@ services:
       PG_PORT: "5432"
       PG_DB: noc
       PG_USER: noc_user
-      PG_PASSWORD: secret
-      PG_DSN: postgresql+psycopg2://noc_user:secret@timescaledb:5432/noc
+      PG_PASSWORD: ${PG_PASSWORD:?Falta PG_PASSWORD en .env}
+      PG_DSN: postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
       NOC_WEBHOOK_TOKEN: ${NOC_WEBHOOK_TOKEN}
     networks:
       - noc_net
@@ -97,7 +98,7 @@ services:
       - timescaledb
     environment:
       REGION: us-east
-      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+      PG_DSN: postgresql://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
     networks:
       - noc_net
 
@@ -110,7 +111,7 @@ services:
       - timescaledb
     environment:
       REGION: eu-west
-      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+      PG_DSN: postgresql://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
     networks:
       - noc_net
 
@@ -123,7 +124,7 @@ services:
       - timescaledb
     environment:
       REGION: sa-south
-      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+      PG_DSN: postgresql://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
     networks:
       - noc_net
 
@@ -136,7 +137,7 @@ services:
       - timescaledb
     environment:
       JUPYTER_TOKEN: ML2026
-      PG_DSN: postgresql://noc_user:secret@timescaledb:5432/noc
+      PG_DSN: postgresql://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
     ports:
       - "8888:8888"
     volumes:

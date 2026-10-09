@@ -18,7 +18,7 @@ datasources:
     user:      noc_user
 
     secureJsonData:
-      password: secret                  # nunca en jsonData plano, siempre en secureJsonData
+      password: ${PG_PASSWORD}                # nunca en jsonData plano, siempre en secureJsonData
 
     jsonData:
       sslmode:          disable          # dentro de Docker mismo host → sin TLS
