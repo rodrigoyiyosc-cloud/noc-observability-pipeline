@@ -3,9 +3,9 @@
 **/.env.*
 !**/.env.example
 
-# Secrets de Kubernetes (los *.example.yaml sí se versionan)
-deploy/**/*secret*.yaml
-!deploy/**/*secret*.example.yaml
+# Secrets de Kubernetes (las plantillas .example sí se versionan)
+**/*secret*.yaml
+!**/*secret*.example.yaml
 
 # Python
 __pycache__/
