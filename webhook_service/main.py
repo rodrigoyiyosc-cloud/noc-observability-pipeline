@@ -10,6 +10,7 @@ from psycopg2.pool import ThreadedConnectionPool
 from fastapi import FastAPI, Request, Security, HTTPException, status
 from fastapi.security import APIKeyHeader
 from fastapi.responses import JSONResponse
+from fastapi.concurrency import run_in_threadpool
 
 import httpx
 
@@ -338,16 +339,16 @@ async def resolve_open_key(fp: str, alert_label: str, device_label: str) -> str 
     usa 'resolution', que el workflow puede no rellenar al cerrar, y además
     depende del índice de Jira.
     """
-    key = db_get_open_key(fp)
+    key = await adb(db_get_open_key, fp)
     if key:
         if not await jira_issue_closed(key):
             return key
-        db_mark_closed(fp)  # alguien lo cerró a mano en Jira
+        await adb(db_mark_closed, fp)  # alguien lo cerró a mano en Jira
         return None
 
     key = await find_open_jira_ticket(alert_label, device_label)
     if key and not await jira_issue_closed(key):
-        db_set_open(fp, key)
+        await adb(db_set_open, fp, key)
         return key
     return None
 
@@ -509,7 +510,7 @@ async def handle_jira_dedup(
         commented = await add_jira_comment(existing_key, resolved_text)
         transitioned = await try_resolve_jira_ticket(existing_key)
         if transitioned:
-            db_mark_closed(fp)
+            await adb(db_mark_closed, fp)
         return {
             "action": "resolved",
             "key": existing_key,
@@ -527,17 +528,17 @@ async def handle_jira_dedup(
         commented = await add_jira_comment(existing_key, persist_text)
         return {"action": "comment_added", "key": existing_key, "commented": commented, "created": False}
 
-    if not db_claim(fp):
+    if not await adb(db_claim, fp):
         logger.info("Creación en curso para %s por otra petición; se omite duplicado", fp)
         return {"action": "dedup_in_progress"}
 
     title, severity = extract_jira_fields(payload)
     result = await create_jira_ticket(title, severity, payload, [alert_label, device_label])
     if result.get("created"):
-        db_set_open(fp, result["key"])
+        await adb(db_set_open, fp, result["key"])
         result["action"] = "ticket_created"
     else:
-        db_release(fp)  # libera la reserva para que el reintento pueda crear
+        await adb(db_release, fp)  # libera la reserva para que el reintento pueda crear
         result["action"] = "jira_create_failed"
     return result
 
@@ -549,7 +550,7 @@ def startup():
     global pool
     pool = ThreadedConnectionPool(
         minconn=1,
-        maxconn=10,
+        maxconn=20,
         host=PG_HOST,
         port=PG_PORT,
         dbname=PG_DB,
@@ -589,20 +590,29 @@ def insert_incident(status_: str | None, alert_name: str | None, payload: dict):
 class DedupStoreError(Exception):
     """Postgres no respondió: no sabemos si la huella ya tiene ticket."""
 
+async def adb(func, *args):
+    """Ejecuta una función bloqueante de Postgres en un hilo, sin congelar el event loop."""
+    return await run_in_threadpool(func, *args)
 
 def db_exec(sql: str, params: tuple = (), fetch: bool = False):
-    conn = pool.getconn()
+    conn = None
     try:
+        conn = pool.getconn()
         with conn.cursor() as cur:
             cur.execute(sql, params)
             row = cur.fetchone() if fetch else None
         conn.commit()
         return row
     except Exception as exc:
-        conn.rollback()
+        if conn is not None:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
         raise DedupStoreError(str(exc)) from exc
     finally:
-        pool.putconn(conn)
+        if conn is not None:
+            pool.putconn(conn)
 
 
 def ensure_schema():
@@ -689,7 +699,7 @@ async def receive_alert(request: Request):
 
         persisted = True
         try:
-            insert_incident(status_, alert_name, view)
+            await adb(insert_incident, status_, alert_name, view)
         except Exception as exc:
             persisted = False
             logger.error("Fallo al insertar en PostgreSQL (%s): %s", alert_name, exc)
@@ -722,7 +732,7 @@ async def receive_alert(request: Request):
 # ── Endpoint /api/chat ───────────────────────────────────────────────────────
 
 @app.post("/api/chat", response_model=ChatResponse, dependencies=[Security(verify_token)])
-async def chat(req: ChatRequest):
+def chat(req: ChatRequest):
     """
     Invoca el grafo NOC-MAS (LangGraph) manteniendo el estado por thread_id
     vía el checkpointer (MemorySaver). El grafo puede detenerse en
