@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webhook-service
@@ -10,6 +10,7 @@ metadata:
     environment: dev
 spec:
   replicas: 2
+  revisionHistoryLimit: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -27,9 +28,11 @@ spec:
         app.kubernetes.io/part-of: noc-observability-pipeline
         environment: dev
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: webhook-receiver
-          image: noc-webhook-service:v1.0.0
+          # El tag de la imagen debe coincidir con el tag Git del codigo (v1.0.12).
+          image: noc-webhook-service:v1.0.12
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -42,19 +45,31 @@ spec:
           resources:
             requests:
               cpu: "100m"
-              memory: "128Mi"
+              memory: "256Mi"
             limits:
               cpu: "500m"
-              memory: "256Mi"
-          readinessProbe:
+              memory: "512Mi"
+          # Da hasta 120 s para importar LangChain/Groq y abrir el pool de Postgres.
+          # Mientras no pase, K8s no ejecuta liveness ni readiness.
+          startupProbe:
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 5
+            periodSeconds: 3
+            failureThreshold: 40
+          # Readiness: puede atender alertas? (verifica Postgres, NO Jira)
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Liveness: el proceso responde? (si falla, reinicia el pod)
           livenessProbe:
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 10
             periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
