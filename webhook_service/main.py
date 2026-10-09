@@ -16,7 +16,23 @@ import httpx
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 
-from src.orchestrator import orchestrator, checkpointer_pool  # objeto ya compilado (checkpointer=PostgresSaver)
+def _require_env(*names: str) -> dict[str, str]:
+    """Falla al arrancar si falta una variable o está vacía. Solo muestra los NOMBRES."""
+    values = {n: os.environ.get(n) for n in names}
+    missing = [n for n, v in values.items() if not v or not v.strip()]
+    if missing:
+        raise RuntimeError("Faltan variables de entorno obligatorias: " + ", ".join(missing))
+    return values
+
+
+# Se valida ANTES de importar src.orchestrator, que también lee PG_* al cargarse.
+_cfg = _require_env(
+    "PG_HOST", "PG_PORT", "PG_DB", "PG_USER", "PG_PASSWORD",
+    "JIRA_URL", "JIRA_USER", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY",
+    "NOC_WEBHOOK_TOKEN",
+)
+
+from src.orchestrator import orchestrator, checkpointer_pool  # noqa: E402  (checkpointer=PostgresSaver)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 logger = logging.getLogger("webhook_service")
@@ -24,19 +40,20 @@ logger = logging.getLogger("webhook_service")
 app = FastAPI(title="NOC Webhook Service")
 
 # ── Configuración desde variables de entorno ────────────────────────────────
-PG_HOST = os.environ.get("PG_HOST", "postgres")
-PG_PORT = os.environ.get("PG_PORT", "5432")
-PG_DB = os.environ.get("PG_DB", "noc_db")
-PG_USER = os.environ.get("PG_USER", "noc_user")
-PG_PASSWORD = os.environ.get("PG_PASSWORD", "secret")
+
+PG_HOST = _cfg["PG_HOST"]
+PG_PORT = _cfg["PG_PORT"]
+PG_DB = _cfg["PG_DB"]
+PG_USER = _cfg["PG_USER"]
+PG_PASSWORD = _cfg["PG_PASSWORD"]
 
 pool: ThreadedConnectionPool | None = None
 
 # ── Configuración Jira desde variables de entorno ───────────────────────────
-JIRA_URL = os.environ.get("JIRA_URL")
-JIRA_USER = os.environ.get("JIRA_USER")
-JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN")
-JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY")
+JIRA_URL = _cfg["JIRA_URL"]
+JIRA_USER = _cfg["JIRA_USER"]
+JIRA_API_TOKEN = _cfg["JIRA_API_TOKEN"]
+JIRA_PROJECT_KEY = _cfg["JIRA_PROJECT_KEY"]
 
 # Nombre de la transición de Jira usada para cerrar el ticket cuando Grafana
 # envía status=resolved. Ajusta este valor al nombre exacto de tu workflow
@@ -48,9 +65,7 @@ JIRA_RESOLVE_TRANSITION_NAME = os.environ.get("JIRA_RESOLVE_TRANSITION_NAME", "D
 JIRA_ISSUE_TYPE = os.environ.get("JIRA_ISSUE_TYPE", "Incident")
 
 # ── Autenticación del webhook (Bearer Token compartido) ─────────────────────
-NOC_WEBHOOK_TOKEN = os.environ.get("NOC_WEBHOOK_TOKEN")
-if not NOC_WEBHOOK_TOKEN:
-    raise RuntimeError("NOC_WEBHOOK_TOKEN no está configurado en el entorno.")
+NOC_WEBHOOK_TOKEN = _cfg["NOC_WEBHOOK_TOKEN"]
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
