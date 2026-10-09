@@ -2,5 +2,6 @@
 deploy/local/webhook-secrets.yaml
 deploy/local/dev/webhook-secret.yaml
 deploy/local/dev/timescaledb-secret.yaml
-/__pycache__/
+__pycache__/
+*.pyc
 /backups/
