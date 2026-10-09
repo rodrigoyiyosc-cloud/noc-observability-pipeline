@@ -1,4 +1,4 @@
-﻿apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: webhook-ingress
@@ -14,18 +14,19 @@ spec:
     - host: webhook.local
       http:
         paths:
+          # Solo se expone lo que necesita el exterior.
+          # /api/chat y /ready quedan internos a proposito.
+          - path: /alert
+            pathType: Exact
+            backend:
+              service:
+                name: webhook-service
+                port:
+                  number: 8000
           - path: /health
-            pathType: Exact                 # healthcheck: solo esta ruta exacta
+            pathType: Exact
             backend:
               service:
                 name: webhook-service
                 port:
                   number: 8000
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: webhook-service
-                port:
-                  number: 8000
-          

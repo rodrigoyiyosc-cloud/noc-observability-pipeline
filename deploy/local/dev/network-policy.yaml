@@ -1,4 +1,4 @@
-﻿apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
@@ -21,7 +21,7 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # 1. Tráfico L7 desde el Ingress Controller
+    # 1. Trafico L7 desde el Ingress Controller
     - from:
         - namespaceSelector:
             matchLabels:
@@ -32,7 +32,7 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
-    # 2. Tráfico interno desde el namespace monitoring (Grafana/Alertmanager)
+    # 2. Trafico interno desde el namespace monitoring (Grafana)
     - from:
         - namespaceSelector:
             matchLabels:
@@ -40,3 +40,28 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+---
+# Sin esta regla, default-deny-ingress bloquea al webhook cuando Postgres
+# corre DENTRO del cluster (StatefulSet timescaledb). No afecta si Postgres
+# sigue en Docker fuera del cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webhook-to-timescaledb
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: timescaledb
+      environment: dev
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: webhook-receiver
+              environment: dev
+      ports:
+        - protocol: TCP
+          port: 5432
