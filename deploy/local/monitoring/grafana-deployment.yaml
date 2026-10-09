@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
@@ -24,9 +24,13 @@ spec:
         app.kubernetes.io/part-of: noc-observability-pipeline
         environment: monitoring
     spec:
+      # Grafana corre como uid 472; sin fsGroup el volumen puede quedar sin permiso de escritura.
+      securityContext:
+        fsGroup: 472
       containers:
         - name: grafana
-          image: grafana/grafana-oss:latest
+          # Version fija: la sintaxis de provisioning cambia entre versiones.
+          image: grafana/grafana-oss:13.0.2
           ports:
             - containerPort: 3000
               name: http
@@ -34,7 +38,10 @@ spec:
             - name: GF_SECURITY_ADMIN_USER
               value: "admin"
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin-secret
+                  key: GF_SECURITY_ADMIN_PASSWORD
           resources:
             requests:
               cpu: "100m"
@@ -42,6 +49,18 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
