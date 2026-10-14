@@ -28,6 +28,18 @@ spec:
         app.kubernetes.io/part-of: noc-observability-pipeline
         environment: dev
     spec:
+      serviceAccountName: webhook-sa
+      automountServiceAccountToken: false
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: webhook-receiver
+                    environment: dev
       terminationGracePeriodSeconds: 30
       containers:
         - name: webhook-receiver
