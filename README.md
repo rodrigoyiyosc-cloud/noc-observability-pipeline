@@ -6,31 +6,32 @@
 ![TimescaleDB](https://img.shields.io/badge/TimescaleDB-009639?style=for-the-badge&logo=timescaledb&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![Jira](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=jira&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![Scikit--Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
 
-Pipeline de observabilidad de extremo a extremo — **multi-región** y ahora **auto-inteligente** — para simular, ingerir, almacenar, visualizar, alertar, **ticketizar**, **analizar con ML** y **operar conversacionalmente** telemetría de red en un entorno de Centro de Operaciones de Red (NOC). Arquitectura 100% contenerizada, gobernada por **Infrastructure as Code**: dashboards, reglas de alerta, ventanas de mantenimiento, el motor de recepción/escalado de incidentes y ahora el propio **sistema multiagente de decisión** viven como código versionado, no como clics en una UI.
+Pipeline de observabilidad de extremo a extremo — **multi-región**, **auto-inteligente** y ahora **cloud-native** — para simular, ingerir, almacenar, visualizar, alertar, **ticketizar**, **analizar con ML** y **operar conversacionalmente** telemetría de red en un entorno de Centro de Operaciones de Red (NOC). Arquitectura contenerizada, gobernada por **Infrastructure as Code**: dashboards, reglas de alerta, ventanas de mantenimiento, el motor de recepción/escalado de incidentes, el sistema multiagente de decisión y, desde la Fase 7, los **manifiestos de Kubernetes** (con RBAC de mínimo privilegio) viven como código versionado, no como clics en una UI.
 
 ---
 
 ## 🧭 Acerca del Proyecto
 
-Este repositorio implementa un **loop de alerta cerrado, geográficamente distribuido y con criterio propio**. Tres simuladores regionales (`us-east`, `eu-west`, `sa-south`) alimentan una única hypertable en TimescaleDB. Grafana detecta la anomalía, la enruta según severidad, respeta las ventanas de mantenimiento definidas en código, y un microservicio propio en **FastAPI** — autenticado, con cliente Jira nativo y ahora con **deduplicación inteligente vía JQL** — recibe, registra, prioriza y **escala automáticamente cada incidente a un ticket de Jira**, sin intervención humana y sin generar *ticket storms*.
+Este repositorio implementa un **loop de alerta cerrado, geográficamente distribuido y con criterio propio**. Tres simuladores regionales (`us-east`, `eu-west`, `sa-south`) alimentan una única hypertable en TimescaleDB. Grafana detecta la anomalía, la enruta según severidad, respeta las ventanas de mantenimiento definidas en código, y un microservicio propio en **FastAPI** — autenticado, con cliente Jira nativo y **deduplicación atómica compartida en PostgreSQL** — recibe, registra, prioriza y **escala automáticamente cada incidente a un ticket de Jira**, sin intervención humana y sin generar *ticket storms*, incluso con varias réplicas corriendo en paralelo.
 
-Con la **Fase 5 completada**, el pipeline deja de ser puramente reactivo (umbral → alerta → ticket) para incorporar una capa de **inteligencia operativa activa**: un modelo `IsolationForest` entrenado sobre la telemetría histórica detecta anomalías dinámicas que los umbrales estáticos no capturan, y un **sistema multiagente (NOC-MAS)** orquestado con **LangGraph** — con un Supervisor, un Data Agent (Text-to-SQL seguro), un Action Agent (ejecución de remediaciones vía payloads Pydantic) y un Responder Agent (síntesis en lenguaje natural), todos bajo una compuerta de seguridad **Human-in-the-Loop** — es capaz de diagnosticar y proponer acciones sobre el propio incidente. Todo esto es accesible en lenguaje natural desde una **ChatOps UI en Streamlit**, ya cableada de punta a punta contra el backend.
+Con la **Fase 5** el pipeline dejó de ser puramente reactivo: un modelo `IsolationForest` detecta anomalías dinámicas que los umbrales estáticos no capturan, y un **sistema multiagente (NOC-MAS)** orquestado con **LangGraph** (Supervisor, Data Agent con Text-to-SQL seguro, Action Agent y Responder Agent, bajo una compuerta **Human-in-the-Loop**) diagnostica y propone acciones, todo accesible desde una **ChatOps UI en Streamlit**.
 
-Con la **Fase 6 completada**, el estado del NOC-MAS (mensajes, decisiones de enrutamiento, aprobaciones HITL) sobrevive a un reinicio del Webhook Service — persiste en PostgreSQL/TimescaleDB en vez de vivir solo en RAM — y el proyecto suma su primera suite de pruebas unitarias automatizadas más un pipeline de CI. La **Fase 7**, en curso, empieza a llevar el Webhook Service desde Docker Compose hacia Kubernetes, con una prueba de concepto en Azure (AKS + ACR) y un clúster local multinodo con `kind` para iterar sin costo de nube.
+Con la **Fase 6** el estado del NOC-MAS persiste en PostgreSQL (`PostgresSaver`) y el proyecto suma pruebas unitarias y CI.
 
-Cinco capas, un solo `docker compose up`.
+La **Fase 7**, en curso, lleva el Webhook Service desde Docker Compose hacia Kubernetes: una prueba de concepto en Azure (AKS + ACR) y un clúster local multinodo con `kind`. En el clúster local el servicio ya corre **endurecido** (probes, límites, NetworkPolicy, Secrets, ServiceAccount sin token y rol de operador de mínimo privilegio) y su comportamiento (alertas, resolución, rollback y deduplicación entre réplicas) está **validado**.
 
 ---
 
 ## 🏗️ Arquitectura y Stack
 
-El ecosistema está compuesto por **cinco capas**, todas orquestadas mediante **Docker Compose** sobre una red bridge compartida (`noc_net`):
+El ecosistema está compuesto por **cinco capas**. En Docker Compose se orquestan sobre una red bridge compartida (`noc_net`); el Webhook Service además tiene una ruta de despliegue en Kubernetes (ver sección dedicada).
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -44,6 +45,7 @@ El ecosistema está compuesto por **cinco capas**, todas orquestadas mediante **
 │ CAPA 2 · ALMACENAMIENTO                                                    │
 │  TimescaleDB (PG16) — hypertable network_telemetry                         │
 │  compresión 7d · retención 90d · vistas telemetría + postmortem            │
+│  jira_dedup (estado de deduplicación compartido entre réplicas)            │
 └───────────────┬─────────────────────────────────────────┬─────────────────┘
                 │ SELECT (datasource)                      │ SELECT (Jupyter/psycopg2)
                 ▼                                           ▼
@@ -56,7 +58,7 @@ El ecosistema está compuesto por **cinco capas**, todas orquestadas mediante **
                      ▼                                        │
 ┌───────────────────────────────────────────────────────────◄┘
 │ CAPA 4 · DECISIÓN — FastAPI + NOC-MAS (LangGraph)                          │
-│  POST /alert → dedupe JQL → insert incident_logs                           │
+│  POST /alert → dedup atómico (Postgres) → insert incident_logs → Jira      │
 │  Supervisor ──▶ Data_Agent (Text-to-SQL) ──▶ Action_Agent (Pydantic)       │
 │              └─▶ human_in_the_loop (HITL gate) ─▶ END                     │
 └───────────────────────────────────┬───────────────────────────────────────┘
@@ -64,7 +66,7 @@ El ecosistema está compuesto por **cinco capas**, todas orquestadas mediante **
                                      ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
 │ CAPA 5 · ESCALADO Y OPERACIÓN — Jira Cloud + ChatOps UI (Streamlit)        │
-│  tickets deduplicados por labels (fingerprint) │ chat operativo NL         │
+│  tickets deduplicados por huella alerta+equipo │ chat operativo NL         │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -86,49 +88,72 @@ Simulador modular, parametrizado por la variable de entorno `REGION`, que genera
 - **Retención automática** de 90 días vía `add_retention_policy`
 - **5 vistas** para Grafana, incluyendo `v_region_health`
 - **Vistas de postmortem sobre JSONB** (`incident_views.sql`): `v_incident_events`, `v_incident_mttr`, `v_incident_latest_status`
+- 🆕 **Tabla `jira_dedup`**: estado de deduplicación compartido por todas las réplicas del Webhook Service; la crea automáticamente `main.py` al arrancar
 
 ### Capa 3 — Visualización e Inteligencia Operativa (Grafana OSS, Unified Alerting)
 Dos dashboards y el sistema de alertas **100% aprovisionados vía IaC** (`grafana/provisioning/`):
 - **Dashboard `NOC — Network Telemetry`**: eventos críticos, time series de latencia/CPU, snapshot por dispositivo — filtrable por `$region`/`$hostname`
 - **Dashboard `NOC - Postmortem & MTTR`**: MTTR general, MTTR por dispositivo, conteo de incidentes, historial
 - **3 reglas de alerta** (`alert_rules.yml`) evaluadas cada minuto
-- **Contact points** con Bearer Token hacia el Webhook Service
+- **Contact points** hacia el Webhook Service con `authorization_credentials` (Bearer Token)
 - **Notification policies** con ruteo por severidad
 - **Mute timings** — ventanas de mantenimiento
 
-### 🆕 Capa 3.5 — ML Analytics Hub (`jupyter/`)
+### Capa 3.5 — ML Analytics Hub (`jupyter/`)
 Contenedor **Jupyter** desplegado dentro de `noc_net`, conectado directamente a TimescaleDB, dedicado a analítica avanzada fuera del ciclo de vida operativo de Grafana:
-- **Entrenamiento y validación de `IsolationForest`** (scikit-learn) sobre series históricas de `cpu_pct` y `latency_ms` para detectar picos inusuales que un umbral estático no captura — el modelo se adapta a la dinámica propia de cada dispositivo/región en vez de usar un corte fijo
-- Complementa (no reemplaza) las reglas de alerta de Grafana: sirve como banco de pruebas para calibrar futuros umbrales dinámicos y como fuente de *features* para el Data_Agent del NOC-MAS
+- **Entrenamiento y validación de `IsolationForest`** (scikit-learn) sobre series históricas de `cpu_pct` y `latency_ms` para detectar picos inusuales que un umbral estático no captura
+- Complementa (no reemplaza) las reglas de alerta de Grafana: banco de pruebas para calibrar umbrales dinámicos y fuente de *features* para el Data_Agent
 - Acceso vía `http://localhost:8888` protegido con `JUPYTER_TOKEN`
 - Notebooks persistidos en `./jupyter/notebooks` (bind mount)
 
-### 🆕 Capa 4 — Decisión: Webhook Service + NOC-MAS (FastAPI + LangGraph)
-El punto de llegada de cada alerta, ahora con **deduplicación inteligente** y capacidad de **razonamiento multiagente**:
+### Capa 4 — Decisión: Webhook Service + NOC-MAS (FastAPI + LangGraph)
 
-**Deduplicación JQL (anti Ticket Storm)**
-- Antes de crear un ticket, `handle_jira_dedup()` construye una huella determinística (`slugify` de `alertname` + `hostname`) y ejecuta una búsqueda **JQL** contra `POST /rest/api/3/search/jql` (endpoint vigente — el clásico `GET/POST /rest/api/3/search` fue retirado por Atlassian y responde `410 Gone`) filtrando por `resolution = Unresolved` y ambos `labels`
-- Si ya existe un ticket abierto para ese par alerta+dispositivo: se agrega un **comentario** ("⚠️ La anomalía PERSISTE") con las métricas actuales — **no se crea un ticket nuevo**
-- Si el `status` entrante es `resolved`: comenta el cierre y **intenta transicionar** el ticket a `JIRA_RESOLVE_TRANSITION_NAME` (ej. `Done`/`Resolved`)
-- Si no hay ticket abierto y la alerta está `firing`: crea el ticket con los labels de huella (`al-<alertname>`, `dev-<hostname>`) para que la siguiente búsqueda lo encuentre
+#### Recepción de alertas (`POST /alert`)
+- **Autenticación Bearer** con `secrets.compare_digest` (mitiga timing attacks); sin token o con token inválido responde `401`
+- **Varias alertas por payload**: `split_alerts()` descompone un POST de Grafana con N alertas en N vistas de 1 alerta, cada una con **su propio** `status`; cada una se registra y se deduplica por separado
+- **Títulos de ticket estables**: se toman de `annotations.summary` (o `alertname` + equipo); el `title` del payload de Grafana (`[FIRING:n] ...`) se descarta porque cambia según cuántas alertas lleguen juntas. Las alertas `DatasourceNoData` usan la identidad de la regla de origen
+- **Fail-closed con Jira**: antes de buscar o crear, `verify_jira_auth()` comprueba las credenciales. Si Jira o Postgres no responden, la alerta devuelve **HTTP 503** (`partial_failure`) y **Grafana reintenta**; los tickets ya creados no se duplican en el reintento
+- Respuesta `200` con `status: received` cuando todo fue bien, y un detalle por alerta (`alert`, `device`, `persisted`, `jira.action`, `jira.key`)
 
-**NOC-MAS — Sistema Multiagente (`webhook_service/src/`, Clean Architecture)**
+#### Deduplicación atómica (anti Ticket Storm, multi-réplica)
+La huella es `al-<alertname>|dev-<equipo>` (`slugify` de cada parte). El equipo se toma del primer label disponible entre `device`, `host`, `hostname`, `instance`, `node`, `pod`, `service`.
+
+| Estado | Qué ocurre |
+|---|---|
+| `firing`, sin ticket abierto | `db_claim()` reserva la huella de forma **atómica** (`PRIMARY KEY` + `ON CONFLICT`); solo la réplica que gana crea el ticket (`ticket_created`). Las demás responden `dedup_in_progress` o `comment_added` |
+| `firing`, con ticket abierto | Se agrega un comentario "⚠️ La anomalía PERSISTE" (`comment_added`), sin crear ticket nuevo |
+| `resolved`, con ticket abierto | Comenta el cierre, ejecuta la transición `JIRA_RESOLVE_TRANSITION_NAME` y marca la huella `closed` (`resolved`) |
+| `resolved`, sin ticket abierto | No hace nada (`resolved_no_open_ticket`) |
+
+Detalles de diseño:
+- **Postgres primero** (`jira_dedup`: consistente e inmediato); si no hay registro, **respaldo JQL** (`POST /rest/api/3/search/jql`, el endpoint clásico `/search` fue retirado por Atlassian y responde `410 Gone`) para adoptar tickets creados antes de que existiera la tabla
+- Todo ticket candidato se **verifica por key** (`statusCategory`), porque la JQL depende del índice de Jira y puede no ver un ticket recién creado, y porque el workflow puede no rellenar `resolution` al cerrar
+- Una reserva `creating` colgada más de 2 minutos (proceso caído a mitad de creación) puede reclamarse de nuevo
+- Si la creación en Jira falla, `db_release()` libera la reserva para que el reintento de Grafana pueda crear
+
+#### Salud, robustez y rendimiento
+- `GET /health` → **liveness** (el proceso responde)
+- `GET /ready` → **readiness** (solo verifica Postgres; Jira no se verifica a propósito: si Jira cae y todos los pods quedaran "no listos", tampoco se podrían guardar las alertas en `incident_logs`)
+- **Validación de variables de entorno al arrancar** (`_require_env`): si falta alguna, el servicio no inicia y el error muestra solo los **nombres**, nunca los valores
+- Acceso a Postgres con `ThreadedConnectionPool` (`maxconn=20`) y llamadas bloqueantes ejecutadas con `run_in_threadpool` para no congelar el event loop
+
+#### NOC-MAS — Sistema Multiagente (`webhook_service/src/`, Clean Architecture)
 Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamiento determinista:
-- `src/state.py` — `NOCState` (`TypedDict`): repositorio de estado compartido, con `messages: Annotated[Sequence[BaseMessage], operator.add]` para acumulación de historial entre nodos, más `incident_id`, `severity`, `next_agent`, `requires_human_approval`, `human_decision` y `context`
+- `src/state.py` — `NOCState` (`TypedDict`): estado compartido, con `messages: Annotated[Sequence[BaseMessage], operator.add]` para acumular historial, más `incident_id`, `severity`, `next_agent`, `requires_human_approval`, `human_decision` y `context`
 - `src/orchestrator.py` — nodo **Supervisor**: LLM (`ChatGroq`) con prompt PTCF que enruta a `Data_Agent`, `Action_Agent`, `Responder_Agent`, `human_in_the_loop` o `END`, con salida forzada a JSON vía `PydanticOutputParser` (`RouteResponse`)
-- `src/nodes/data_agent.py` — **Data Agent**: Text-to-SQL **seguro** sobre TimescaleDB — solo `SELECT`, bloqueo por regex de `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE`, forzado a referenciar `network_telemetry`, `LIMIT 200` en la ejecución
-- `src/nodes/action_agent.py` — **Action Agent**: genera acciones estructuradas (`CREATE_TICKET`, `SEND_ALERT`, `ACK_ALERT`, `ESCALATE`, `INFO_QUERY`) con `action_payload` validado como JSON vía Pydantic; para `CREATE_TICKET`/`INFO_QUERY` ejecuta la llamada real a Jira
-- 🆕 `src/nodes/responder_agent.py` — **Responder Agent**: nodo de cierre que sintetiza los resultados crudos del Data Agent (filas SQL) o del Action Agent (datos de Jira) en una respuesta breve en lenguaje natural para el operador, sin pasar por HITL; termina el grafo (`END`)
-- **Compuerta HITL**: el grafo se compila con `interrupt_before=["human_in_the_loop"]` — cualquier severidad `P1`, acción irreversible o ambigüedad detectada por el Supervisor detiene el flujo hasta aprobación humana
-- 🆕 **Checkpointer persistente**: `MemorySaver` fue reemplazado por `PostgresSaver` (`langgraph-checkpoint-postgres`), reutilizando el mismo contenedor `timescaledb` — el historial de mensajes, `next_agent` y la decisión HITL sobreviven a un reinicio del Webhook Service (tablas `checkpoints`/`checkpoint_writes`/`checkpoint_blobs`, creadas automáticamente al arrancar)
-- **Sanitización para modelos Open Source**: `clean_think_tags()`/`strip_think_tags()` limpian bloques `<think>...</think>` (típicos de modelos razonadores servidos vía Groq) antes de intentar el parseo Pydantic — con *fallback* seguro a `human_in_the_loop` (o un mensaje controlado en el Responder) si el parseo falla
-- Ciclo del grafo: `supervisor → {Data_Agent | Action_Agent} → supervisor → ... → {Responder_Agent | human_in_the_loop | END}`, con reentrada al Supervisor tras cada nodo especialista salvo el Responder, que siempre termina el grafo
+- `src/nodes/data_agent.py` — **Data Agent**: Text-to-SQL **seguro** sobre TimescaleDB — solo `SELECT`, bloqueo por regex de `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE`, forzado a referenciar `network_telemetry`, `LIMIT 200`
+- `src/nodes/action_agent.py` — **Action Agent**: acciones estructuradas (`CREATE_TICKET`, `SEND_ALERT`, `ACK_ALERT`, `ESCALATE`, `INFO_QUERY`) con `action_payload` validado vía Pydantic; para `CREATE_TICKET`/`INFO_QUERY` ejecuta la llamada real a Jira
+- `src/nodes/responder_agent.py` — **Responder Agent**: nodo de cierre que sintetiza los resultados crudos (filas SQL o datos de Jira) en una respuesta breve en lenguaje natural; termina el grafo (`END`)
+- **Compuerta HITL**: el grafo se compila con `interrupt_before=["human_in_the_loop"]` — severidad `P1`, acción irreversible o ambigüedad detienen el flujo hasta aprobación humana
+- **Checkpointer persistente**: `PostgresSaver` (`langgraph-checkpoint-postgres`) sobre el mismo contenedor `timescaledb` — el historial, `next_agent` y la decisión HITL sobreviven a un reinicio del Webhook Service
+- **Sanitización para modelos Open Source**: `clean_think_tags()`/`strip_think_tags()` limpian bloques `<think>...</think>` antes del parseo Pydantic, con *fallback* seguro a `human_in_the_loop`
+- Ciclo del grafo: `supervisor → {Data_Agent | Action_Agent} → supervisor → ... → {Responder_Agent | human_in_the_loop | END}`
 
-### 🆕 Capa 5 — ChatOps UI (Streamlit) + Jira
+### Capa 5 — ChatOps UI (Streamlit) + Jira
 - Servicio web interactivo en `http://localhost:8501` para interactuar en lenguaje natural con el ecosistema NOC
-- Sidebar con estado de conectividad (Backend FastAPI, TimescaleDB, Orquestador LangGraph, Jira) y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime) — estos widgets del sidebar son valores de demostración fijos, no están cableados a métricas en vivo
-- ✅ Conexión real de punta a punta: `chatops_ui/app.py` llama por HTTP a `POST /api/chat` en el Webhook Service (`http://webhook-service:8000/api/chat` dentro de `noc_net`), con un `thread_id` estable por sesión de navegador (`st.session_state`) que mantiene la memoria conversacional gracias al checkpointer persistente
-- Los tickets creados/comentados por la deduplicación JQL y por el Action Agent llegan al mismo proyecto Jira, cerrando el loop: **detección → diagnóstico → decisión → registro**
+- Sidebar con estado de conectividad y métricas rápidas — estos widgets son valores de demostración fijos, no están cableados a métricas en vivo
+- ✅ Conexión real de punta a punta: `chatops_ui/app.py` llama por HTTP a `POST /api/chat` (autenticado con el mismo token) con un `thread_id` estable por sesión de navegador, que mantiene la memoria conversacional gracias al checkpointer persistente
+- Los tickets creados/comentados por la deduplicación y por el Action Agent llegan al mismo proyecto Jira, cerrando el loop: **detección → diagnóstico → decisión → registro**
 
 ---
 
@@ -147,28 +172,27 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   └── requirements.txt
 │
 ├── webhook_service/
-│   ├── main.py                      # FastAPI: POST /alert (Bearer auth), POST /api/chat, GET /health, dedupe JQL + Jira
+│   ├── main.py                      # FastAPI: /alert (Bearer), /api/chat, /health, /ready, dedup atómico + Jira
 │   ├── src/
 │   │   ├── state.py                 # NOCState (TypedDict) — estado compartido del NOC-MAS
-│   │   ├── orchestrator.py          # StateGraph LangGraph + nodo Supervisor + checkpointer PostgresSaver
+│   │   ├── orchestrator.py          # StateGraph LangGraph + Supervisor + checkpointer PostgresSaver
 │   │   └── nodes/
 │   │       ├── data_agent.py        # Text-to-SQL seguro (solo SELECT) sobre network_telemetry
-│   │       ├── action_agent.py      # Generación y ejecución de acciones estructuradas (Pydantic)
-│   │       └── responder_agent.py   # 🆕 Síntesis en lenguaje natural para el operador (nodo final)
-│   ├── requirements.txt             # fastapi, uvicorn[standard], psycopg2-binary, httpx, langgraph,
-│   │                                 # langchain-groq, sqlalchemy, pydantic, langgraph-checkpoint-postgres, psycopg
+│   │       ├── action_agent.py      # Acciones estructuradas (Pydantic) y llamadas a Jira
+│   │       └── responder_agent.py   # Síntesis en lenguaje natural para el operador (nodo final)
+│   ├── requirements.txt
 │   └── Dockerfile
 │
 ├── chatops_ui/
 │   ├── app.py                       # Streamlit — chat NL conectado a POST /api/chat, sidebar de estado
-│   ├── requirements.txt             # streamlit
+│   ├── requirements.txt
 │   └── Dockerfile
 │
 ├── jupyter/
 │   ├── notebooks/
 │   │   ├── IsolationForest.ipynb    # Entrenamiento/validación IsolationForest (CPU/latencia)
 │   │   └── RandomForest2.ipynb
-│   ├── requirements.txt             # scikit-learn, pandas, sqlalchemy, psycopg2-binary, matplotlib
+│   ├── requirements.txt
 │   └── Dockerfile
 │
 ├── grafana/provisioning/
@@ -190,50 +214,55 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   ├── panels_postmortem.sql        # Queries de referencia — dashboard de postmortem
 │   └── incident_views.sql           # Vistas JSONB: v_incident_events, v_incident_mttr, v_incident_latest_status
 │
-├── 🆕 tests/
+├── tests/
 │   ├── test_webhook_endpoints.py    # Unit tests (TestClient) — GET /health, auth de POST /alert; corren en CI
-│   ├── test_checkpointer_persistence.py # Integración: persistencia del checkpointer PostgresSaver entre "reinicios"
-│   ├── test_supervisor.py           # Script manual (no pytest) — invoca el grafo real, requiere GROQ_API_KEY
+│   ├── test_checkpointer_persistence.py # Integración: persistencia del checkpointer PostgresSaver
+│   ├── test_supervisor.py           # Script manual (no pytest) — requiere GROQ_API_KEY
 │   └── test_action_agent.py         # Script manual (no pytest) — idem, sobre el Action Agent
 │
-├── 🆕 webhook_service.sql           # DDL de incident_logs (tabla + índices GIN) — en la raíz del repo; idempotente, ya incluido en sql/schema.sql
+├── webhook_service.sql              # DDL de incident_logs (tabla + índices GIN); idempotente, incluido en sql/schema.sql
 │
-├── 🆕 .github/workflows/
-│   └── ci.yml                       # pytest sobre tests/test_webhook_endpoints.py + build de la imagen Docker en cada push/PR
-├── 🆕 .gitlab-ci.yml                # Mismo pipeline en GitLab CI: stages test (pytest) y build (docker build vía dind)
+├── .github/workflows/
+│   └── ci.yml                       # pytest sobre tests/test_webhook_endpoints.py + build de la imagen Docker
+├── .gitlab-ci.yml                   # Mismo pipeline en GitLab CI: stages test (pytest) y build (docker build vía dind)
 │
-├── 🆕 k8s/                          # PoC de despliegue en Azure AKS (ver sección Kubernetes)
+├── k8s/                             # PoC de despliegue en Azure AKS (ver sección Kubernetes)
 │   ├── webhook-deployment.yaml
 │   ├── webhook-service.yaml         # type: LoadBalancer
-│   ├── webhook-secret.yaml
+│   ├── webhook-secret.yaml          # plantilla con placeholders — sin valores reales
 │   ├── timescaledb-deployment.yaml  # PVC 10Gi + PGDATA en subdirectorio (workaround Azure Disk)
 │   └── timescaledb-service.yaml
 │
-├── 🆕 deploy/local/                 # Clúster local con kind (ver sección Kubernetes)
+├── deploy/local/                    # Clúster local con kind (ver sección Kubernetes)
 │   ├── kind-3nodes.yaml             # 1 control-plane + 2 workers
 │   ├── setup-local-cluster.ps1
 │   ├── namespaces.yaml              # namespaces dev y monitoring con labels estándar
 │   ├── dev/                         # namespace dev
-│   │   ├── webhook-deployment.yaml  # 2 réplicas, RollingUpdate
-│   │   ├── webhook-config.yaml      # ConfigMap (PG_HOST, PG_PORT, PG_DB, PG_USER)
+│   │   ├── webhook-deployment.yaml  # imagen v1.0.12, probes, límites, anti-affinity, SA propia
+│   │   ├── webhook-serviceaccount.yaml # 🆕 webhook-sa (sin token montado)
+│   │   ├── noc-operator-rbac.yaml   # 🆕 SA + Role + RoleBinding del operador NOC (mínimo privilegio)
+│   │   ├── webhook-config.yaml      # ConfigMap (PG_HOST, PG_PORT, PG_DB, PG_USER, JIRA_URL, ...)
 │   │   ├── webhook-secret.yaml.example # plantilla — el real está gitignored
 │   │   ├── webhook-service.yaml     # ClusterIP
-│   │   ├── webhook-ingress.yaml     # NGINX Ingress, host webhook.local
-│   │   ├── network-policy.yaml      # default-deny ingress + allow desde ingress-nginx y monitoring
+│   │   ├── webhook-ingress.yaml     # NGINX Ingress, host webhook.local (solo /alert y /health)
+│   │   ├── network-policy.yaml      # default-deny + allow ingress-nginx/monitoring + allow webhook→timescaledb
 │   │   ├── timescaledb-statefulset.yaml # StatefulSet + volumeClaimTemplate RWO 2Gi
 │   │   ├── timescaledb-service.yaml
+│   │   ├── timescaledb-secret.yaml.example # 🆕 plantilla — el real está gitignored
 │   │   └── timescaledb-secret.yaml  # gitignored
 │   └── monitoring/                  # namespace monitoring
-│       ├── grafana-deployment.yaml  # 🚧 sin datasource/dashboards provisionados aún
+│       ├── grafana-deployment.yaml  # grafana-oss:13.0.2, fsGroup 472, admin desde Secret, probes /api/health
+│       ├── grafana-admin-secret.yaml.example # 🆕 plantilla — el real está gitignored
 │       ├── grafana-pvc.yaml
 │       ├── grafana-service.yaml
 │       └── grafana-ingress.yaml     # NGINX Ingress, host grafana.local
 │
-├── 🆕 deploy-azure-infra.ps1        # az login / group create / acr create / aks create / attach-acr
+├── deploy-azure-infra.ps1           # az login / group create / acr create / aks create / attach-acr
 │
 ├── .env                              # Secretos y configuración (no versionado)
 ├── .env.example                      # Plantilla sin valores
 ├── .gitignore
+├── .dockerignore
 ├── .gitattributes
 ├── docker-compose.yml                # Orquestación: 9 servicios (ver tabla abajo)
 └── README.md
@@ -245,17 +274,18 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 
 - **Docker** 20.10+
 - **Docker Compose** v2 (`docker compose`, sin guion)
-- **8 GB RAM** mínimo (recomendado 12 GB — 3 simuladores + TimescaleDB + Grafana + Webhook Service/NOC-MAS + Jupyter + ChatOps UI)
+- **8 GB RAM** mínimo (recomendado 12 GB — 3 simuladores + TimescaleDB + Grafana + Webhook Service/NOC-MAS + Jupyter + ChatOps UI; más si además corres el clúster `kind`)
 - **3 GB** de espacio en disco para volúmenes de datos
-- Cuenta de **Jira Cloud** con un API Token válido (requerido para auto-ticketing + deduplicación JQL)
-- Cuenta de **Groq** con API Key válida (requerida para el Supervisor, Data Agent y Action Agent del NOC-MAS)
-- Windows: **PowerShell 5.1+** o **PowerShell 7+** (las instrucciones de este README están validadas para ambos)
+- Cuenta de **Jira Cloud** con un API Token válido (auto-ticketing + deduplicación)
+- Cuenta de **Groq** con API Key válida (Supervisor, Data Agent y Action Agent del NOC-MAS)
+- Para Kubernetes local: **kind**, **kubectl** y el Ingress Controller NGINX
+- Windows: **PowerShell 5.1+** o **PowerShell 7+** (los comandos de este README están validados para PowerShell 5.1)
 
 ---
 
 ## 🔐 Variables de Entorno (`.env`)
 
-Crea un archivo `.env` en la raíz del repositorio (ya cubierto por `.gitignore`) con las siguientes claves:
+Crea un archivo `.env` en la raíz del repositorio (ya cubierto por `.gitignore` y `.dockerignore`) con las siguientes claves. **El `docker-compose.yml` ya no trae credenciales por defecto**: si falta una variable obligatoria, el servicio no arranca.
 
 ```dotenv
 # ── Webhook Service — autenticación ─────────────────────────────────────────
@@ -266,22 +296,25 @@ JIRA_URL=https://tu-dominio.atlassian.net
 JIRA_USER=tu-email@tudominio.com
 JIRA_API_TOKEN=reemplaza-con-tu-api-token-de-atlassian
 JIRA_PROJECT_KEY=NOC
-JIRA_RESOLVE_TRANSITION_NAME="Done"
+JIRA_RESOLVE_TRANSITION_NAME="Finalizar"
 JIRA_ISSUE_TYPE="Incident"
 
-# ── PostgreSQL / TimescaleDB (opcional si difiere del default de compose) ──
+# ── PostgreSQL / TimescaleDB ────────────────────────────────────────────────
 PG_HOST=timescaledb
 PG_PORT=5432
 PG_DB=noc
 PG_USER=noc_user
-PG_PASSWORD=secret
-PG_DSN=postgresql+psycopg2://noc_user:secret@timescaledb:5432/noc
+PG_PASSWORD=reemplaza-con-una-contrasena-fuerte
+PG_DSN=postgresql+psycopg2://noc_user:<PG_PASSWORD>@timescaledb:5432/noc
 
 # ── NOC-MAS (LangGraph + Groq) ───────────────────────────────────────────────
 GROQ_API_KEY=reemplaza-con-tu-api-key-de-groq
 NOC_SUPERVISOR_MODEL=llama3-8b-8192
 NOC_DATA_AGENT_MODEL=llama3-8b-8192
 NOC_ACTION_AGENT_MODEL=qwen/qwen3.6-27b
+
+# ── Grafana ──────────────────────────────────────────────────────────────────
+GF_SECURITY_ADMIN_PASSWORD=reemplaza-con-una-contrasena-fuerte
 
 # ── ML Analytics Hub (Jupyter) ───────────────────────────────────────────────
 JUPYTER_TOKEN=reemplaza-con-un-token-de-acceso
@@ -292,30 +325,28 @@ WEBHOOK_URL=http://localhost:8000/alert
 
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `NOC_WEBHOOK_TOKEN` | ✅ Sí | Token Bearer compartido entre Grafana (`contact_points.yml`) y el Webhook Service. Sin él, el servicio **no arranca** (`RuntimeError`). |
-| `JIRA_URL` / `JIRA_USER` / `JIRA_API_TOKEN` / `JIRA_PROJECT_KEY` | Opcional* | Credenciales de Jira Cloud. Sin ellas, `handle_jira_dedup()` responde `{"action": "skipped", "reason": "missing_credentials"}` sin romper la ingesta. |
-| `JIRA_RESOLVE_TRANSITION_NAME` | Opcional | Nombre exacto de la transición de workflow usada para cerrar el ticket al recibir `status=resolved`. Default `Done`. |
-| `JIRA_ISSUE_TYPE` | Opcional | Tipo de issue a crear en Jira. Default `Incident`. |
-| `GROQ_API_KEY` | ✅ Sí (para NOC-MAS) | Autentica las llamadas `ChatGroq` del Supervisor, Data Agent y Action Agent. |
-| `NOC_SUPERVISOR_MODEL` / `NOC_DATA_AGENT_MODEL` / `NOC_ACTION_AGENT_MODEL` | Opcional | Override del modelo Groq por nodo del grafo. |
-| `PG_DSN` | ✅ Sí (para Data Agent / Jupyter) | DSN SQLAlchemy de solo lectura usado por `data_agent.py` y los notebooks. |
-| `JUPYTER_TOKEN` | Opcional | Token de acceso al contenedor `jupyter-ml` (`http://localhost:8888`). |
-| `PG_*` | Opcional | Sobrescriben los defaults ya definidos en `docker-compose.yml`. |
-| `WEBHOOK_URL` | Opcional | Usada por `simulate_mttr_incidents.py` para apuntar a un Webhook Service distinto de `http://localhost:8000/alert`. |
+| `NOC_WEBHOOK_TOKEN` | ✅ Sí | Token Bearer compartido entre Grafana (`contact_points.yml`), la ChatOps UI y el Webhook Service. Sin él, el servicio **no arranca**. |
+| `PG_HOST` / `PG_PORT` / `PG_DB` / `PG_USER` / `PG_PASSWORD` | ✅ Sí | Conexión a PostgreSQL. Se validan al arrancar. |
+| `JIRA_URL` / `JIRA_USER` / `JIRA_API_TOKEN` / `JIRA_PROJECT_KEY` | ✅ Sí | Credenciales de Jira Cloud. El servicio valida que existan al arrancar y verifica la autenticación (`fail-closed`) antes de cada operación. |
+| `JIRA_RESOLVE_TRANSITION_NAME` | Recomendada | Nombre **exacto** de la transición de workflow usada para cerrar el ticket al recibir `resolved`. Si no se define, el código usa `Done`; en este proyecto el workflow usa **`Finalizar`**. |
+| `JIRA_ISSUE_TYPE` | Opcional | Tipo de issue a crear. Default `Incident`. |
+| `GROQ_API_KEY` | ✅ Sí (para NOC-MAS) | Autentica las llamadas `ChatGroq`. |
+| `NOC_*_MODEL` | Opcional | Override del modelo Groq por nodo del grafo. |
+| `PG_DSN` | ✅ Sí (Data Agent / Jupyter) | DSN SQLAlchemy usado por `data_agent.py` y los notebooks. |
+| `JUPYTER_TOKEN` | Opcional | Token de acceso a `jupyter-ml` (`http://localhost:8888`). |
+| `WEBHOOK_URL` | Opcional | Usada por `simulate_mttr_incidents.py` para apuntar a otro Webhook Service. |
 
-\* Si cualquiera de las 4 variables de Jira falta, el servicio sigue funcionando con normalidad.
-
-> ⚠️ Nunca commitees el `.env` real. Usa `.env.example` (sin valores) como plantilla para el equipo.
+> ⚠️ Nunca commitees el `.env` real ni imprimas valores de secretos en logs o capturas: al verificar, muestra solo **nombres y largos**. Usa `.env.example` como plantilla.
 
 ---
 
-## ⚙️ Instalación y Despliegue
+## ⚙️ Instalación y Despliegue (Docker Compose)
 
 ### 1. Clonar el repositorio
 
 ```powershell
 git clone <repo-url>
-cd noc-observability-pipeline
+cd noc-observability-pipeline-cloud-native
 ```
 
 ### 2. Configurar el `.env`
@@ -331,74 +362,44 @@ notepad .env
 
 ```powershell
 docker compose up -d --build
-```
-
-Verifica que **los nueve** servicios estén corriendo:
-
-```powershell
 docker compose ps
-```
-
-Esperado:
-```
-NAME                 IMAGE                              STATUS         PORTS
-timescaledb          timescale/timescaledb:latest-pg16  Up            0.0.0.0:5432->5432/tcp
-grafana              grafana/grafana-oss:latest         Up            0.0.0.0:3000->3000/tcp
-webhook_service      noc-observability-webhook          Up            0.0.0.0:8000->8000/tcp
-simulator_us_east    noc-observability-simulator        Up
-simulator_eu_west    noc-observability-simulator        Up
-simulator_sa_south   noc-observability-simulator        Up
-jupyter_ml           noc-observability-jupyter          Up            0.0.0.0:8888->8888/tcp
-chatops_ui           noc-observability-chatops           Up            0.0.0.0:8501->8501/tcp
 ```
 
 ### 4. Inicializar el esquema principal (telemetría + regiones)
 
 ```powershell
 Get-Content sql/schema.sql | docker exec -i timescaledb psql -U noc_user -d noc
-```
-
-```powershell
 docker exec -i timescaledb psql -U noc_user -d noc `
   -c "SELECT table_name FROM information_schema.tables WHERE table_schema='public';"
 ```
 
 Deberías ver `devices`, `network_telemetry` y las vistas `v_telemetry_ts`, `v_event_counts`, `v_device_latest`, `v_recent_anomalies`, `v_region_health`.
 
-```powershell
-docker exec -i timescaledb psql -U noc_user -d noc `
-  -c "SELECT region, COUNT(*) FROM devices GROUP BY region ORDER BY region;"
-```
-
 ### 5. Inicializar el esquema del Webhook Service
 
 ```powershell
 Get-Content webhook_service.sql | docker exec -i timescaledb psql -U noc_user -d noc
-```
-
-```powershell
 docker exec -i timescaledb psql -U noc_user -d noc -c "\d incident_logs"
 ```
+
+La tabla `jira_dedup` **no requiere paso manual**: el Webhook Service la crea al arrancar.
 
 ### 6. Inicializar las vistas de postmortem (JSONB → MTTR)
 
 ```powershell
 Get-Content sql/incident_views.sql | docker exec -i timescaledb psql -U noc_user -d noc
-```
-
-```powershell
 docker exec -i timescaledb psql -U noc_user -d noc `
   -c "SELECT viewname FROM pg_views WHERE viewname LIKE 'v_incident%';"
 ```
 
-### 7. Verificar el Webhook Service (auth incluida)
+### 7. Verificar el Webhook Service
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get
-
-$headers = @{ Authorization = "Bearer $env:NOC_WEBHOOK_TOKEN" }
-Invoke-RestMethod -Uri "http://localhost:8000/health" -Headers $headers -Method Get
+Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get   # liveness
+Invoke-RestMethod -Uri "http://localhost:8000/ready"  -Method Get   # readiness (Postgres)
 ```
+
+`/health` y `/ready` no requieren token; `/alert` y `/api/chat` sí (`Authorization: Bearer <NOC_WEBHOOK_TOKEN>`).
 
 ### 8. Poblar datos de entrenamiento y validar el modelo ML
 
@@ -408,16 +409,15 @@ python simulate_mttr_incidents.py --webhook-url "http://localhost:8000/alert"
 cd ..
 ```
 
-Abre `http://localhost:8888` (token = `JUPYTER_TOKEN`) y ejecuta `notebooks/anomaly_detection.ipynb` de punta a punta para entrenar y validar el `IsolationForest`.
+Abre `http://localhost:8888` (token = `JUPYTER_TOKEN`) y ejecuta `notebooks/IsolationForest.ipynb` de punta a punta para entrenar y validar el `IsolationForest`.
 
 ### 9. Verificar el NOC-MAS y la ChatOps UI
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/health" -Headers $headers -Method Get
 Start-Process "http://localhost:8501"
 ```
 
-Escribe una consulta en el chat (ej. *"muéstrame los dispositivos con CPU > 90% en la última hora"*) para validar el circuito Supervisor → Data_Agent → Supervisor.
+Escribe una consulta (ej. *"muéstrame los dispositivos con CPU > 90% en la última hora"*) para validar el circuito Supervisor → Data_Agent → Supervisor.
 
 ---
 
@@ -431,30 +431,51 @@ Escribe una consulta en el chat (ej. *"muéstrame los dispositivos con CPU > 90%
 cd python-simulator
 $env:REGION = "eu-west"
 python simulator.py --fmt postgres --interval 2 --batch 3 `
-  --pg-dsn "postgresql://noc_user:secret@localhost:5432/noc"
+  --pg-dsn "postgresql://noc_user:<PG_PASSWORD>@localhost:5432/noc"
 ```
-
-En producción, los 3 simuladores ya corren automáticamente como servicios de `docker-compose.yml` — no requieren intervención manual.
 
 ### Acceder a Grafana
 
-Abre `http://localhost:3000` (`admin` / `admin` en laboratorio). Navega a:
+Abre `http://localhost:3000` con el usuario `admin` y la contraseña definida en tu `.env`. Navega a:
 - **Dashboards → NOC — Network Telemetry**
 - **Dashboards → NOC - Postmortem & MTTR**
 
-### Forzar una alerta de punta a punta (incluye ticket Jira deduplicado)
+### Forzar una alerta de punta a punta (ticket Jira deduplicado)
 
 ```powershell
 cd python-simulator
 python force_alert_test.py --minutes 5 `
-  --pg-dsn "postgresql://noc_user:secret@localhost:5432/noc"
+  --pg-dsn "postgresql://noc_user:<PG_PASSWORD>@localhost:5432/noc"
 ```
 
-Dispara el mismo `alertname`+`hostname` dos veces seguidas para confirmar que la segunda vez el Webhook Service **comenta** en vez de crear un ticket duplicado (`jira.action == "comment_added"`).
+Si la misma alerta (mismo `alertname` + equipo) llega dos veces, la segunda **comenta** el ticket existente en vez de crear uno nuevo (`jira.action == "comment_added"`).
+
+### Enviar una alerta manual al Webhook (PowerShell)
+
+> ⚠️ Esto crea un ticket real en Jira. Usa un `alertname` de prueba (ej. `PRUEBA-...`) y ciérralo después con un `resolved`.
+
+```powershell
+$token = $env:NOC_WEBHOOK_TOKEN   # no lo imprimas
+$ahora = (Get-Date).ToUniversalTime().ToString("o")
+$cuerpo = @{
+  receiver = "noc-webhook"; status = "firing"; version = "1"
+  alerts = @(@{
+    status      = "firing"
+    labels      = @{ alertname = "PRUEBA-MANUAL"; severity = "warning"; instance = "prueba-host" }
+    annotations = @{ summary = "Prueba manual" }
+    startsAt    = $ahora
+    endsAt      = "0001-01-01T00:00:00Z"
+  })
+} | ConvertTo-Json -Depth 8
+
+Invoke-RestMethod -Uri "http://localhost:8000/alert" -Method Post `
+  -ContentType "application/json" -Headers @{ Authorization = "Bearer $token" } `
+  -Body ([Text.Encoding]::UTF8.GetBytes($cuerpo))
+```
 
 ### Interactuar con el NOC-MAS desde la ChatOps UI
 
-Abre `http://localhost:8501`. El sidebar muestra el estado de conectividad y métricas rápidas (incidentes abiertos, MTTR promedio, agentes activos, uptime). Escribe consultas o instrucciones en lenguaje natural en el campo de chat; el Supervisor decide si el flujo debe pasar por `Data_Agent`, `Action_Agent` o detenerse en la compuerta `human_in_the_loop`.
+Abre `http://localhost:8501`. Escribe consultas en lenguaje natural; el Supervisor decide si el flujo pasa por `Data_Agent`, `Action_Agent` o se detiene en la compuerta `human_in_the_loop`.
 
 ### Ejecutar el NOC-MAS directamente (fuera de la UI)
 
@@ -487,7 +508,7 @@ Reglas, contact points, políticas de notificación y ventanas de mantenimiento 
 
 ### Contact points (`contact_points.yml`)
 
-Ambos contact points apuntan al **Webhook Service interno**, autenticados con **Bearer Token**. Cada disparo queda persistido, deduplicado por JQL y ticketizado en Jira por defecto.
+Ambos contact points apuntan al **Webhook Service**, autenticados con **Bearer Token** (`authorization_credentials`). Cada disparo queda persistido, deduplicado y ticketizado en Jira. Si el webhook responde `503`, Grafana **reintenta**.
 
 ### Ruteo de notificaciones (`notification_policies.yml`)
 
@@ -534,16 +555,26 @@ iface_status     iface_state      -- UP | DOWN
 peer_ip          INET
 ```
 
-### `incident_logs` — tabla del Webhook Service
+### `incident_logs` — bitácora del Webhook Service
 
 ```sql
 id              BIGSERIAL PRIMARY KEY
 received_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 status          TEXT              -- 'firing' | 'resolved'
 alert_name      TEXT
-payload         JSONB NOT NULL    -- payload completo de Grafana, indexado con GIN
+payload         JSONB NOT NULL    -- payload de Grafana (1 alerta por fila), indexado con GIN
 ```
-Índices: `received_at DESC`, `status`, `alert_name`, GIN sobre `payload`.
+Índices: `received_at DESC`, `status`, `alert_name`, GIN sobre `payload`. Cada alerta de un POST agrupado se guarda en su propia fila.
+
+### `jira_dedup` — estado de deduplicación compartido
+
+```sql
+fingerprint  TEXT PRIMARY KEY                     -- 'al-<alertname>|dev-<equipo>'
+issue_key    TEXT                                  -- key del ticket en Jira
+state        TEXT NOT NULL                         -- 'creating' | 'open' | 'closed'
+updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+```
+La `PRIMARY KEY` junto con `INSERT ... ON CONFLICT` actúa como **lock distribuido**: solo una réplica obtiene la reserva de creación para una huella.
 
 ### `NOCState` — estado compartido del NOC-MAS (`src/state.py`)
 
@@ -578,10 +609,146 @@ context: dict                                              # last_sql_query, las
 
 ---
 
+## ☸️ Despliegue Cloud-Native (Kubernetes) — Fase 7, en curso
+
+El `webhook-service` tiene dos rutas paralelas de migración a Kubernetes. En ambas, **TimescaleDB** sigue pudiendo vivir en Docker Compose (red híbrida) salvo donde se indica.
+
+### Prueba de concepto en Azure (AKS + ACR) — `k8s/`
+
+- `webhook-deployment.yaml`: imagen `nocacr.azurecr.io/noc-webhook-service:latest`, variables no sensibles inline y el resto vía `envFrom: secretRef`; sondas sobre `/health`
+- `webhook-service.yaml`: `type: LoadBalancer` (IP pública directa; sin Ingress/TLS todavía)
+- `webhook-secret.yaml`: plantilla con placeholders `REEMPLAZAR_*` — **nunca** commitear con valores reales
+- `timescaledb-deployment.yaml`: `PersistentVolumeClaim` (10Gi, `ReadWriteOnce`) + `Deployment` (`strategy: Recreate`); `PGDATA` en subdirectorio para sortear el `lost+found` de Azure Disk
+- `deploy-azure-infra.ps1`: aprovisiona Resource Group + ACR + AKS y adjunta el ACR al clúster
+- El job `docker-build` de `ci.yml` corre en cada push/PR (build sin push). Los pasos de login a ACR, push y despliegue a AKS están escritos pero **pausados** mientras se valida Kubernetes en local
+
+### Clúster local con `kind` — `deploy/local/`
+
+Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`kind-3nodes.yaml` + `setup-local-cluster.ps1`). Namespaces `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`.
+
+#### Webhook Service endurecido (`dev/webhook-deployment.yaml`)
+
+| Aspecto | Configuración |
+|---|---|
+| Imagen | `noc-webhook-service:v1.0.12` (cargada al clúster con `kind load docker-image`) |
+| Probes | `startupProbe` y `livenessProbe` en `/health`; `readinessProbe` en `/ready` (Postgres) |
+| Recursos | límite de memoria 512Mi (a ajustar tras medir con `docker stats`) |
+| Historial | `revisionHistoryLimit: 5` |
+| Apagado | `terminationGracePeriodSeconds: 30` |
+| Estrategia | `RollingUpdate` (`maxSurge: 1`, `maxUnavailable: 0`) |
+| Identidad | `serviceAccountName: webhook-sa`, `automountServiceAccountToken: false` |
+| Reparto | `podAntiAffinity` **preferred** por `kubernetes.io/hostname`: separa réplicas entre workers sin bloquear el despliegue si no hay nodos suficientes |
+
+#### Exposición y red
+
+- `webhook-service` es un `Service` ClusterIP publicado por **NGINX Ingress** (`webhook-ingress.yaml`, host `webhook.local`) que expone **solo** `/alert` y `/health` (rutas `Exact`); `/ready` y `/api/chat` no se publican. Grafana se expone en `grafana.local`
+- **`NetworkPolicy`** (`dev/network-policy.yaml`): *default-deny* en `dev`; permite ingreso al webhook (puerto 8000) solo desde `ingress-nginx` y el namespace `monitoring`; y `allow-webhook-to-timescaledb` permite al webhook llegar a TimescaleDB (5432)
+- En `kind`, el Ingress no es alcanzable desde Windows sin `extraPortMappings`; para pruebas se usa `kubectl port-forward`
+
+#### Secrets (sin valores en el repositorio)
+
+| Secret | Namespace | Contenido |
+|---|---|---|
+| `webhook-secret` | `dev` | 5 claves: `GROQ_API_KEY`, `NOC_WEBHOOK_TOKEN`, `PG_PASSWORD`, `JIRA_API_TOKEN`, `JIRA_USER` |
+| `grafana-admin-secret` | `monitoring` | contraseña de admin de Grafana |
+| `timescaledb-secret` | `dev` | credenciales de TimescaleDB |
+
+Las plantillas `*.yaml.example` están versionadas y los secretos reales están en `.gitignore`. Al verificarlos, compara solo **nombres y largos** contra el `.env`.
+
+> Nota: Grafana solo aplica la contraseña de admin al **crear su base**. Si el PVC ya existía, restablécela con `grafana cli admin reset-admin-password`.
+
+#### Scheduling y RBAC de mínimo privilegio
+
+Principio: partir de cero permisos y agregar solo lo que se puede justificar.
+
+- **`webhook-sa`** (`webhook-serviceaccount.yaml`): identidad propia del webhook, **sin Role asociado y sin token montado**. El webhook no habla con la API de Kubernetes; si alguien explotara el contenedor, no tendría credencial para pivotar al clúster. Se verifica que `/var/run/secrets/kubernetes.io/serviceaccount` no exista dentro del pod
+- **Grafana**: mismo patrón (`grafana-sa`, `automountServiceAccountToken: false`)
+- **`noc-operator`** (`noc-operator-rbac.yaml`): rol de un operador NOC de guardia, limitado al namespace `dev`:
+
+| Recurso | Verbos |
+|---|---|
+| `pods`, `pods/log`, `services`, `endpoints`, `events` | `get`, `list`, `watch` |
+| `deployments`, `replicasets` (apps) | `get`, `list`, `watch` |
+| `deployments` (apps) | `patch` (permite `rollout restart` y `rollout undo`) |
+
+Exclusiones deliberadas: **`secrets`** (el operador no lee credenciales), **`pods/exec`** (no entra a los contenedores), **`delete`** (no borra recursos) y cualquier acceso a otros namespaces o recursos de clúster.
+
+- **Taints, tolerations y affinity** (práctica de laboratorio): un taint repele pods de un nodo; la toleration solo *permite* entrar (no obliga); para dirigir el pod al nodo dedicado se combina con `nodeSelector`/`nodeAffinity`. `podAntiAffinity` `required` con más réplicas que nodos deja pods en `Pending`, por eso el proyecto usa `preferred`
+
+Verificación del rol (matriz de pruebas, todas deben dar el resultado esperado):
+
+```powershell
+$sa = "system:serviceaccount:dev:noc-operator"
+kubectl auth can-i get    pods              -n dev --as=$sa   # yes
+kubectl auth can-i get    pods/log          -n dev --as=$sa   # yes
+kubectl auth can-i patch  deployments.apps  -n dev --as=$sa   # yes
+kubectl auth can-i delete pods              -n dev --as=$sa   # no
+kubectl auth can-i get    secrets           -n dev --as=$sa   # no
+kubectl auth can-i create pods/exec         -n dev --as=$sa   # no
+kubectl auth can-i get    pods              -n monitoring --as=$sa   # no
+kubectl auth can-i get    nodes             --as=$sa          # no
+```
+
+#### TimescaleDB en Kubernetes (`dev/timescaledb-statefulset.yaml`)
+
+`StatefulSet` de 1 réplica (`timescale/timescaledb:2.17.2-pg16`) con `volumeClaimTemplate` RWO de 2Gi (`storageClassName: standard`). El clúster no trae el esquema (`incident_logs`, `network_telemetry`, `devices`); `main.py` solo crea `jira_dedup`. Para usarlo hay que cargar `sql/schema.sql`, `webhook_service.sql` e `sql/incident_views.sql`.
+
+#### Red híbrida Docker ↔ Kubernetes
+
+Hoy el webhook usa `PG_HOST=host.docker.internal` (TimescaleDB de Compose). Queda pendiente repuntarlo a `timescaledb-service` del clúster.
+
+### Despliegue y validación en `kind` (paso a paso)
+
+```powershell
+# 1) Construir la imagen y cargarla al clúster
+docker build -t noc-webhook-service:v1.0.12 .\webhook_service
+kind load docker-image noc-webhook-service:v1.0.12 --name noc-local-cluster
+
+# 2) Aplicar los manifiestos y esperar el rollout
+kubectl apply -R -f .\deploy\local\dev\
+kubectl rollout status deployment/webhook-deployment -n dev
+
+# 3) Acceso local para pruebas
+kubectl port-forward -n dev svc/webhook-service 8000:8000
+```
+
+> Un `port-forward` a un `Service` se pega a **un solo pod** y se cae cuando ese pod se reemplaza (por ejemplo en un `rollout undo`): hay que relanzarlo. Para probar varias réplicas se usa un `port-forward` por pod.
+
+#### Resultados de la validación (Fase 3)
+
+| Prueba | Resultado |
+|---|---|
+| `/health` y `/ready` | 200 en ambos (readiness comprueba el alcance a Postgres) |
+| `/alert` sin token | 401 |
+| `firing` → repetido → `resolved` | `ticket_created` → `comment_added` → `resolved` (ticket finalizado con la transición `Finalizar`) |
+| `resolved` repetido | `resolved_no_open_ticket`, sin ruido en Jira |
+| Grupo de 2 alertas en un payload | 2 tickets distintos, un `status` por alerta |
+| `rollout restart` + `rollout undo` | `successfully rolled out` y `/ready` 200 tras revertir |
+| 2 réplicas, mismo `alertname` + equipo, secuencial | un `ticket_created` y un `comment_added` con la misma key |
+| 2 réplicas, peticiones simultáneas | un solo `ticket_created` (reserva atómica en `jira_dedup`) |
+| Filas en Postgres | una fila de `jira_dedup` por alerta; todos los POST en `incident_logs` |
+
+### Pendientes de la Fase 7
+
+- Repuntar `PG_HOST` al `timescaledb-service` del clúster y cargar el esquema allí
+- Inyectar `PG_DSN` en los manifiestos (el Data Agent no funciona en Kubernetes sin esa variable; confirmar si `data_agent.py` la exige)
+- Confirmar que el CNI de `kind` (kindnet) aplica las `NetworkPolicy`
+- Agregar `extraPortMappings` a `kind-3nodes.yaml` para alcanzar el Ingress desde Windows
+- Medir la memoria real del webhook (`docker stats`) y ajustar el límite de 512Mi
+- Verificar que `webhook_service/.env` no entra a la imagen (`.dockerignore`)
+- `JIRA_URL` en el ConfigMap revela el nombre del sitio Atlassian: revisar antes de publicar el repositorio
+- Provisionar `grafana/provisioning/` (datasource, contact point con `NOC_WEBHOOK_TOKEN`, reglas) en el Grafana del clúster
+- Kustomize con overlays (réplicas: 1 en `dev`, 2 en producción)
+- `NetworkPolicy` de egress
+- CHANGELOG, runbook (incluido el rol `noc-operator`) y checklist de rotación de secretos
+- Reactivar el push a ACR + despliegue a AKS en `ci.yml`
+
+---
+
 ## 🔍 Troubleshooting
 
 ### "AlertRule has no datasource"
-**Causa:** la UID en `alert_rules.yml` no coincide con la UID real del datasource. **Solución:** cópiala desde **Administration → Connections → Datasources**.
+**Causa:** la UID en `alert_rules.yml` no coincide con la del datasource. **Solución:** cópiala desde **Administration → Connections → Datasources**.
 
 ### "Connection refused" entre Grafana y PostgreSQL
 ```powershell
@@ -590,42 +757,73 @@ docker exec grafana ping timescaledb
 ```
 
 ### El Webhook Service responde `401 Unauthorized`
-**Causa:** `NOC_WEBHOOK_TOKEN` no coincide entre `.env` y `contact_points.yml`. **Solución:**
+**Causa:** `NOC_WEBHOOK_TOKEN` no coincide entre `.env`/Secret y `contact_points.yml`. **Solución (Compose):**
 ```powershell
 docker compose up -d --force-recreate grafana webhook-service
 ```
 
+### El Webhook Service no arranca: "Faltan variables de entorno obligatorias"
+**Causa:** `main.py` valida `PG_*`, `JIRA_*` y `NOC_WEBHOOK_TOKEN` al iniciar y muestra solo los **nombres** faltantes. **Solución:** revisa el `.env` (Compose) o el Secret/ConfigMap (Kubernetes).
+
+### `/alert` responde `503` (`partial_failure`)
+**Causa:** Jira o Postgres no respondieron (diseño *fail-closed*): el servicio prefiere fallar a crear duplicados. Grafana reintenta solo. **Revisa:**
+```powershell
+docker logs webhook_service --tail 50 | Select-String "Jira|Postgres"
+# Kubernetes:
+kubectl logs -n dev deploy/webhook-deployment --tail=50
+```
+
+### `/ready` responde `503`
+**Causa:** el pod no alcanza Postgres. En el clúster `kind` con la red híbrida, comprueba `host.docker.internal:5432` y la `NetworkPolicy` hacia TimescaleDB.
+
+### El ticket se crea pero el `resolved` no lo cierra
+**Causa:** `JIRA_RESOLVE_TRANSITION_NAME` no coincide con el nombre exacto de la transición del workflow (el default del código es `Done`; este proyecto usa `Finalizar`). El comentario sí se agrega (`transitioned: false`). **Solución:** define la variable en `.env`/ConfigMap y reinicia el servicio.
+
 ### El ticket de Jira no se crea (`jira.created: false`)
-**Causa 1:** faltan variables Jira en `.env`. **Causa 2:** API Token expirado o sin permisos.
+**Causa 1:** faltan variables Jira. **Causa 2:** API Token expirado o sin permisos.
 ```powershell
 docker logs webhook_service --tail 50 | Select-String "Jira"
 ```
 
-### La búsqueda JQL de deduplicación falla o responde `410 Gone`
-**Causa:** se está usando el endpoint clásico `GET/POST /rest/api/3/search`, retirado por Atlassian (CHANGE-2046). **Solución:** confirma que el código apunte a `POST /rest/api/3/search/jql`; revisa logs:
+### La búsqueda JQL falla o responde `410 Gone`
+**Causa:** se usa el endpoint clásico `/rest/api/3/search`, retirado por Atlassian. **Solución:** el código debe apuntar a `POST /rest/api/3/search/jql`.
+
+### Se duplican tickets con varias réplicas
+**Causa:** las réplicas no comparten el mismo Postgres, o `jira_dedup` no existe. **Verifica:**
 ```powershell
-docker logs webhook_service --tail 50 | Select-String "búsqueda JQL"
+docker exec -i timescaledb psql -U noc_user -d noc -c "SELECT fingerprint, issue_key, state FROM jira_dedup ORDER BY updated_at DESC LIMIT 10;"
 ```
 
+### El pod sigue montando el token de ServiceAccount
+**Causa:** el deployment no tiene `serviceAccountName`/`automountServiceAccountToken: false`. **Verifica:**
+```powershell
+kubectl get pods -n dev -o custom-columns="POD:.metadata.name,SA:.spec.serviceAccountName,AUTOMOUNT:.spec.automountServiceAccountToken"
+```
+Si muestra `default`, aplica de nuevo `deploy/local/dev/`.
+
+### `kubectl auth can-i ... --as=...` devuelve un resultado inesperado
+**Causa:** el Role o el RoleBinding no se aplicaron, o el `RoleBinding` apunta a otro namespace/SA. **Verifica:** `kubectl get sa,role,rolebinding -n dev`.
+
+### Grafana en Kubernetes no acepta la contraseña del Secret
+**Causa:** Grafana solo aplica la contraseña al crear su base y el PVC ya existía. **Solución:** `grafana cli admin reset-admin-password` dentro del pod.
+
 ### El Supervisor cae siempre en `human_in_the_loop` (fallback)
-**Causa:** el LLM no está devolviendo JSON parseable por `PydanticOutputParser` (típico en modelos que emiten bloques `<think>` sin cerrarse, o `GROQ_API_KEY` inválida/rate-limited).
+**Causa:** el LLM no devuelve JSON parseable (bloques `<think>` sin cerrar, o `GROQ_API_KEY` inválida/rate-limited).
 ```powershell
 docker logs webhook_service --tail 100 | Select-String "Fallo de parseo|FALLBACK"
 ```
-Verifica `GROQ_API_KEY` y considera bajar `temperature` o cambiar `NOC_SUPERVISOR_MODEL`.
 
 ### El Data_Agent rechaza toda consulta con "operaciones no permitidas"
-**Causa esperada:** el validador (`_validate_query`) bloquea cualquier sentencia que no sea `SELECT` puro sobre `network_telemetry`, o que contenga `INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE/GRANT/REVOKE/CREATE` — es una medida de seguridad, no un bug. Reformula la pregunta en lenguaje natural para que derive en un `SELECT` válido.
+**Causa esperada:** el validador bloquea cualquier sentencia que no sea `SELECT` puro sobre `network_telemetry` — es una medida de seguridad, no un bug.
 
 ### El notebook de Jupyter no conecta a TimescaleDB
 ```powershell
-docker exec jupyter_ml python -c "import os; print(os.environ['PG_DSN'])"
+docker exec jupyter_ml python -c "import os; print('PG_DSN definido:', bool(os.environ.get('PG_DSN')))"
 docker network inspect noc_net
 ```
-Confirma que `jupyter_ml` esté en `noc_net` y que `PG_DSN` apunte a `timescaledb:5432`.
 
 ### El dashboard de Postmortem no muestra datos
-**Causa:** `incident_views.sql` no se ejecutó, o no hay pares `firing`/`resolved` todavía. **Solución:** corre el paso 6 de instalación y `simulate_mttr_incidents.py`.
+**Causa:** `incident_views.sql` no se ejecutó, o aún no hay pares `firing`/`resolved`. **Solución:** paso 6 de instalación y `simulate_mttr_incidents.py`.
 
 ### Quiero volver a usar Slack en vez del Webhook Service
 Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
@@ -634,56 +832,31 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 
 ## 🔐 Seguridad
 
-### Credenciales por defecto (solo laboratorio — no usar en producción)
+### Credenciales y laboratorio
 
-- **PostgreSQL:** usuario `noc_user`, contraseña `secret`
-- **Grafana Admin:** usuario `admin`, contraseña `admin`
-- **Jupyter:** token definido en `JUPYTER_TOKEN`
-- **Webhook Service:** hereda credenciales de PostgreSQL vía variables de entorno
+- **Compose sin credenciales por defecto**: todas las contraseñas y tokens salen del `.env`; el servicio no inicia sin ellas
+- `.gitignore` y `.dockerignore` excluyen `.env`, Secrets reales y archivos temporales; solo se versionan plantillas `*.example`
+- En Kubernetes, las credenciales viven en `Secret` y la config no sensible en `ConfigMap`; ningún valor real se versiona
 
-### Autenticación y controles implementados
+### Controles implementados
 
-- `POST /alert` **exige** `Authorization: Bearer <NOC_WEBHOOK_TOKEN>`; comparación con `secrets.compare_digest` (mitiga timing attacks)
-- `JIRA_API_TOKEN` y `GROQ_API_KEY` viajan únicamente como variables de entorno del contenedor, nunca hardcodeadas
-- **Text-to-SQL blindado**: el Data_Agent solo ejecuta `SELECT` validados por regex y forzados a `network_telemetry`, con `LIMIT 200` — el LLM nunca tiene acceso a credenciales de escritura ni a otras tablas
-- **Compuerta HITL obligatoria**: cualquier severidad `P1`, acción irreversible o fallo de parseo del Supervisor enruta forzosamente a `human_in_the_loop`, deteniendo el grafo (`interrupt_before`) hasta aprobación explícita
-- **Sanitización de salida de modelos Open Source**: `clean_think_tags()`/`strip_think_tags()` eliminan bloques `<think>` antes de cualquier parseo, evitando inyección de contenido no estructurado en el pipeline de decisión
-- ✅ **Checkpointer persistente en Postgres**: el estado del NOC-MAS (`PostgresSaver`) ya no vive solo en RAM (`MemorySaver`) — sobrevive a un reinicio del Webhook Service, condición necesaria para poder escalar a múltiples réplicas sin perder sesiones en curso
+- `POST /alert` y `POST /api/chat` **exigen** `Authorization: Bearer <NOC_WEBHOOK_TOKEN>`, con `secrets.compare_digest`
+- **Fail-closed**: si Jira o Postgres no responden, el servicio devuelve `503` en vez de arriesgar duplicados; Grafana reintenta
+- **Deduplicación atómica** en Postgres: mismo ticket aunque varias réplicas reciban la misma alerta a la vez
+- **Validación de entorno al arrancar**, mostrando solo nombres de variables, nunca valores
+- **Text-to-SQL blindado**: el Data_Agent solo ejecuta `SELECT` validados y forzados a `network_telemetry`, con `LIMIT 200`
+- **Compuerta HITL obligatoria** para severidad `P1`, acciones irreversibles o fallos de parseo del Supervisor
+- **Sanitización de salida** de modelos Open Source (bloques `<think>`) antes de cualquier parseo
+- **Checkpointer persistente** en Postgres: el estado del NOC-MAS sobrevive a reinicios y permite escalar a varias réplicas
+- **Kubernetes**: NetworkPolicy *default-deny*, Ingress mínimo (`/alert` y `/health`), ServiceAccount sin token montado, rol `noc-operator` sin acceso a `secrets`, `exec` ni `delete`, y límites de recursos
 
 ### En producción
 
-- Usa `.env` (nunca lo commitees) o un secret manager (Vault, AWS/GCP Secrets Manager, Azure Key Vault)
-- Cambia la contraseña de Grafana Admin y el token de Jupyter inmediatamente tras el despliegue
-- Rota `NOC_WEBHOOK_TOKEN`, `JIRA_API_TOKEN` y `GROQ_API_KEY` periódicamente
-- No publiques los puertos `8000`, `8888` fuera del host — restringe a `noc_net` y usa reverse proxy con TLS para exposición externa
-- `k8s/webhook-secret.yaml` documenta las claves esperadas con placeholders `REEMPLAZAR_*` — nunca commitear ese archivo con valores reales; poblarlo vía `kubectl create secret --from-env-file` o un CSI driver de secretos (Azure Key Vault) en el clúster real
-
----
-
-## ☸️ Despliegue Cloud-Native (Kubernetes) — Fase 7, en curso
-
-El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker Compose salvo donde se indica) tiene dos rutas paralelas de migración a Kubernetes, ambas como prueba de concepto:
-
-### Prueba de concepto en Azure (AKS + ACR) — `k8s/`
-
-- `webhook-deployment.yaml`: imagen `nocacr.azurecr.io/noc-webhook-service:latest`, variables no sensibles (`PG_HOST=timescaledb`, `PG_PORT`, `PG_DB`, `PG_USER`) inline y el resto vía `envFrom: secretRef` contra `webhook-service-secrets`; sondas `readinessProbe`/`livenessProbe` sobre `/health`
-- `webhook-service.yaml`: `type: LoadBalancer` (IP pública directa; sin Ingress/TLS todavía)
-- `webhook-secret.yaml`: plantilla con placeholders `REEMPLAZAR_*` para `NOC_WEBHOOK_TOKEN`, `PG_PASSWORD`, `PG_DSN`, credenciales de Jira y `GROQ_API_KEY` — **nunca** commitear con valores reales
-- `timescaledb-deployment.yaml`: también migrado a AKS — `PersistentVolumeClaim` (10Gi, `ReadWriteOnce`) + `Deployment` (`strategy: Recreate`, para no chocar con el PVC RWO en un rolling update); variable `PGDATA=/var/lib/postgresql/data/pgdata` para sortear la restricción de Azure Disk, que monta un `lost+found` en la raíz del volumen y hace que Postgres se niegue a inicializar
-- `deploy-azure-infra.ps1`: aprovisiona Resource Group + Azure Container Registry + clúster AKS y adjunta el ACR al clúster (`az aks update --attach-acr`) vía Azure CLI
-- El job `docker-build` de `ci.yml` **sí** corre en cada push/PR (build de la imagen, sin push). Los pasos de login a ACR, build+push y despliegue a AKS (`azure/login`, `azure/aks-set-context`, `azure/k8s-deploy`) ya están escritos en el workflow pero **están comentados/pausados** mientras se prioriza validar Kubernetes en un clúster local — no se ejecutan automáticamente todavía
-
-### Clúster local con `kind` — `deploy/local/`
-
-- `kind-3nodes.yaml` + `setup-local-cluster.ps1`: clúster multinodo (1 control-plane, 2 workers) para probar cargas distribuidas sin costo de nube
-- **Namespaces** (`namespaces.yaml`): `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`
-- `dev/webhook-deployment.yaml`: 2 réplicas con `strategy: RollingUpdate` (`maxSurge: 1`, `maxUnavailable: 0` — sin downtime), config no sensible en `webhook-config.yaml` (ConfigMap) y credenciales en `webhook-secret.yaml` (gitignored; plantilla versionada en `webhook-secret.yaml.example`)
-- **Exposición**: `webhook-service` es un `Service` ClusterIP publicado por **NGINX Ingress** (`webhook-ingress.yaml`, host virtual `webhook.local`; `/health` como ruta exacta y `/` como prefijo). Grafana se expone igual en `grafana.local` (`monitoring/grafana-ingress.yaml`). Requiere el Ingress Controller instalado en el clúster y las entradas en el archivo `hosts`
-- **Seguridad de red** (`dev/network-policy.yaml`): `NetworkPolicy` *default-deny* de ingreso en `dev`, más una regla que solo permite al pod `webhook-receiver` (puerto 8000) recibir tráfico del controller `ingress-nginx` y del namespace `monitoring`
-- **TimescaleDB en Kubernetes** (`dev/timescaledb-statefulset.yaml`): `StatefulSet` de 1 réplica (`timescale/timescaledb:2.17.2-pg16`) con `volumeClaimTemplate` RWO de 2Gi (`storageClassName: standard`, aprovisionamiento dinámico) y credenciales vía `timescaledb-secret` (gitignored). Tras desplegarlo hay que cargar el esquema (`sql/schema.sql`, `sql/incident_views.sql`) igual que en Compose
-- **Red híbrida Docker ↔ Kubernetes**: `webhook-config.yaml` aún apunta a `PG_HOST=host.docker.internal` (TimescaleDB de `docker-compose`) en lugar de `timescaledb-service` — queda pendiente repuntarlo al StatefulSet del clúster
-- 🚧 Grafana tiene manifiestos locales (`grafana-deployment.yaml`, `grafana-pvc.yaml`, `grafana-service.yaml`, `grafana-ingress.yaml`), pero sin el `grafana/provisioning/` (datasources/dashboards/alerting) montado — es una instancia en blanco
-- **Nota de brecha conocida**: `data_agent.py` (Text-to-SQL del NOC-MAS) sigue leyendo `PG_DSN` vía SQLAlchemy, y ningún manifiesto de `k8s/` ni `deploy/local/` lo inyecta todavía (solo cubren `PG_HOST`/`PG_PORT`/`PG_DB`/`PG_USER`/`PG_PASSWORD`, que alcanzan para `main.py` y el checkpointer). El Data Agent no funcionará correctamente corriendo sobre Kubernetes hasta agregar esa variable.
+- Usa un secret manager (Vault, AWS/GCP Secrets Manager, Azure Key Vault) o un CSI driver de secretos en el clúster
+- Rota `NOC_WEBHOOK_TOKEN`, `JIRA_API_TOKEN`, `GROQ_API_KEY` y `PG_PASSWORD` periódicamente, y **de inmediato** si alguno se pegó en un chat, ticket o log
+- Cambia la contraseña de Grafana Admin y el token de Jupyter tras el despliegue
+- No publiques los puertos `8000` y `8888` fuera del host; usa reverse proxy con TLS
+- Recuerda que `JIRA_URL` revela el nombre del sitio Atlassian si el repositorio es público
 
 ---
 
@@ -699,48 +872,67 @@ El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker 
 - ✅ Tabla `incident_logs` como bitácora auditable de incidentes
 
 ### ✅ Fase 4 — Escalado Avanzado (completada)
-- ✅ Integración del Webhook Service con **JIRA** para auto-tickets zero-touch
+- ✅ Integración con **JIRA** para auto-tickets zero-touch
 - ✅ **Autenticación Bearer Token** en `POST /alert`
-- ✅ **Escalado geográfico multi-región**: 3 simuladores concurrentes sobre una hypertable única
+- ✅ **Escalado geográfico multi-región**: 3 simuladores sobre una hypertable única
 - ✅ Extensión del esquema con la dimensión `region`
-- ✅ **Dashboards de postmortem** con MTTR general, MTTR por dispositivo, conteo de incidentes e historial
-- ✅ Vistas JSONB refactorizadas (`incident_views.sql`)
-- ✅ Variable de plantilla `$region` en ambos dashboards
+- ✅ **Dashboards de postmortem** con MTTR, conteo de incidentes e historial
+- ✅ Vistas JSONB refactorizadas (`incident_views.sql`) y variable `$region` en ambos dashboards
 
 ### ✅ Fase 5 — ML, Multiagencia y ChatOps (completada)
-- ✅ **Deduplicación Inteligente en Jira (JQL)**: búsqueda `POST /rest/api/3/search/jql` por labels antes de ticketizar; comentario de "falla persistente" en vez de ticket duplicado
-- ✅ **Cierre automático de tickets Jira** al recibir `status=resolved` (transición configurable vía `JIRA_RESOLVE_TRANSITION_NAME`)
-- ✅ **ML Analytics Hub**: contenedor Jupyter en `noc_net`, conectado a TimescaleDB
-- ✅ **Detección Dinámica de Anomalías** con `IsolationForest` sobre CPU/latencia, complementando los umbrales estáticos de Grafana
-- ✅ **Sistema Multiagente NOC-MAS** en LangGraph: `NOCState` compartido, `StateGraph` jerárquico, Supervisor con enrutamiento determinista, Data Agent (Text-to-SQL seguro), Action Agent (payloads Pydantic)
-- ✅ **Compuerta de seguridad Human-in-the-Loop (HITL)** con `interrupt_before` y checkpointer `MemorySaver`
-- ✅ **Sanitización Regex** de bloques `<think>` para modelos Open Source servidos vía Groq, con validación `PydanticOutputParser` y *fallback* seguro
-- ✅ **ChatOps UI en Streamlit** (`http://localhost:8501`) con sidebar de estado y métricas rápidas
-- ✅ Nuevo árbol de infraestructura: `webhook_service/src/`, `jupyter/`, servicios `chatops-ui` y `jupyter-ml` en `docker-compose.yml`
+- ✅ Deduplicación en Jira y cierre automático de tickets al recibir `resolved`
+- ✅ **ML Analytics Hub** (Jupyter) y detección dinámica de anomalías con `IsolationForest`
+- ✅ **NOC-MAS** en LangGraph: `NOCState`, `StateGraph` jerárquico, Supervisor, Data Agent (Text-to-SQL seguro), Action Agent (Pydantic)
+- ✅ **Compuerta HITL** con `interrupt_before`
+- ✅ Sanitización de bloques `<think>` con validación `PydanticOutputParser` y *fallback* seguro
+- ✅ **ChatOps UI en Streamlit** con sidebar de estado
 
 ### ✅ Fase 6 — Cierre del loop conversacional, persistencia y CI (completada)
-- ✅ **ChatOps UI cableada de punta a punta**: `chatops_ui/app.py` llama `POST /api/chat` del Webhook Service vía HTTP real, con `thread_id` estable por sesión de navegador
-- ✅ **`Responder_Agent`** (`src/nodes/responder_agent.py`): nodo que sintetiza resultados crudos de SQL/Jira en una respuesta ejecutiva en lenguaje natural, sin pasar por Jira ni HITL cuando no hace falta
-- ✅ **Checkpointer persistente**: `MemorySaver` reemplazado por `PostgresSaver` (`langgraph-checkpoint-postgres`) sobre el mismo contenedor `timescaledb` — mensajes, `next_agent` y decisión HITL sobreviven a un reinicio del Webhook Service
-- ✅ **Suite de pruebas unitarias + CI**: `tests/test_webhook_endpoints.py` (`TestClient` sobre `/health` y auth de `/alert`) corriendo en `.github/workflows/ci.yml` en cada push/PR, junto a la validación del build de la imagen Docker
-- [ ] Exponer los hallazgos del `IsolationForest` como feature adicional del Data_Agent (contexto enriquecido para el Supervisor)
-- [ ] Endpoint dedicado `POST /noc-mas/invoke` en el Webhook Service, desacoplado de `/alert`
-- [ ] Exportación de métricas de MTTR + decisiones del NOC-MAS a un dashboard ejecutivo (SLA/SLO tracking)
-- [ ] Autenticación de la ChatOps UI (hoy expuesta sin login en `8501`)
+- ✅ ChatOps UI cableada de punta a punta con `POST /api/chat` y `thread_id` estable por sesión
+- ✅ `Responder_Agent` para respuestas ejecutivas en lenguaje natural
+- ✅ Checkpointer `PostgresSaver`
+- ✅ Pruebas unitarias + CI (`ci.yml`, `.gitlab-ci.yml`)
+- [ ] Exponer los hallazgos del `IsolationForest` como feature del Data_Agent
+- [ ] Endpoint dedicado `POST /noc-mas/invoke`, desacoplado de `/alert`
+- [ ] Dashboard ejecutivo de MTTR y decisiones del NOC-MAS (SLA/SLO)
+- [ ] Autenticación de la ChatOps UI (hoy sin login en `8501`)
 
-### 🚧 Fase 7 — Cloud-Native / Kubernetes (en curso, PoC — ver sección dedicada arriba)
-- ✅ Manifiestos declarativos para AKS (`k8s/`) y script de aprovisionamiento de infraestructura Azure (`deploy-azure-infra.ps1`)
-- ✅ Clúster local multinodo con `kind` (`deploy/local/`) y `webhook-service` migrado a 2 réplicas con `RollingUpdate`
-- ✅ Namespaces `dev`/`monitoring` con labels estándar
-- ✅ `webhook-service` y Grafana expuestos vía NGINX Ingress (`webhook.local`, `grafana.local`)
-- ✅ `NetworkPolicy` default-deny + regla inter-namespace hacia `webhook-service`
-- ✅ TimescaleDB como `StatefulSet` con provisionamiento dinámico de volumen RWO
-- ✅ Pipeline equivalente en GitLab CI (`.gitlab-ci.yml`: pytest + docker build)
-- ⏸️ Push a ACR y despliegue automático a AKS ya escritos en `ci.yml`, pausados mientras se valida Kubernetes en local
-- [ ] Repuntar `PG_HOST` del webhook-service al `timescaledb-service` del clúster (hoy usa `host.docker.internal`)
-- [ ] Inyectar `PG_DSN` en los manifiestos de Kubernetes (falta para que el Data_Agent funcione ahí)
-- [ ] Provisionar `grafana/provisioning/` (datasources, dashboards, alerting) también en el Grafana de `deploy/local/`
-- [ ] Reactivar el push a ACR + despliegue a AKS en `ci.yml` una vez validado el flujo en local
+### ✅ Hardening del Webhook Service — v1.0.12 (completado en Docker)
+- ✅ Autenticación por token en el webhook y en el chat; Grafana → webhook con `authorization_credentials`
+- ✅ Varias alertas por payload (`split_alerts`) y títulos de ticket estables
+- ✅ **Fail-closed con Jira** (`verify_jira_auth` → `503` para que Grafana reintente)
+- ✅ **Deduplicación atómica** con tabla `jira_dedup` (`PRIMARY KEY` + `ON CONFLICT`), válida entre réplicas
+- ✅ Cierre de tickets con la transición `Finalizar`
+- ✅ `/health` (liveness) y `/ready` (readiness, solo Postgres)
+- ✅ Validación de variables de entorno, `run_in_threadpool` y pool de conexiones (`maxconn=20`)
+- ✅ Compose sin credenciales por defecto; reglas de `.gitignore` y `.dockerignore`
+
+### 🚧 Fase 7 — Cloud-Native / Kubernetes (en curso)
+- ✅ Manifiestos para AKS (`k8s/`) y script de aprovisionamiento Azure (`deploy-azure-infra.ps1`)
+- ✅ Clúster local multinodo con `kind` y namespaces `dev`/`monitoring`
+- ✅ Webhook en `v1.0.12` con probes (`startup`, `liveness`, `readiness`), límite de memoria, `revisionHistoryLimit` y `terminationGracePeriodSeconds`
+- ✅ `NetworkPolicy` *default-deny* + reglas hacia el webhook y hacia TimescaleDB
+- ✅ Ingress mínimo (`/alert` y `/health`) para el webhook y Ingress para Grafana
+- ✅ Grafana `13.0.2` con contraseña desde Secret, `fsGroup` y probes
+- ✅ Secrets reales fuera del repositorio y plantillas `*.yaml.example`
+- ✅ **RBAC de mínimo privilegio**: `webhook-sa` sin token, rol `noc-operator` y `podAntiAffinity` preferred
+- ✅ **Validación funcional** en Kubernetes: alertas `firing`/`resolved`/grupo, `rollout undo` y deduplicación entre 2 réplicas
+- ✅ TimescaleDB como `StatefulSet` con volumen RWO
+- ✅ Pipeline equivalente en GitLab CI
+- ⏸️ Push a ACR y despliegue a AKS escritos en `ci.yml`, pausados
+- [ ] Repuntar `PG_HOST` al `timescaledb-service` y cargar el esquema en el clúster
+- [ ] Inyectar `PG_DSN` en los manifiestos
+- [ ] Provisioning de Grafana en Kubernetes (datasource, contact point, reglas, `NOC_WEBHOOK_TOKEN`)
+- [ ] Kustomize con overlays, `NetworkPolicy` de egress
+- [ ] CHANGELOG, runbook y README operativo
+
+### 🧱 Deuda técnica registrada
+- Timeout de Streamlit de 30 s frente a respuestas del chat de 22 a 111 s
+- Indicadores fijos del sidebar de la ChatOps UI
+- *Mojibake* (codificación) en `alert_rules.yml`
+- `execErrState` en `Error` en las reglas de alerta
+- `/api/chat`: tipo de `reply`, fuga de mensajes de error al cliente, `thread_id` por defecto y endpoint HITL
+- La verificación de memoria del webhook y los límites de recursos están pendientes de medición
 
 ---
 
@@ -757,22 +949,26 @@ El `webhook-service` (solo él; TimescaleDB y Grafana siguen viviendo en Docker 
 - **Groq API:** https://console.groq.com/docs
 - **scikit-learn — IsolationForest:** https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 - **Streamlit:** https://docs.streamlit.io/
+- **Kubernetes (RBAC):** https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+- **Kubernetes (taints, tolerations y affinity):** https://kubernetes.io/docs/concepts/scheduling-eviction/
+- **kind:** https://kind.sigs.k8s.io/
 
 ---
 
 ## 📝 Contribuciones
 
-Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier cambio en alertas, dashboards, datasources, esquema multi-región, Webhook Service o en el grafo del NOC-MAS debe pasar por código y Git.
+Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier cambio en alertas, dashboards, datasources, esquema, Webhook Service, grafo del NOC-MAS o manifiestos de Kubernetes debe pasar por código y Git.
 
 **Workflow:**
-1. Edita el YAML/SQL/código correspondiente
-2. Commit descriptivo
-3. Abre PR
-4. Redeploy: `docker compose down && docker compose up -d --build`
-5. Valida el cambio en la UI o vía `Invoke-RestMethod`/API
+1. Crea una rama de trabajo (`git switch -c chore/<tema>`) desde `kubernetes` o `main`
+2. Edita el YAML/SQL/código correspondiente
+3. Commit descriptivo (un tema por commit)
+4. Abre PR / merge y haz push a `origin` y `gitlab`
+5. Redeploy: `docker compose up -d --build` (Compose) o `kubectl apply -R -f .\deploy\local\dev\` (Kubernetes)
+6. Valida el cambio en la UI, con `Invoke-RestMethod` o con la matriz de pruebas de la sección Kubernetes
 
 ---
 
 **Mantenido por:** Rodrigo Codoceo.
 **Última actualización:** Octubre 2026
-**Versión:** 6.0 (Checkpointer PostgresSaver + ChatOps E2E + Responder Agent + CI/CD + Kubernetes PoC)
+**Versión:** 7.0 (Webhook v1.0.12 · dedup atómico multi-réplica · Kubernetes local endurecido con RBAC de mínimo privilegio)
