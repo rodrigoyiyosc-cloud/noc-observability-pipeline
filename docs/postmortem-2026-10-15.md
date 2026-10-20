@@ -56,7 +56,7 @@ Hallazgo adicional: el `timescaledb-service` del clúster seguía con endpoint (
 | Tiempo de detección a resolución | 2 min 0 s |
 | Tiempo total de indisponibilidad (MTTR) | 4 min 4 s |
 
-Limitación: el código 503 de `/ready` durante la falla no se capturó directamente con port-forward. La evidencia del 503 es el evento del kubelet. El 200 de la tabla es de después de la recuperación.
+Actualización 2026-10-20: el 503 de `/ready` se reprodujo y se capturó directamente con `kubectl debug` (`wget` desde un contenedor efímero) con Postgres detenido, y `nc` al puerto 5432 dio `exit=1` (con Postgres arriba, `exit=0`). Esto confirma la causa observada en los eventos del kubelet. El 200 de la tabla es de después de la recuperación.
 
 ## 7. Qué funcionó
 
@@ -86,6 +86,8 @@ Responsable y fechas son una propuesta, ajusta según tu calendario.
 | 6 | Medir memoria del webhook bajo carga y recién entonces ajustar request y límite (hoy 256Mi y 512Mi, con 105,5 MiB en reposo) | Rodrigo | 2026-10-24 |
 | 7 | Alerta por reinicios con motivo `OOMKilled` (requiere kube-state-metrics o equivalente) | Rodrigo | 2026-10-22 |
 | 8 | Usar 2 réplicas en el overlay de producción de Kustomize para eliminar la ventana de 7 s | Rodrigo | 2026-11-05 |
+| 9 | Decidir si el NOC necesita un rol temporal de depuración (`noc-debugger`) y validarlo con `can-i` y un `debug` real antes de adoptarlo | Rodrigo | 2026-10-30 |
+| 10 | Revisar con qué usuario corre el contenedor del webhook (`ps` mostró `uvicorn` como `root`) y evaluar `runAsNonRoot` en el `securityContext`, probando que la app siga arrancando | Rodrigo | 2026-11-06 |
 
 ## 10. Otros simulacros del día (resumen)
 
