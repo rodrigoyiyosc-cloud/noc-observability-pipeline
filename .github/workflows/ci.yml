@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ["main", "Fase_3", "Fase_6", "Fase_de_IA_y_ML"]
+    branches: ["main", "kubernetes"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "kubernetes"]
 
 jobs:
   test:
@@ -27,9 +27,18 @@ jobs:
 
       - name: Run unit tests
         env:
-          # Token de prueba temporal: main.py exige NOC_WEBHOOK_TOKEN al
-          # importarse; nunca usar un secreto real en este job.
+          # Valores falsos de prueba: main.py exige estas 10 variables al
+          # importarse. Nunca usar secretos reales en este job.
           NOC_WEBHOOK_TOKEN: ci-test-token-temporal
+          PG_HOST: localhost
+          PG_PORT: "5432"
+          PG_DB: noc_test
+          PG_USER: test_user
+          PG_PASSWORD: test-password-not-real
+          JIRA_URL: "https://jira.example.invalid"
+          JIRA_USER: "test@example.invalid"
+          JIRA_API_TOKEN: test-token-not-real
+          JIRA_PROJECT_KEY: TST
         run: python -m pytest tests/test_webhook_endpoints.py -v
 
   docker-build:
