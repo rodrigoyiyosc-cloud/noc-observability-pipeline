@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: noc-observability-pipeline
     environment: dev
 spec:
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 5
   strategy:
     type: RollingUpdate
