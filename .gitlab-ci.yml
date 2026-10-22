@@ -7,7 +7,7 @@ stages:
 workflow:
   rules:
     # Se ejecuta en ramas específicas ante un push
-    - if: $CI_COMMIT_BRANCH =~ /^(main|Fase_3|Fase_6|Fase_de_IA_y_ML|kubernetes)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(main|kubernetes)$/
     # Se ejecuta ante un Merge Request (equivalente a pull_request) dirigido a main
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
 
@@ -18,6 +18,15 @@ unit-tests:
   variables:
     # Token de prueba temporal (reemplaza la sección env:)
     NOC_WEBHOOK_TOKEN: "ci-test-token-temporal"
+    PG_HOST: "localhost"
+    PG_PORT: "5432"
+    PG_DB: "noc_test"
+    PG_USER: "test_user"
+    PG_PASSWORD: "test-password-not-real"
+    JIRA_URL: "https://jira.example.invalid"
+    JIRA_USER: "test@example.invalid"
+    JIRA_API_TOKEN: "test-token-not-real"
+    JIRA_PROJECT_KEY: "TST"
   script:
     - python -m pip install --upgrade pip
     - pip install -r webhook_service/requirements.txt
