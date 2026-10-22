@@ -13,3 +13,5 @@ __pycache__/
 
 # Respaldos
 /backups/
+
+/.timeline.txt
