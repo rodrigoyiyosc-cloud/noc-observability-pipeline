@@ -1,0 +1,10 @@
+# PM-001 · Marcas originales de timeline.txt, 2026-10-22 (hora Santiago, UTC-3). Sin editar.
+14:56:54  BASE: 1 pod 1/1, PG_HOST presente en webhook-config
+14:57:25  INYECTO: PG_HOST eliminado del ConfigMap
+14:59:37  OBSERVADO: 2 min despues, pod sigue 1/1 (la variable se lee solo al arrancar)
+14:59:48  DISPARO: rollout restart
+15:02:55  DETECTADO: _cfg = _require_env, Faltan variables de entorno obligatorias: PG HOST, detectado con kubectl logs pod --previous --tail=5
+15:04:35  CAUSA: PG_HOST ausente en ConfigMap | EVIDENCIA: Compare-Object repo vs clúster
+15:05:04  INTENTO: rollout undo (remedio incorrecto para un cambio de ConfigMap)
+15:05:46  COMPROBADO: pods 1/1 pero PG_HOST sigue ausente (síntoma enmascarado)
+15:07:38  RESUELTO: ConfigMap restaurado desde el repo + rollout restart, pod nuevo 1/1
