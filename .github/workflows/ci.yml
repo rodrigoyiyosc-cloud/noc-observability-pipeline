@@ -39,7 +39,7 @@ jobs:
           JIRA_USER: "test@example.invalid"
           JIRA_API_TOKEN: test-token-not-real
           JIRA_PROJECT_KEY: TST
-        run: python -m pytest tests/test_webhook_endpoints.py -v
+        run: python -m pytest tests/test_webhook_endpoints.py tests/test_db_url.py -v
 
   docker-build:
     name: Validate Docker build (webhook_service)

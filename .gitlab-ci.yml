@@ -31,7 +31,7 @@ unit-tests:
     - python -m pip install --upgrade pip
     - pip install -r webhook_service/requirements.txt
     - pip install pytest httpx
-    - python -m pytest tests/test_webhook_endpoints.py -v
+    - python -m pytest tests/test_webhook_endpoints.py tests/test_db_url.py -v
 
 # 2. Job de Validación de Docker
 docker-build:
