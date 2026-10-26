@@ -16,3 +16,6 @@ __pycache__/
 
 # Cuaderno de laboratorio
 timeline.txt
+
+# Cache de dependencias
+.cache/

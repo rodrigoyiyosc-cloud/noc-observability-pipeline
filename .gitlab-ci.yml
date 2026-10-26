@@ -14,8 +14,18 @@ workflow:
 # 1. Job de Tests Unitarios
 unit-tests:
   stage: test
-  image: python:3.12-slim
+  parallel:
+    matrix:
+      - PYTHON: ["3.12", "3.13"]
+  image: python:${PYTHON}-slim
+  cache:
+    key:
+      files:
+        - webhook_service/requirements.txt
+    paths:
+      - .cache/pip
   variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     # Token de prueba temporal (reemplaza la sección env:)
     NOC_WEBHOOK_TOKEN: "ci-test-token-temporal"
     PG_HOST: "localhost"

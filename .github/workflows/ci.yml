@@ -8,16 +8,22 @@ on:
 
 jobs:
   test:
-    name: Unit tests (webhook_service)
+    name: Unit tests (py${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: webhook_service/requirements.txt
 
       - name: Install dependencies
         run: |
