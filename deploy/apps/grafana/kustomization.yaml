@@ -1,7 +1,7 @@
-# deploy/local/monitoring/kustomization.yaml
+# deploy/apps/grafana/kustomization.yaml
 #
 # IMPORTANTE: desde ahora el Deployment de Grafana se aplica con
-#   kubectl apply -k deploy/local/monitoring
+#   kubectl apply -k deploy/apps/grafana
 # nunca con "kubectl apply -f", porque los ConfigMaps generados llevan un hash
 # en el nombre y solo Kustomize actualiza la referencia del Deployment.
 #

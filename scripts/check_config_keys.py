@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 
 MAIN = Path("webhook_service/main.py")
-CONFIGMAP = Path("deploy/local/dev/webhook-config.yaml")
-SECRET_EXAMPLE = Path("deploy/local/dev/webhook-secret.yaml.example")
+CONFIGMAP = Path("deploy/apps/webhook/webhook-config.yaml")
+SECRET_EXAMPLE = Path("deploy/apps/webhook/webhook-secret.yaml.example")
 
 
 def required_from_main() -> set[str]:

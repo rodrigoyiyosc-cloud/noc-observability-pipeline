@@ -233,7 +233,7 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 │   ├── timescaledb-deployment.yaml  # PVC 10Gi + PGDATA en subdirectorio (workaround Azure Disk)
 │   └── timescaledb-service.yaml
 │
-├── deploy/local/                    # Clúster local con kind (ver sección Kubernetes)
+├── deploy/                          # Manifiestos: cluster/, base/, apps/ (ver deploy/README.md)
 │   ├── kind-3nodes.yaml             # 1 control-plane + 2 workers
 │   ├── setup-local-cluster.ps1
 │   ├── namespaces.yaml              # namespaces dev y monitoring con labels estándar
@@ -622,7 +622,7 @@ El `webhook-service` tiene dos rutas paralelas de migración a Kubernetes. En am
 - `deploy-azure-infra.ps1`: aprovisiona Resource Group + ACR + AKS y adjunta el ACR al clúster
 - El job `docker-build` de `ci.yml` corre en cada push/PR (build sin push). Los pasos de login a ACR, push y despliegue a AKS están escritos pero **pausados** mientras se valida Kubernetes en local
 
-### Clúster local con `kind` — `deploy/local/`
+### Clúster local con `kind` — `deploy/`
 
 Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`kind-3nodes.yaml` + `setup-local-cluster.ps1`). Namespaces `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`.
 
@@ -698,9 +698,9 @@ kubectl auth can-i get    nodes             --as=$sa          # no
 Hoy el webhook usa `PG_HOST=host.docker.internal` (TimescaleDB de Compose). Queda pendiente repuntarlo a `timescaledb-service` del clúster.
 
 ### Grafana en Kubernetes (provisioning)
-Datasource, contact points, políticas, mute timings y reglas viven en `deploy/local/monitoring/grafana-provisioning/` y se montan como ConfigMaps con Kustomize.
+Datasource, contact points, políticas, mute timings y reglas viven en `deploy/apps/grafana/grafana-provisioning/` y se montan como ConfigMaps con Kustomize.
 
-- Aplicar: `kubectl apply -k deploy/local/monitoring`. Nunca `kubectl apply -f` sobre el Deployment (los ConfigMaps llevan hash en el nombre).
+- Aplicar: `kubectl apply -k deploy/apps/grafana`. Nunca `kubectl apply -f` sobre el Deployment (los ConfigMaps llevan hash en el nombre).
 - Secret: `grafana-provisioning-secret` (PG_PASSWORD y NOC_WEBHOOK_TOKEN), copiado desde `webhook-secret`. Al rotar credenciales, recrearlo y ejecutar `kubectl rollout restart deployment/grafana -n monitoring`.
 - Mientras Postgres siga en Docker, el datasource apunta a `host.docker.internal:5432`.
 - No arrancar a la vez el Grafana de Docker y el de Kubernetes: cada alerta llegaría dos veces.
@@ -807,7 +807,7 @@ docker exec -i timescaledb psql -U noc_user -d noc -c "SELECT fingerprint, issue
 ```powershell
 kubectl get pods -n dev -o custom-columns="POD:.metadata.name,SA:.spec.serviceAccountName,AUTOMOUNT:.spec.automountServiceAccountToken"
 ```
-Si muestra `default`, aplica de nuevo `deploy/local/dev/`.
+Si muestra `default`, aplica de nuevo `deploy/base/` y `deploy/apps/`.
 
 ### `kubectl auth can-i ... --as=...` devuelve un resultado inesperado
 **Causa:** el Role o el RoleBinding no se aplicaron, o el `RoleBinding` apunta a otro namespace/SA. **Verifica:** `kubectl get sa,role,rolebinding -n dev`.
