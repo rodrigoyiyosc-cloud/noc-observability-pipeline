@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/part-of: noc-observability-pipeline
     environment: dev
 data:
+  PG_HOST: "host.docker.internal"
   PG_PORT: "5432"
   PG_DB: "noc"
   PG_USER: "noc_user"
