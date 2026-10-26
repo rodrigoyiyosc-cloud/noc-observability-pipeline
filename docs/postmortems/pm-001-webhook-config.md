@@ -125,7 +125,7 @@ Prioridades: **P0** previene un impacto directo a usuarios; **P1** evita este fa
 
 | ID | Tipo | Prioridad | Acción y criterio de cierre | Responsable | Fecha | Seguimiento |
 |---|---|---|---|---|---|---|
-| PM1-A1 | prevent | P1 | Paso de CI que compara las claves de `webhook-config.yaml` con las que exige `_require_env`. Cierre: un PR de prueba sin `PG_HOST` falla el job, y uno completo lo pasa | Rodrigo | 2026-10-30 | Issue por crear |
+| PM1-A1 | prevent | P1 | Paso de CI que compara las claves de `webhook-config.yaml` y `webhook-secret.yaml.example` con las 10 que exige `_require_env` (el script `scripts/check_config_keys.py` las lee de `main.py` con `ast`, sin lista copiada a mano). Cierre: un PR de prueba sin `PG_HOST` falla el job, y uno completo lo pasa | Rodrigo | 2026-10-30 | **Cerrada 2026-10-26.** PR `ci/config-keys` fusionado en `kubernetes`. Prueba negativa: un commit que borró `PG_HOST` del ConfigMap hizo fallar el check en GitHub; se revirtió y el check pasó en verde. Pipeline de GitLab en verde tras el merge. Alcance: valida el repo, no el estado vivo del clúster (eso es PM1-A4) |
 | PM1-A2 | prevent | P2 | Revisar quién puede hacer `patch` de ConfigMaps en `dev`. Cierre: resultado de `kubectl auth can-i patch configmaps -n dev --as=...` de cada rol operativo documentado en el runbook, y los permisos sobrantes retirados | Rodrigo | 2026-10-30 | Issue por crear |
 | PM1-A3 | prevent | P2 | Generar el ConfigMap con Kustomize (`configMapGenerator`, que añade un hash al nombre). Cierre: cambiar un valor en el repo crea un ConfigMap con nombre nuevo y un rollout visible en `kubectl rollout history` | Rodrigo | 2026-11-13 | Issue por crear |
 | PM1-A4 | prevent | P1 | Argo CD con `selfHeal` (Fase 2, semanas 3 y 4). Cierre: un `kubectl patch` manual a un ConfigMap se revierte o queda `OutOfSync`, y el tiempo hasta que ocurre se mide y se registra | Rodrigo | 2026-11-20 | Issue por crear |
@@ -134,6 +134,8 @@ Prioridades: **P0** previene un impacto directo a usuarios; **P1** evita este fa
 | PM1-A7 | prevent | P2 | Script de apoyo `lab-marks.ps1` con las funciones `Det`, `Causa` y `Res` que calculan solas el tiempo T+ desde el disparo. Cierre: usado en el siguiente simulacro, con marcas que traen su T+ | Rodrigo | 2026-10-23 | Issue por crear |
 
 Mientras no existan los issues, el seguimiento queda sin trazabilidad externa: crearlos y reemplazar "Issue por crear" por su número es el paso siguiente para cerrar este documento.
+
+**Actualización 2026-10-26.** PM1-A1 cerrada (1 de 7). Siguen abiertas A2 a A7. A6 y A7 tenían fecha 2026-10-23 y ya vencieron: reprogramarlas o cerrarlas con evidencia. A7 menciona `lab-marks.ps1`; el entorno de trabajo ahora es Bash, así que su criterio de cierre debe replantearse con un script `.sh`.
 
 ## Glosario
 
