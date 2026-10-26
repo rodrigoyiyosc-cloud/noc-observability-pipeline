@@ -7,7 +7,7 @@ on:
     branches: ["main", "kubernetes"]
 
 jobs:
-    test:
+  test:
     name: Unit tests (py${{ matrix.python }})
     runs-on: ubuntu-latest
     strategy:
