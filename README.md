@@ -697,6 +697,14 @@ kubectl auth can-i get    nodes             --as=$sa          # no
 
 Hoy el webhook usa `PG_HOST=host.docker.internal` (TimescaleDB de Compose). Queda pendiente repuntarlo a `timescaledb-service` del clúster.
 
+### Grafana en Kubernetes (provisioning)
+Datasource, contact points, políticas, mute timings y reglas viven en `deploy/local/monitoring/grafana-provisioning/` y se montan como ConfigMaps con Kustomize.
+
+- Aplicar: `kubectl apply -k deploy/local/monitoring`. Nunca `kubectl apply -f` sobre el Deployment (los ConfigMaps llevan hash en el nombre).
+- Secret: `grafana-provisioning-secret` (PG_PASSWORD y NOC_WEBHOOK_TOKEN), copiado desde `webhook-secret`. Al rotar credenciales, recrearlo y ejecutar `kubectl rollout restart deployment/grafana -n monitoring`.
+- Mientras Postgres siga en Docker, el datasource apunta a `host.docker.internal:5432`.
+- No arrancar a la vez el Grafana de Docker y el de Kubernetes: cada alerta llegaría dos veces.
+
 ### Despliegue y validación en `kind` (paso a paso)
 
 ```powershell

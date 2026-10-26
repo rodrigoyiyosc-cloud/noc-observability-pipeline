@@ -1,0 +1,32 @@
+# grafana/provisioning/alerting/notification_policies.yaml
+apiVersion: 1
+
+policies:
+  - orgId: 1
+    receiver: noc-webhook-default
+    group_by: ['alertname', 'hostname']
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    
+    routes:
+      # Severidad crítica → canal dedicado, notificación más agresiva
+      - receiver: noc-webhook-critical
+        matchers:
+          - severity = critical
+        group_wait: 10s
+        group_interval: 2m
+        repeat_interval: 20s
+        continue: false
+        mute_time_intervals:
+          - maintenance-window-tuesday
+
+      # Severidad warning → canal general, cadencia más relajada
+      - receiver: noc-webhook-default
+        matchers:
+          - severity = warning
+        group_wait: 1m
+        repeat_interval: 6h
+        continue: false
+        mute_time_intervals:
+          - maintenance-window-tuesday
