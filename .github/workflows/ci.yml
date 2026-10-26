@@ -47,10 +47,21 @@ jobs:
           JIRA_PROJECT_KEY: TST
         run: python -m pytest tests/test_webhook_endpoints.py tests/test_db_url.py -v
 
+  config-check:
+    name: Validate config keys (PM1-A1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check required env keys
+        run: python scripts/check_config_keys.py
+
   docker-build:
     name: Validate Docker build (webhook_service)
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, config-check]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
