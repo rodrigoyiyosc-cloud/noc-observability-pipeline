@@ -778,7 +778,7 @@ docker compose up -d --force-recreate grafana webhook-service
 ```powershell
 docker logs webhook_service --tail 50 | Select-String "Jira|Postgres"
 # Kubernetes:
-kubectl logs -n dev deploy/webhook-deployment --tail=50
+kubectl logs -n dev deploy/webhook-service --tail=50
 ```
 
 ### `/ready` responde `503`
