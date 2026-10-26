@@ -45,6 +45,7 @@ jobs:
           JIRA_USER: "test@example.invalid"
           JIRA_API_TOKEN: test-token-not-real
           JIRA_PROJECT_KEY: TST
+          GROQ_API_KEY: test-groq-api-key-not-real
         run: python -m pytest tests/test_webhook_endpoints.py tests/test_db_url.py -v
 
   config-check:

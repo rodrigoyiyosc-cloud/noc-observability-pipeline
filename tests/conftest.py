@@ -22,6 +22,7 @@ _FAKE_ENV = {
     "JIRA_USER": "test@example.invalid",
     "JIRA_API_TOKEN": "test-token-not-real",
     "JIRA_PROJECT_KEY": "TST",
+    "GROQ_API_KEY": "test-groq-key-not-real",
 }
 
 for _name, _value in _FAKE_ENV.items():

@@ -30,7 +30,7 @@ def _require_env(*names: str) -> dict[str, str]:
 _cfg = _require_env(
     "PG_HOST", "PG_PORT", "PG_DB", "PG_USER", "PG_PASSWORD",
     "JIRA_URL", "JIRA_USER", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY",
-    "NOC_WEBHOOK_TOKEN",
+    "NOC_WEBHOOK_TOKEN", "GROQ_API_KEY",
 )
 
 from src.orchestrator import orchestrator, checkpointer_pool  # noqa: E402  (checkpointer=PostgresSaver)
