@@ -43,7 +43,14 @@ unit-tests:
     - pip install pytest httpx
     - python -m pytest tests/test_webhook_endpoints.py tests/test_db_url.py -v
 
-# 2. Job de Validación de Docker
+# 2. Job de Validación de Configuración de Claves (PM1-A1) 
+config-check:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - python scripts/check_config_keys.py
+
+# 3. Job de Validación de Docker
 docker-build:
   stage: build
   image: docker:24.0.9 # Imagen base con el cliente de Docker instalado
