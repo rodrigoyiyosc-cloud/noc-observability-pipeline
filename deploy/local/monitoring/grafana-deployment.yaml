@@ -54,6 +54,18 @@ spec:
                 secretKeyRef:
                   name: grafana-admin-secret
                   key: GF_SECURITY_ADMIN_PASSWORD
+            # Variables que usan los archivos de provisioning (datasource y contact points).
+            # Si falta el Secret o una clave, el pod queda en CreateContainerConfigError (visible).
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-provisioning-secret
+                  key: PG_PASSWORD
+            - name: NOC_WEBHOOK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-provisioning-secret
+                  key: NOC_WEBHOOK_TOKEN
           resources:
             requests:
               cpu: "100m"
@@ -76,7 +88,20 @@ spec:
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
+            - name: provisioning-datasources
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+            - name: provisioning-alerting
+              mountPath: /etc/grafana/provisioning/alerting
+              readOnly: true
       volumes:
         - name: grafana-storage
           persistentVolumeClaim:
             claimName: grafana-pvc
+        # Kustomize reemplaza estos nombres por los ConfigMaps generados (con hash).
+        - name: provisioning-datasources
+          configMap:
+            name: grafana-provisioning-datasources
+        - name: provisioning-alerting
+          configMap:
+            name: grafana-provisioning-alerting

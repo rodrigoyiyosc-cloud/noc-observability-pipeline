@@ -1,0 +1,31 @@
+# Datasource de Grafana para Kubernetes (deploy/local/monitoring/grafana-provisioning/datasources/).
+#
+# Igual al de Docker Compose, salvo la URL: en el clúster no existe el nombre
+# "timescaledb" de Compose. Mientras Postgres siga en Docker se usa
+# host.docker.internal, igual que el webhook.
+# La contraseña viene de la variable de entorno PG_PASSWORD (Secret
+# grafana-provisioning-secret). No escribir ningún valor secreto en este archivo.
+
+apiVersion: 1
+
+datasources:
+  - name:      TimescaleDB-NOC
+    type:      postgres
+    uid:       timescaledb_noc          # las reglas de alerta usan este uid
+    url:       host.docker.internal:5432
+    database:  noc
+    user:      noc_user
+
+    secureJsonData:
+      password: ${PG_PASSWORD}
+
+    jsonData:
+      sslmode:          disable
+      maxOpenConns:     10
+      maxIdleConns:     2
+      connMaxLifetime:  14400
+      postgresVersion:  1600
+      timescaledb:      true
+
+    isDefault:  true
+    editable:   true

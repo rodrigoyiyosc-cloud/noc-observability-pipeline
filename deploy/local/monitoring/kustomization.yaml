@@ -1,0 +1,29 @@
+# deploy/local/monitoring/kustomization.yaml
+#
+# IMPORTANTE: desde ahora el Deployment de Grafana se aplica con
+#   kubectl apply -k deploy/local/monitoring
+# nunca con "kubectl apply -f", porque los ConfigMaps generados llevan un hash
+# en el nombre y solo Kustomize actualiza la referencia del Deployment.
+#
+# Un cambio en cualquier archivo de provisioning genera un ConfigMap nuevo y un
+# despliegue visible (en vez de un cambio latente que se activa en el próximo reinicio).
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - grafana-deployment.yaml
+
+configMapGenerator:
+  - name: grafana-provisioning-datasources
+    files:
+      - grafana-provisioning/datasources/timescaledb.yaml
+
+  - name: grafana-provisioning-alerting
+    files:
+      - grafana-provisioning/alerting/contact_points.yml
+      - grafana-provisioning/alerting/notification_policies.yml
+      - grafana-provisioning/alerting/alert_rules.yml
+      - grafana-provisioning/alerting/mute_timings.yml
