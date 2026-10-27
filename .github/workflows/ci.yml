@@ -59,10 +59,27 @@ jobs:
       - name: Check required env keys
         run: python scripts/check_config_keys.py
 
+  manifests:
+    name: Validate manifests (kubeconform)
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFORM_VERSION: v0.8.0
+      K8S_VERSION: "1.37.0"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform
+        run: |
+          curl -sSfL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz kubeconform
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -v
+          kubectl version --client
+      - name: Validate
+        run: bash scripts/validate_manifests.sh
+
   docker-build:
     name: Validate Docker build (webhook_service)
     runs-on: ubuntu-latest
-    needs: [test, config-check]
+    needs: [test, config-check, manifests]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

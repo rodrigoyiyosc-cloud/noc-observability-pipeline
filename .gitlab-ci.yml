@@ -51,7 +51,25 @@ config-check:
   script:
     - python scripts/check_config_keys.py
 
-# 3. Job de Validación de Docker
+# 3. Job de Validación de Manifiestos de Kubernetes 
+manifests:
+  stage: test
+  image: alpine:3.20
+  variables:
+    KUBECONFORM_VERSION: "v0.8.0"
+    KUBECTL_VERSION: "v1.37.0"
+    K8S_VERSION: "1.37.0"
+  before_script:
+    - apk add --no-cache bash curl tar
+    - curl -sSfL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz -C /usr/local/bin kubeconform
+    - curl -sSfL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+    - curl -sSfL -o /tmp/kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+    - echo "$(cat /tmp/kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum -c -
+    - chmod +x /usr/local/bin/kubectl
+  script:
+    - bash scripts/validate_manifests.sh
+
+# 4. Job de Validación de Docker
 docker-build:
   stage: build
   image: docker:24.0.9 # Imagen base con el cliente de Docker instalado
