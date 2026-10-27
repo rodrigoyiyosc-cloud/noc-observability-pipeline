@@ -48,4 +48,4 @@ La diferencia de bytes es exactamente la cantidad de CR. El ConfigMap de datasou
 | ID | Tipo | Acción y criterio de cierre |
 |---|---|---|
 | D1 | detect | Cubierta por PM1-A4: Argo CD marca `OutOfSync` este tipo de divergencia. Cierre: demostrarlo en un simulacro y registrar el tiempo |
-| D2 | prevent | Paso de CI que renderiza `kubectl kustomize deploy/apps/grafana` y valida con kubeconform. Cierre: el job falla ante un manifiesto o kustomization inválido |
+| D2 | prevent | Paso de CI que renderiza `kubectl kustomize deploy/apps/grafana` y valida con kubeconform. Cierre: el job falla ante un manifiesto o kustomization inválido. **Cerrada 2026-10-27**: el job `manifests` fusionado en `kubernetes`; un campo mal escrito (`replica`) lo puso en rojo en GitHub y GitLab |
