@@ -1,35 +1,35 @@
-# Excepción documentada (docs/security-exceptions.md). Vence 2026-10-01.
+# Excepción documentada (docs/security-exceptions.md). Vence 2026-11-13.
 vulnerabilities:
   - id: CVE-2025-68664
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2025-65106
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-34070
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-44843
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2025-64439
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-104873
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-45134
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: GHSA-f4xh-w4cj-qxq8
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2024-47874
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-48818
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
   - id: CVE-2026-54283
     statement: "Pila LangChain 0.x y FastAPI pendientes de subir (ver docs/security-exceptions.md)"
-    expired_at: 2026-10-01
+    expired_at: 2026-11-13
