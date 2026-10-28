@@ -170,3 +170,11 @@ Desde el 22-oct las marcas de causa nombran la causa concreta (variable, valor, 
 - **Gestión de incidentes**: `debug` es una herramienta de diagnóstico dentro del incidente.
 - **Control de accesos**: el permiso se concede por incidente y se retira al cerrarlo.
 - **Gestión de problemas**: lo encontrado con `debug` alimenta la causa raíz y el post-mortem.
+
+## Pod nuevo no arranca: ¿clave faltante o Postgres inalcanzable? (2026-10-27)
+El webhook exige Postgres al arrancar: `orchestrator.py` crea el checkpointer al importarse (5 intentos de 10 s) y, si falla, el proceso termina. Con Postgres caído, un pod nuevo entra en CrashLoopBackOff (no solo falla `/ready`). Durante un rollout, el pod viejo sigue sirviendo.
+
+| `logs --previous` dice | Causa |
+|---|---|
+| `Faltan variables de entorno obligatorias: <NOMBRE>` | Falta una clave en el ConfigMap o Secret (PM-001) |
+| `No se pudo inicializar el checkpointer Postgres tras 5 intentos` | Postgres inalcanzable o credenciales incorrectas (PM-002) |

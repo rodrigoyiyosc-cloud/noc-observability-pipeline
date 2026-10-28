@@ -102,6 +102,11 @@ jobs:
           docker run --rm -v "$RUNNER_TEMP:/work" -v "$GITHUB_WORKSPACE:/src" "$TRIVY_IMAGE" image \
             --input /work/image.tar --ignorefile /src/.trivyignore.yaml --scanners vuln,secret \
             --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress --skip-version-check
+      - name: Smoke test (kind efímero)
+        run: |
+          kind version
+          kubectl version --client
+          bash scripts/smoke_test_kind.sh "$LOCAL_TAG"
       - name: Publish to GHCR
         if: github.event_name == 'push'
         env:

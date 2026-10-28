@@ -18,4 +18,4 @@ __pycache__/
 timeline.txt
 
 # Cache de dependencias
-.cache/
+.cache/.smoke-kubeconfig
