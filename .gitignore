@@ -4,4 +4,5 @@ deploy/local/dev/webhook-secret.yaml
 deploy/local/dev/timescaledb-secret.yaml
 __pycache__/
 *.pyc
-/backups/
+/backups/**/__pycache__/
+CLAUDE.md
