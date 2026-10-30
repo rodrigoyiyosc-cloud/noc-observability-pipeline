@@ -19,3 +19,6 @@ timeline.txt
 
 # Cache de dependencias
 .cache/.smoke-kubeconfig
+
+# Configuración de kubectl para simuladores de CKA
+cka/
