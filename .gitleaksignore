@@ -1,0 +1,7 @@
+# Revisado el 2026-10-30: curl -u admin:admin en README.md (commits de agosto).
+# Era la credencial real por defecto de la Grafana local (Docker), expuesta en el
+# repo publico y rotada el 2026-10-30. Ya no es valida; se ignora para que el
+# historial no marque en rojo un valor muerto.
+56d9b1513202ddeb50fa1b9e4edee33569323634:README.md:curl-auth-user:273
+886e5b0b4c314d4ed65266578e18f346859defcc:README.md:curl-auth-user:265
+1722da2791def7bd2905654aad7c9817fc99fe51:README.md:curl-auth-user:265
