@@ -19,7 +19,7 @@ services:
     networks:
       - noc_net
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
 
   grafana:
     image: grafana/grafana-oss:13.0.2
@@ -42,7 +42,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - noc_net
 
@@ -51,7 +51,7 @@ services:
       context: ./webhook_service
     container_name: webhook_service
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     restart: unless-stopped
     depends_on:
       - timescaledb
@@ -84,7 +84,7 @@ services:
     depends_on:
       - webhook-service
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     networks:
       - noc_net
         
@@ -139,7 +139,7 @@ services:
       JUPYTER_TOKEN: ML2026
       PG_DSN: postgresql://${PG_USER}:${PG_PASSWORD}@timescaledb:5432/${PG_DB}
     ports:
-      - "8888:8888"
+      - "127.0.0.1:8888:8888"
     volumes:
       - ./jupyter/notebooks:/home/jovyan/work
     networks:
