@@ -14,3 +14,9 @@ Alcance (pendiente de analizar): para cada CVE, ¿se usa la función afectada? E
 - No verificado: accesos anteriores al 28-oct (el log se perdió al recrear el contenedor) y si el puerto era alcanzable fuera de la red local.
 - Pendiente: acotar 3000, 5432 y 8000 a 127.0.0.1; clave de 8 caracteres a reemplazar por una larga.
 - El valor viejo sigue en el historial git, pero ya no es válido. No se reescribe el historial.
+
+### SEC-002: actualización 2026-10-30 (puertos)
+- Cerrado: puertos de Compose (3000, 5432, 8000, 8501, 8888) publicados solo en 127.0.0.1.
+- Verificado: `docker compose config` con 5 host_ip 127.0.0.1; el clúster sigue llegando a Postgres (host.docker.internal:5432); por la IP de red los puertos no responden.
+- No verificado: si antes eran alcanzables desde fuera de la red local (depende de firewall y router, no revisados).
+- Pendiente: reemplazar la clave de Grafana de 8 caracteres por una larga.
