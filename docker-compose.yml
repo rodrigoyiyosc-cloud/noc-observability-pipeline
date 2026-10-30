@@ -29,7 +29,7 @@ services:
       - timescaledb
     environment:
       GF_SECURITY_ADMIN_USER:     admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD:?falta en .env}
       GF_SESSION_PROVIDER: memory
       GF_DEFAULT_APP_MODE: production
       TZ: America/Santiago
