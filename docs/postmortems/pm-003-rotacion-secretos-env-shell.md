@@ -99,10 +99,10 @@ Factor contribuyente: el procedimiento no incluía abrir una terminal limpia ni 
 | ID | Acción | Tipo | Prioridad | Responsable | Criterio de cierre | Fecha / estado |
 |---|---|---|---|---|---|---|
 | PM3-A1 | Desactivar `python.terminal.useEnvFile` | prevent | P1 | Rodrigo | Terminal nueva con 0 secretos | **Cerrada 2026-10-29 11:05** |
-| PM3-A2 | Runbook de rotación: terminal limpia, inventario, `docker compose config`, hash antes de revocar, revocar al final | prevent | P1 | Rodrigo | `docs/runbook-rotacion-secretos.md` ejecutado al rotar `dev/timescaledb-secret` | Issue por crear. Vence 2026-11-03 |
-| PM3-A3 | Script que lista variables del shell que pisan al `.env`, para correr antes de `compose up` | detect | P2 | Rodrigo | Script en `scripts/` probado con una variable falsa | Issue por crear. Vence 2026-11-06 |
-| PM3-A4 | Rotar `dev/timescaledb-secret` (6 caracteres) y reemplazar la clave de Grafana Docker (8 caracteres) por una larga | mitigate | P1 | Rodrigo | Valores nuevos aplicados y verificados con el runbook de A2 | Issue por crear. Vence 2026-11-02 |
-| PM3-A5 | Mover Postgres al clúster para reducir copias de la contraseña (hoy 5 lugares) | prevent | P3 | Rodrigo | Un solo Secret como fuente | Backlog. Unificar con PM2-A2 |
+| PM3-A2 | Runbook de rotación: terminal limpia, inventario, `docker compose config`, hash antes de revocar, revocar al final | prevent | P1 | Rodrigo | `docs/runbook-rotacion-secretos.md` ejecutado al rotar `dev/timescaledb-secret` | Issue #30. Vence 2026-11-03 |
+| PM3-A3 | Script que lista variables del shell que pisan al `.env`, para correr antes de `compose up` | detect | P2 | Rodrigo | Script en `scripts/` probado con una variable falsa | Issue #31. Vence 2026-11-06 |
+| PM3-A4 | Rotar `dev/timescaledb-secret` (6 caracteres) y reemplazar la clave de Grafana Docker (8 caracteres) por una larga | mitigate | P1 | Rodrigo | Valores nuevos aplicados y verificados con el runbook de A2 | Issue #27. Vence 2026-11-02 |
+| PM3-A5 | Mover Postgres al clúster para reducir copias de la contraseña (hoy 5 lugares) | prevent | P3 | Rodrigo | Un solo Secret como fuente | Issue #32. Backlog. Unificar con PM2-A2 |
 
 Las fechas de vencimiento, el tipo y la prioridad son propuestas: ajústalas si no calzan.
 
