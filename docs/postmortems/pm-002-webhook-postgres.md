@@ -7,6 +7,8 @@
 | Entorno | Clúster kind `noc-local-cluster`, namespace `dev` |
 | Servicio afectado | `webhook-service` (imagen `noc-webhook-service:v1.0.12`, 1 réplica) |
 | Autor | Rodrigo Codoceo |
+| Estado | Cerrado; acciones abiertas (ver sección 10) |
+| Formato | SREW cap. 10, sin culpa |
 | Marco | ITIL v4: Gestión de incidentes y Gestión de problemas |
 
 ## 1. Resumen
@@ -58,38 +60,44 @@ Hallazgo adicional: el `timescaledb-service` del clúster seguía con endpoint (
 
 Actualización 2026-10-20: el 503 de `/ready` se reprodujo y se capturó directamente con `kubectl debug` (`wget` desde un contenedor efímero) con Postgres detenido, y `nc` al puerto 5432 dio `exit=1` (con Postgres arriba, `exit=0`). Esto confirma la causa observada en los eventos del kubelet. El 200 de la tabla es de después de la recuperación.
 
-## 7. Qué funcionó
+## 7. Qué salió bien
 
 - La readiness probe retiró el pod del tráfico sin reiniciarlo, que es lo correcto: reiniciar no arregla una base caída.
 - La liveness (`/health`) no depende de Postgres, así que no hubo reinicios en cascada (`RESTARTS 0`).
 - Recuperación automática al volver la dependencia, sin intervención sobre el Deployment.
 - Los Events del pod dieron la causa visible en una sola lectura.
 
-## 8. Qué no funcionó
+## 8. Qué salió mal
 
 - Sin alerta automática: la caída se detectó porque se estaba mirando.
 - Dependencia crítica fuera del clúster, sin vigilancia desde Kubernetes.
 - Una sola réplica: no hay redundancia, pero tampoco ayudaría, porque todas las réplicas dependen de la misma base.
 - Una sola marca de resolución en el registro de tiempos.
 
-## 9. Acciones correctivas
+## 9. Dónde hubo suerte
 
-Responsable y fechas son una propuesta, ajusta según tu calendario.
+- La falla fue provocada y acotada: quien la ejecutó controló la duración (4 min 4 s). En un caso real no habría tenido esa ventana.
+- Nadie estaba enviando alertas durante la caída (no se envió tráfico de prueba), así que no se perdieron alertas ni tickets que se hayan notado. El impacto real no se midió.
+- *(Borrador mío a partir del propio documento: añade aquí algo que pudo salir peor y no salió, si lo recuerdas.)*
 
-| # | Acción | Responsable | Fecha |
-|---|---|---|---|
-| 1 | Crear alerta en Grafana sobre pod no listo (`kube_pod_status_ready{condition="false"}`) o sobre `/ready` | Rodrigo | 2026-10-22 |
-| 2 | Repuntar `PG_HOST` a `timescaledb-service` del clúster y cargar el esquema (fase posterior) | Rodrigo | 2026-10-29 |
-| 3 | Añadir al runbook: ante `Running 0/1`, revisar Postgres antes de reiniciar el pod | Rodrigo | 2026-10-18 |
-| 4 | Verificar `jira_dedup` tras la recuperación. **Cerrada el 2026-10-15**: estructura, estados (10 open, 17 closed, 0 creating) y 0 `issue_key` repetidos. Opcional: contrastar las 10 `open` con Jira | Rodrigo | Hecho |
-| 5 | Registrar dos marcas (acción y confirmación) en los próximos simulacros | Rodrigo | 2026-10-16 |
-| 6 | Medir memoria del webhook bajo carga y recién entonces ajustar request y límite (hoy 256Mi y 512Mi, con 105,5 MiB en reposo) | Rodrigo | 2026-10-24 |
-| 7 | Alerta por reinicios con motivo `OOMKilled` (requiere kube-state-metrics o equivalente) | Rodrigo | 2026-10-22 |
-| 8 | Usar 2 réplicas en el overlay de producción de Kustomize para eliminar la ventana de 7 s | Rodrigo | 2026-11-05 |
-| 9 | Decidir si el NOC necesita un rol temporal de depuración (`noc-debugger`) y validarlo con `can-i` y un `debug` real antes de adoptarlo | Rodrigo | 2026-10-30 |
-| 10 | Revisar con qué usuario corre el contenedor del webhook (`ps` mostró `uvicorn` como `root`) y evaluar `runAsNonRoot` en el `securityContext`, probando que la app siga arrancando | Rodrigo | 2026-11-06 |
+## 10. Acciones correctivas
 
-## 10. Otros simulacros del día (resumen)
+| ID | Acción | Tipo | Prioridad | Responsable | Criterio de cierre | Fecha / estado |
+|---|---|---|---|---|---|---|
+| PM2-A1 | Crear alerta en Grafana sobre pod no listo (`kube_pod_status_ready{condition="false"}`) o sobre `/ready` | detect | P1 | Rodrigo | Alerta disparada con Postgres detenido y recibida en el webhook | Vencida (2026-10-22). Duplica PM1-A5: consolidar allí |
+| PM2-A2 | Repuntar `PG_HOST` a `timescaledb-service` del clúster y cargar el esquema (fase posterior) | prevent | P2 | Rodrigo | `/ready` 200 con el Postgres de Docker detenido | Vencida (2026-10-29). Coincide con PM-003 A5: unificar |
+| PM2-A3 | Añadir al runbook: ante `Running 0/1`, revisar Postgres antes de reiniciar el pod | mitigate | P1 | Rodrigo | Sección en el runbook, ejecutada una vez | Vencida (2026-10-18). Posible cierre por la ampliación de `runbook-kubectl-debug.md`: verificar |
+| PM2-A4 | Verificar `jira_dedup` tras la recuperación | detect | P2 | Rodrigo | 0 `issue_key` repetidos | **Cerrada el 2026-10-15**: estructura, estados (10 open, 17 closed, 0 creating) y 0 `issue_key` repetidos. Opcional: contrastar las 10 `open` con Jira |
+| PM2-A5 | Registrar dos marcas (acción y confirmación) en los próximos simulacros | detect | P2 | Rodrigo | Próximo simulacro con ambas marcas | Vencida (2026-10-16). Estado por verificar |
+| PM2-A6 | Medir memoria del webhook bajo carga y recién entonces ajustar request y límite (hoy 256Mi y 512Mi, con 105,5 MiB en reposo) | prevent | P2 | Rodrigo | Medición registrada y valores ajustados o justificados | Vencida (2026-10-24) |
+| PM2-A7 | Alerta por reinicios con motivo `OOMKilled` (requiere kube-state-metrics o equivalente) | detect | P2 | Rodrigo | Alerta dispara con un pod forzado a OOM | Vencida (2026-10-22). Relacionada con PM1-A5 |
+| PM2-A8 | Usar 2 réplicas en el overlay de producción de Kustomize para eliminar la ventana de 7 s | prevent | P2 | Rodrigo | Rollout sin ventana sin endpoints | Vence 2026-11-05 |
+| PM2-A9 | Decidir si el NOC necesita un rol temporal de depuración (`noc-debugger`) y validarlo con `can-i` y un `debug` real antes de adoptarlo | prevent | P3 | Rodrigo | ADR con la decisión, validada con `can-i` y un `debug` real | Vence 2026-10-30 |
+| PM2-A10 | Revisar con qué usuario corre el contenedor del webhook (`ps` mostró `uvicorn` como `root`) y evaluar `runAsNonRoot` en el `securityContext`, probando que la app siga arrancando | prevent | P2 | Rodrigo | App arranca como no root, verificado | Vence 2026-11-06 |
+
+Tipo y prioridad son propuestas: ajústalas si no calzan.
+
+## 11. Otros simulacros del día (resumen)
 
 | Falla | Síntoma | Causa visible | Duración | Resolución |
 |---|---|---|---|---|
@@ -118,8 +126,8 @@ Hallazgo (falla 4): el consumo medido del webhook en reposo es 105,5 MiB (`memor
 
 Hallazgo (falla 5): con 1 réplica, el Deployment repone el pod en 7 s. Esa cifra es el costo de no tener redundancia, y la medición incluye el tiempo del propio `delete`.
 
-## 11. ITIL v4 (resumen)
+## 12. ITIL v4 (resumen)
 
 - **Gestión de incidentes**: restaurar el servicio rápido (secciones 4 a 6).
-- **Gestión de problemas**: causa raíz y acciones correctivas (secciones 5 y 9).
+- **Gestión de problemas**: causa raíz y acciones correctivas (secciones 5 y 10).
 - **Mejora continua**: alerta, runbook y repunte de la base al clúster.
