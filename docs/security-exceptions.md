@@ -20,3 +20,8 @@ Alcance (pendiente de analizar): para cada CVE, ¿se usa la función afectada? E
 - Verificado: `docker compose config` con 5 host_ip 127.0.0.1; el clúster sigue llegando a Postgres (host.docker.internal:5432); por la IP de red los puertos no responden.
 - No verificado: si antes eran alcanzables desde fuera de la red local (depende de firewall y router, no revisados).
 - Pendiente: reemplazar la clave de Grafana de 8 caracteres por una larga.
+
+### SEC-002: cierre 2026-11-02
+- Clave de la Grafana Docker reemplazada por una de 24 caracteres (antes 8), cambiada por la interfaz web, y registrada en GF_ADMIN_PASSWORD de .env.
+- Verificado: login con la clave nueva, 401 con admin:admin, Save & test del datasource OK y largo del .env igual al que resuelve docker compose config.
+- No verificado: que la clave sobreviva a recrear el contenedor sin el volumen (el volumen de Grafana persiste, no se probó).
