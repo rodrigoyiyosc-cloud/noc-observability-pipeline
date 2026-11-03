@@ -17,6 +17,18 @@ Pipeline de observabilidad de extremo a extremo — **multi-región**, **auto-in
 
 ---
 
+## ✅ Evidencia verificable
+
+| Qué | Dónde |
+|---|---|
+| CI/CD: tests en matriz con caché, validación de claves de configuración, kubeconform sobre los manifiestos, escaneo Trivy, smoke test en un clúster `kind` efímero y publicación en GHCR | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) · [`docs/ci-notes.md`](docs/ci-notes.md) |
+| Post-mortems sin culpa, con línea de tiempo, causa raíz y acciones con criterio de cierre | [`docs/postmortems/`](docs/postmortems/) |
+| Runbooks de diagnóstico y de rotación de secretos | [`docs/runbook-kubectl-debug.md`](docs/runbook-kubectl-debug.md) · [`docs/runbook-rotacion-secretos.md`](docs/runbook-rotacion-secretos.md) |
+| Hallazgos y excepciones de seguridad documentados | [`docs/security-exceptions.md`](docs/security-exceptions.md) |
+| Manifiestos de Kubernetes (RBAC de mínimo privilegio, NetworkPolicy, Kustomize para Grafana) | [`deploy/`](deploy/) · [`deploy/README.md`](deploy/README.md) |
+
+---
+
 ## 🧭 Acerca del Proyecto
 
 Este repositorio implementa un **loop de alerta cerrado, geográficamente distribuido y con criterio propio**. Tres simuladores regionales (`us-east`, `eu-west`, `sa-south`) alimentan una única hypertable en TimescaleDB. Grafana detecta la anomalía, la enruta según severidad, respeta las ventanas de mantenimiento definidas en código, y un microservicio propio en **FastAPI** — autenticado, con cliente Jira nativo y **deduplicación atómica compartida en PostgreSQL** — recibe, registra, prioriza y **escala automáticamente cada incidente a un ticket de Jira**, sin intervención humana y sin generar *ticket storms*, incluso con varias réplicas corriendo en paralelo.
@@ -223,41 +235,27 @@ Orquestación con **LangGraph** bajo un `StateGraph` jerárquico con enrutamient
 ├── webhook_service.sql              # DDL de incident_logs (tabla + índices GIN); idempotente, incluido en sql/schema.sql
 │
 ├── .github/workflows/
-│   └── ci.yml                       # pytest sobre tests/test_webhook_endpoints.py + build de la imagen Docker
-├── .gitlab-ci.yml                   # Mismo pipeline en GitLab CI: stages test (pytest) y build (docker build vía dind)
+│   └── ci.yml                       # test (matriz), config-check, manifests (kubeconform), image-scan (Trivy), smoke test en kind y publicación en GHCR
+├── .gitlab-ci.yml                   # GitLab CI: stages test, build y scan (sin smoke test)
 │
-├── k8s/                             # PoC de despliegue en Azure AKS (ver sección Kubernetes)
-│   ├── webhook-deployment.yaml
-│   ├── webhook-service.yaml         # type: LoadBalancer
-│   ├── webhook-secret.yaml          # plantilla con placeholders — sin valores reales
-│   ├── timescaledb-deployment.yaml  # PVC 10Gi + PGDATA en subdirectorio (workaround Azure Disk)
-│   └── timescaledb-service.yaml
+├── deploy/                          # Manifiestos de Kubernetes (ver deploy/README.md)
+│   ├── cluster/                     # kind-3nodes.yaml + setup-local-cluster.ps1
+│   ├── base/                        # namespaces, NetworkPolicy y RBAC del operador NOC
+│   ├── apps/
+│   │   ├── webhook/                 # Deployment, Service, Ingress, ConfigMap y ServiceAccount
+│   │   ├── timescaledb/             # StatefulSet y Service
+│   │   └── grafana/                 # Deployment y provisioning (Kustomize: kubectl apply -k)
+│   └── _archive/azure-intento-1/    # PoC de Azure AKS (histórico, ver deploy/_archive/README.md)
 │
-├── deploy/                          # Manifiestos: cluster/, base/, apps/ (ver deploy/README.md)
-│   ├── kind-3nodes.yaml             # 1 control-plane + 2 workers
-│   ├── setup-local-cluster.ps1
-│   ├── namespaces.yaml              # namespaces dev y monitoring con labels estándar
-│   ├── dev/                         # namespace dev
-│   │   ├── webhook-deployment.yaml  # imagen v1.0.12, probes, límites, anti-affinity, SA propia
-│   │   ├── webhook-serviceaccount.yaml # 🆕 webhook-sa (sin token montado)
-│   │   ├── noc-operator-rbac.yaml   # 🆕 SA + Role + RoleBinding del operador NOC (mínimo privilegio)
-│   │   ├── webhook-config.yaml      # ConfigMap (PG_HOST, PG_PORT, PG_DB, PG_USER, JIRA_URL, ...)
-│   │   ├── webhook-secret.yaml.example # plantilla — el real está gitignored
-│   │   ├── webhook-service.yaml     # ClusterIP
-│   │   ├── webhook-ingress.yaml     # NGINX Ingress, host webhook.local (solo /alert y /health)
-│   │   ├── network-policy.yaml      # default-deny + allow ingress-nginx/monitoring + allow webhook→timescaledb
-│   │   ├── timescaledb-statefulset.yaml # StatefulSet + volumeClaimTemplate RWO 2Gi
-│   │   ├── timescaledb-service.yaml
-│   │   ├── timescaledb-secret.yaml.example # 🆕 plantilla — el real está gitignored
-│   │   └── timescaledb-secret.yaml  # gitignored
-│   └── monitoring/                  # namespace monitoring
-│       ├── grafana-deployment.yaml  # grafana-oss:13.0.2, fsGroup 472, admin desde Secret, probes /api/health
-│       ├── grafana-admin-secret.yaml.example # 🆕 plantilla — el real está gitignored
-│       ├── grafana-pvc.yaml
-│       ├── grafana-service.yaml
-│       └── grafana-ingress.yaml     # NGINX Ingress, host grafana.local
+├── scripts/                         # validate_manifests.sh, check_config_keys.py, smoke_test_kind.sh, respaldos y utilidades
 │
-├── deploy-azure-infra.ps1           # az login / group create / acr create / aks create / attach-acr
+├── docs/
+│   ├── postmortems/                 # PM-001 a PM-003 (SREW cap. 10) y evidencia
+│   ├── runbook-kubectl-debug.md     # diagnóstico en Kubernetes
+│   ├── runbook-rotacion-secretos.md # rotación de secretos
+│   ├── security-exceptions.md       # hallazgos y excepciones de seguridad
+│   └── ci-notes.md · cloud-setup.md
+│
 │
 ├── .env                              # Secretos y configuración (no versionado)
 ├── .env.example                      # Plantilla sin valores
@@ -314,7 +312,8 @@ NOC_DATA_AGENT_MODEL=llama3-8b-8192
 NOC_ACTION_AGENT_MODEL=qwen/qwen3.6-27b
 
 # ── Grafana ──────────────────────────────────────────────────────────────────
-GF_SECURITY_ADMIN_PASSWORD=reemplaza-con-una-contrasena-fuerte
+# docker-compose.yml la entrega a Grafana como GF_SECURITY_ADMIN_PASSWORD
+GF_ADMIN_PASSWORD=reemplaza-con-una-clave-de-24-o-mas-caracteres
 
 # ── ML Analytics Hub (Jupyter) ───────────────────────────────────────────────
 JUPYTER_TOKEN=reemplaza-con-un-token-de-acceso
@@ -346,7 +345,7 @@ WEBHOOK_URL=http://localhost:8000/alert
 
 ```powershell
 git clone <repo-url>
-cd noc-observability-pipeline-cloud-native
+cd noc-observability-pipeline
 ```
 
 ### 2. Configurar el `.env`
@@ -613,24 +612,24 @@ context: dict                                              # last_sql_query, las
 
 El `webhook-service` tiene dos rutas paralelas de migración a Kubernetes. En ambas, **TimescaleDB** sigue pudiendo vivir en Docker Compose (red híbrida) salvo donde se indica.
 
-### Prueba de concepto en Azure (AKS + ACR) — `k8s/`
+### Prueba de concepto en Azure (AKS + ACR) — `deploy/_archive/azure-intento-1/`
 
 - `webhook-deployment.yaml`: imagen `nocacr.azurecr.io/noc-webhook-service:latest`, variables no sensibles inline y el resto vía `envFrom: secretRef`; sondas sobre `/health`
 - `webhook-service.yaml`: `type: LoadBalancer` (IP pública directa; sin Ingress/TLS todavía)
 - `webhook-secret.yaml`: plantilla con placeholders `REEMPLAZAR_*` — **nunca** commitear con valores reales
 - `timescaledb-deployment.yaml`: `PersistentVolumeClaim` (10Gi, `ReadWriteOnce`) + `Deployment` (`strategy: Recreate`); `PGDATA` en subdirectorio para sortear el `lost+found` de Azure Disk
-- `deploy-azure-infra.ps1`: aprovisiona Resource Group + ACR + AKS y adjunta el ACR al clúster
-- El job `docker-build` de `ci.yml` corre en cada push/PR (build sin push). Los pasos de login a ACR, push y despliegue a AKS están escritos pero **pausados** mientras se valida Kubernetes en local
+- `scripts/deploy-azure-infra.ps1`: aprovisiona Resource Group + ACR + AKS y adjunta el ACR al clúster
+- El job `image-scan` de `ci.yml` construye, escanea, prueba y publica la imagen en GHCR (el push, solo en eventos `push`). Los pasos de login a ACR, push y despliegue a AKS están escritos pero **pausados** mientras se valida Kubernetes en local
 
 ### Clúster local con `kind` — `deploy/`
 
-Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`kind-3nodes.yaml` + `setup-local-cluster.ps1`). Namespaces `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`.
+Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`deploy/cluster/kind-3nodes.yaml` + `deploy/cluster/setup-local-cluster.ps1`). Namespaces `dev` (webhook-service + TimescaleDB) y `monitoring` (Grafana), con labels estándar `app.kubernetes.io/*` y `environment`.
 
-#### Webhook Service endurecido (`dev/webhook-deployment.yaml`)
+#### Webhook Service endurecido (`deploy/apps/webhook/webhook-deployment.yaml`)
 
 | Aspecto | Configuración |
 |---|---|
-| Imagen | `noc-webhook-service:v1.0.12` (cargada al clúster con `kind load docker-image`) |
+| Imagen | `noc-webhook-service:v1.0.13` (cargada al clúster con `kind load docker-image`; CI publica además en GHCR) |
 | Probes | `startupProbe` y `livenessProbe` en `/health`; `readinessProbe` en `/ready` (Postgres) |
 | Recursos | límite de memoria 512Mi (a ajustar tras medir con `docker stats`) |
 | Historial | `revisionHistoryLimit: 5` |
@@ -642,7 +641,7 @@ Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`kind-3nodes.yaml` + 
 #### Exposición y red
 
 - `webhook-service` es un `Service` ClusterIP publicado por **NGINX Ingress** (`webhook-ingress.yaml`, host `webhook.local`) que expone **solo** `/alert` y `/health` (rutas `Exact`); `/ready` y `/api/chat` no se publican. Grafana se expone en `grafana.local`
-- **`NetworkPolicy`** (`dev/network-policy.yaml`): *default-deny* en `dev`; permite ingreso al webhook (puerto 8000) solo desde `ingress-nginx` y el namespace `monitoring`; y `allow-webhook-to-timescaledb` permite al webhook llegar a TimescaleDB (5432)
+- **`NetworkPolicy`** (`deploy/base/network-policy.yaml`): *default-deny* en `dev`; permite ingreso al webhook (puerto 8000) solo desde `ingress-nginx` y el namespace `monitoring`; y `allow-webhook-to-timescaledb` permite al webhook llegar a TimescaleDB (5432)
 - En `kind`, el Ingress no es alcanzable desde Windows sin `extraPortMappings`; para pruebas se usa `kubectl port-forward`
 
 #### Secrets (sin valores en el repositorio)
@@ -689,7 +688,7 @@ kubectl auth can-i get    pods              -n monitoring --as=$sa   # no
 kubectl auth can-i get    nodes             --as=$sa          # no
 ```
 
-#### TimescaleDB en Kubernetes (`dev/timescaledb-statefulset.yaml`)
+#### TimescaleDB en Kubernetes (`deploy/apps/timescaledb/timescaledb-statefulset.yaml`)
 
 `StatefulSet` de 1 réplica (`timescale/timescaledb:2.17.2-pg16`) con `volumeClaimTemplate` RWO de 2Gi (`storageClassName: standard`). El clúster no trae el esquema (`incident_logs`, `network_telemetry`, `devices`); `main.py` solo crea `jira_dedup`. Para usarlo hay que cargar `sql/schema.sql`, `webhook_service.sql` e `sql/incident_views.sql`.
 
@@ -707,14 +706,18 @@ Datasource, contact points, políticas, mute timings y reglas viven en `deploy/a
 
 ### Despliegue y validación en `kind` (paso a paso)
 
-```powershell
-# 1) Construir la imagen y cargarla al clúster
-docker build -t noc-webhook-service:v1.0.12 .\webhook_service
-kind load docker-image noc-webhook-service:v1.0.12 --name noc-local-cluster
+```bash
+# 1) Construir la imagen y cargarla al clúster (el manifiesto usa la etiqueta local)
+docker build -t noc-webhook-service:v1.0.13 ./webhook_service
+kind load docker-image noc-webhook-service:v1.0.13 --name noc-local-cluster
 
-# 2) Aplicar los manifiestos y esperar el rollout
-kubectl apply -R -f .\deploy\local\dev\
-kubectl rollout status deployment/webhook-deployment -n dev
+# 2) Aplicar base y aplicaciones, y esperar el rollout
+#    Los Secrets reales no están en el repo: se crean aparte desde las plantillas *.example
+kubectl apply -f deploy/base/
+kubectl apply -f deploy/apps/webhook/
+kubectl apply -f deploy/apps/timescaledb/
+kubectl apply -k deploy/apps/grafana
+kubectl rollout status deployment/webhook-service -n dev
 
 # 3) Acceso local para pruebas
 kubectl port-forward -n dev svc/webhook-service 8000:8000
@@ -863,7 +866,7 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 - Usa un secret manager (Vault, AWS/GCP Secrets Manager, Azure Key Vault) o un CSI driver de secretos en el clúster
 - Rota `NOC_WEBHOOK_TOKEN`, `JIRA_API_TOKEN`, `GROQ_API_KEY` y `PG_PASSWORD` periódicamente, y **de inmediato** si alguno se pegó en un chat, ticket o log
 - Cambia la contraseña de Grafana Admin y el token de Jupyter tras el despliegue
-- No publiques los puertos `8000` y `8888` fuera del host; usa reverse proxy con TLS
+- Los puertos de Compose (3000, 5432, 8000, 8501 y 8888) se publican solo en `127.0.0.1`; para exponerlos fuera del host usa un reverse proxy con TLS
 - Recuerda que `JIRA_URL` revela el nombre del sitio Atlassian si el repositorio es público
 
 ---
@@ -916,9 +919,9 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 - ✅ Compose sin credenciales por defecto; reglas de `.gitignore` y `.dockerignore`
 
 ### 🚧 Fase 7 — Cloud-Native / Kubernetes (en curso)
-- ✅ Manifiestos para AKS (`k8s/`) y script de aprovisionamiento Azure (`deploy-azure-infra.ps1`)
+- ✅ Manifiestos para AKS (`deploy/_archive/azure-intento-1/`) y script de aprovisionamiento Azure (`scripts/deploy-azure-infra.ps1`)
 - ✅ Clúster local multinodo con `kind` y namespaces `dev`/`monitoring`
-- ✅ Webhook en `v1.0.12` con probes (`startup`, `liveness`, `readiness`), límite de memoria, `revisionHistoryLimit` y `terminationGracePeriodSeconds`
+- ✅ Webhook en `v1.0.13` con probes (`startup`, `liveness`, `readiness`), límite de memoria, `revisionHistoryLimit` y `terminationGracePeriodSeconds`
 - ✅ `NetworkPolicy` *default-deny* + reglas hacia el webhook y hacia TimescaleDB
 - ✅ Ingress mínimo (`/alert` y `/health`) para el webhook y Ingress para Grafana
 - ✅ Grafana `13.0.2` con contraseña desde Secret, `fsGroup` y probes
@@ -972,11 +975,11 @@ Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier 
 2. Edita el YAML/SQL/código correspondiente
 3. Commit descriptivo (un tema por commit)
 4. Abre PR / merge y haz push a `origin` y `gitlab`
-5. Redeploy: `docker compose up -d --build` (Compose) o `kubectl apply -R -f .\deploy\local\dev\` (Kubernetes)
+5. Redeploy: `docker compose up -d --build` (Compose) o `kubectl apply -f deploy/apps/webhook/` y `kubectl apply -k deploy/apps/grafana` (Kubernetes)
 6. Valida el cambio en la UI, con `Invoke-RestMethod` o con la matriz de pruebas de la sección Kubernetes
 
 ---
 
 **Mantenido por:** Rodrigo Codoceo.
-**Última actualización:** Octubre 2026
-**Versión:** 7.0 (Webhook v1.0.12 · dedup atómico multi-réplica · Kubernetes local endurecido con RBAC de mínimo privilegio)
+**Última actualización:** Noviembre 2026
+**Versión:** 7.0 (Webhook v1.0.13 · dedup atómico multi-réplica · Kubernetes local endurecido con RBAC de mínimo privilegio)
