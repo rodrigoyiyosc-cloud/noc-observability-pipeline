@@ -13,6 +13,7 @@ __pycache__/
 
 # Respaldos
 /backups/
+/backups/**/__pycache__/
 
 # Cuaderno de laboratorio
 timeline.txt
@@ -22,4 +23,6 @@ timeline.txt
 
 # Configuración de kubectl para simuladores de CKA
 cka/
-cka/
+
+# Archivo de instrucciones local
+CLAUDE.md
