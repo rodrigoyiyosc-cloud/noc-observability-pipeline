@@ -5,3 +5,7 @@
 56d9b1513202ddeb50fa1b9e4edee33569323634:README.md:curl-auth-user:273
 886e5b0b4c314d4ed65266578e18f346859defcc:README.md:curl-auth-user:265
 1722da2791def7bd2905654aad7c9817fc99fe51:README.md:curl-auth-user:265
+# Revisado el 2026-11-03: la primera línea de este archivo (commit 2b018fe) cita el ejemplo
+# de agosto ya rotado. Es texto propio, sin credencial vigente. Falso positivo.
+2b018fe11e64b03bb83d8a8f271fdab7c32201a5:.gitleaksignore:curl-auth-user:1
+
