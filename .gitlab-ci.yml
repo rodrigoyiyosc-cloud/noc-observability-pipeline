@@ -8,9 +8,9 @@ stages:
 workflow:
   rules:
     # Se ejecuta en ramas específicas ante un push
-    - if: $CI_COMMIT_BRANCH =~ /^(main|kubernetes)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(main)$/
     # Se ejecuta ante un Merge Request (equivalente a pull_request) dirigido a main
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(main|kubernetes)$/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(main)$/
 
 # 1. Job de Tests Unitarios
 unit-tests:
