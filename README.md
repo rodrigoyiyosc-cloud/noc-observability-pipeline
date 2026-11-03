@@ -971,7 +971,7 @@ Cambia `type: webhook` por `type: slack` en `contact_points.yml`.
 Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier cambio en alertas, dashboards, datasources, esquema, Webhook Service, grafo del NOC-MAS o manifiestos de Kubernetes debe pasar por código y Git.
 
 **Workflow:**
-1. Crea una rama de trabajo (`git switch -c chore/<tema>`) desde `kubernetes` o `main`
+1. Crea una rama de trabajo (`git switch -c chore/<tema>`) desde `main`
 2. Edita el YAML/SQL/código correspondiente
 3. Commit descriptivo (un tema por commit)
 4. Abre PR / merge y haz push a `origin` y `gitlab`
