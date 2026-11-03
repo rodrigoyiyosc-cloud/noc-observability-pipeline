@@ -1,0 +1,1 @@
+Primer intento de despliegue en Azure, pausado para estudiar fundamentos. No es la fuente de verdad.

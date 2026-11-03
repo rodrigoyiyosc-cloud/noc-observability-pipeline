@@ -15,8 +15,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.state import NOCState
 
-PG_DSN = os.getenv("PG_DSN", "postgresql+psycopg2://user:pass@localhost:5432/noc")
-_engine = create_engine(PG_DSN, pool_pre_ping=True)
+from src.db_url import build_db_url
+
+_engine = create_engine(build_db_url(), pool_pre_ping=True)
 
 ALLOWED_TABLE = "network_telemetry"
 _FORBIDDEN = re.compile(

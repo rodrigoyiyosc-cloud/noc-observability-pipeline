@@ -1,0 +1,33 @@
+# Contact points de Grafana para Kubernetes (deploy/local/monitoring/grafana-provisioning/alerting/).
+#
+# Igual al de Docker Compose, salvo la URL: Grafana corre en el namespace
+# monitoring y el webhook en dev, por eso se usa el nombre DNS completo.
+# El token viene de la variable de entorno NOC_WEBHOOK_TOKEN (Secret
+# grafana-provisioning-secret). No escribir ningún valor secreto en este archivo.
+
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: noc-webhook-default
+    receivers:
+      - uid: noc-webhook-001
+        type: webhook
+        settings:
+          url: http://webhook-service.dev.svc.cluster.local:8000/alert
+          httpMethod: POST
+          authorization_scheme: Bearer
+          authorization_credentials: ${NOC_WEBHOOK_TOKEN}
+        disableResolveMessage: false
+
+  - orgId: 1
+    name: noc-webhook-critical
+    receivers:
+      - uid: noc-webhook-002
+        type: webhook
+        settings:
+          url: http://webhook-service.dev.svc.cluster.local:8000/alert
+          httpMethod: POST
+          authorization_scheme: Bearer
+          authorization_credentials: ${NOC_WEBHOOK_TOKEN}
+        disableResolveMessage: false

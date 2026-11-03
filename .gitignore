@@ -1,8 +1,28 @@
+# Credenciales
 **/.env
-deploy/local/webhook-secrets.yaml
-deploy/local/dev/webhook-secret.yaml
-deploy/local/dev/timescaledb-secret.yaml
+**/.env.*
+!**/.env.example
+
+# Secrets de Kubernetes (las plantillas .example sí se versionan)
+**/*secret*.yaml
+!**/*secret*.example.yaml
+
+# Python
 __pycache__/
 *.pyc
+
+# Respaldos
+/backups/
 /backups/**/__pycache__/
+
+# Cuaderno de laboratorio
+timeline.txt
+
+# Cache de dependencias
+.cache/.smoke-kubeconfig
+
+# Configuración de kubectl para simuladores de CKA
+cka/
+
+# Archivo de instrucciones local
 CLAUDE.md
