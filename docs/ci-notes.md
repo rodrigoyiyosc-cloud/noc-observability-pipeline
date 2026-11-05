@@ -4,3 +4,6 @@ Solo corre en GitHub Actions (job `image-scan`, antes de publicar). GitLab no lo
 
 ## Overlays de gitops (2026-11-04)
 El smoke test usa los manifiestos base de `deploy/`; el overlay `gitops/` lo valida `scripts/validate_manifests.sh`. El `kustomization.yaml` de `deploy/apps/webhook/` se omite en el bucle del smoke test.
+
+## Publicación y promoción a dev (2026-11-04)
+En cada push a main corren test, config-check, manifests e image-scan; después publish (sha-<7>, sin sobrescribir una etiqueta que ya existe) y promote-dev (solo si cambió webhook_service/ o si se lanza a mano). promote-dev abre un PR que cambia la línea digest de gitops/dev, lanza ci.yml con workflow_dispatch sobre la rama del PR para que se reporten los checks obligatorios y activa el auto-merge. Si esos checks no se reportan, la salida es un PAT fine-grained como excepción documentada (ADR-002). Los tags v* no disparan este workflow.
