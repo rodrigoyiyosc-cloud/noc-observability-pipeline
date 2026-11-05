@@ -3,9 +3,17 @@ name: CI
 on:
   push:
     branches: ["main"]
-    tags: ["v*"]
+    paths-ignore: ["gitops/**"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.ref) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -84,7 +92,6 @@ jobs:
     needs: test
     permissions:
       contents: read
-      packages: write
     env:
       TRIVY_IMAGE: ghcr.io/aquasecurity/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c
       LOCAL_TAG: noc-webhook-service:ci
@@ -111,21 +118,14 @@ jobs:
           kind version
           kubectl version --client
           bash scripts/smoke_test_kind.sh "$LOCAL_TAG"
-      - name: Publish to GHCR
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/noc-webhook-service"
-          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          TAGS=("sha-${GITHUB_SHA::7}")
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then TAGS+=("$GITHUB_REF_NAME"); fi
-          for t in "${TAGS[@]}"; do
-            docker tag "$LOCAL_TAG" "$REPO:$t"
-            docker push "$REPO:$t"
-          done
-          docker inspect --format '{{index .RepoDigests 0}}' "$REPO:${TAGS[0]}"
+      - name: Upload image artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: image
+          path: ${{ runner.temp }}/image.tar
+          retention-days: 1
+          if-no-files-found: error
 
 
 # ── Pasos de Azure ACR pausados durante el aprendizaje local de Kubernetes ──
@@ -181,3 +181,112 @@ jobs:
   #           k8s/webhook-service.yaml
   #         images: |
   #           nocacr.azurecr.io/noc-webhook-service:${{ github.sha }}
+
+  changes:
+    name: Detect webhook changes
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      webhook: ${{ steps.diff.outputs.webhook }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          changed=true
+          if [ "$EVENT" = "push" ] && [[ "$BEFORE" =~ ^[0-9a-f]{40}$ ]] && [[ ! "$BEFORE" =~ ^0+$ ]] \
+             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            if git diff --quiet "$BEFORE" "$SHA" -- webhook_service/; then changed=false; fi
+          fi
+          echo "webhook=$changed" >> "$GITHUB_OUTPUT"
+          echo "webhook_service/ cambio: $changed"
+
+  publish:
+    name: Publish to GHCR
+    needs: [test, config-check, manifests, image-scan]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.pub.outputs.digest }}
+    env:
+      LOCAL_TAG: noc-webhook-service:ci
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: image
+          path: ${{ runner.temp }}/img
+      - name: Publish (sin sobrescribir un sha-<7> existente)
+        id: pub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/noc-webhook-service"
+          TAG="sha-${SHA::7}"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          if docker pull "$REPO:$TAG" >/dev/null 2>&1; then
+            echo "El tag $TAG ya existe: se reutiliza su digest, no se sobrescribe."
+          else
+            docker load -i "$RUNNER_TEMP/img/image.tar"
+            docker tag "$LOCAL_TAG" "$REPO:$TAG"
+            docker push "$REPO:$TAG"
+          fi
+          RD="$(docker inspect --format '{{index .RepoDigests 0}}' "$REPO:$TAG")"
+          DIGEST="${RD#*@}"
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "ERROR: digest invalido" >&2; exit 1; }
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "$REPO:$TAG -> $DIGEST"
+
+  promote-dev:
+    name: Promote to dev (PR)
+    needs: [publish, changes]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || needs.changes.outputs.webhook == 'true')
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    concurrency:
+      group: promote-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open promotion PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGEST: ${{ needs.publish.outputs.digest }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "ERROR: digest invalido" >&2; exit 1; }
+          SHA7="${SHA::7}"
+          BRANCH="promote/dev-$SHA7"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          bash scripts/set_image_digest.sh dev "$DIGEST"
+          if git diff --quiet; then echo "gitops/dev ya apunta a ese digest: nada que promover."; exit 0; fi
+          [ "$(git diff --name-only)" = "gitops/dev/kustomization.yaml" ] || { echo "ERROR: el cambio toca otros archivos" >&2; exit 1; }
+          [ "$(git diff --numstat | awk '{print $1"/"$2}')" = "1/1" ] || { echo "ERROR: el cambio no es de una linea" >&2; exit 1; }
+          git add gitops/dev/kustomization.yaml
+          git commit -m "chore(gitops): promover dev a $DIGEST (sha-$SHA7)"
+          for n in $(gh pr list --state open --json number,headRefName --jq '.[] | select(.headRefName | startswith("promote/dev-")) | .number'); do
+            gh pr close "$n" --delete-branch --comment "Reemplazada por una promocion mas reciente."
+          done
+          git push origin "$BRANCH"
+          PR="$(gh pr create --base main --head "$BRANCH" --title "chore(gitops): promover dev a sha-$SHA7" --body "Promocion automatica (ADR-002). Digest: $DIGEST")"
+          gh workflow run ci.yml --ref "$BRANCH"
+          gh pr merge "$PR" --auto --squash --delete-branch
