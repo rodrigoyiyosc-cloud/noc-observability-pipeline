@@ -34,7 +34,7 @@ jobs:
 
       - name: Run unit tests
         env:
-          # Valores falsos de prueba: main.py exige estas 10 variables al
+          # Valores falsos de prueba: main.py exige estas 11 variables al
           # importarse. Nunca usar secretos reales en este job.
           NOC_WEBHOOK_TOKEN: ci-test-token-temporal
           PG_HOST: localhost
@@ -91,9 +91,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
+        env:
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}
+          REVISION: ${{ github.sha }}
         run: |
           docker build \
-            --label "org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}" \
+            --label "org.opencontainers.image.source=$SOURCE_URL" \
+            --label "org.opencontainers.image.revision=$REVISION" \
             -t "$LOCAL_TAG" ./webhook_service
       - name: Save image
         run: docker save "$LOCAL_TAG" -o "$RUNNER_TEMP/image.tar"
