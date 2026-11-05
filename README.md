@@ -629,7 +629,7 @@ Clúster `noc-local-cluster`: 1 control-plane + 2 workers (`deploy/cluster/kind-
 
 | Aspecto | Configuración |
 |---|---|
-| Imagen | `noc-webhook-service:v1.0.13` (cargada al clúster con `kind load docker-image`; CI publica además en GHCR) |
+| Imagen | `ghcr.io/rodrigoyiyosc-cloud/noc-webhook-service@sha256:<digest>` (fijada en `gitops/dev`, ver ADR-002) |
 | Probes | `startupProbe` y `livenessProbe` en `/health`; `readinessProbe` en `/ready` (Postgres) |
 | Recursos | límite de memoria 512Mi (a ajustar tras medir con `docker stats`) |
 | Historial | `revisionHistoryLimit: 5` |
@@ -707,20 +707,15 @@ Datasource, contact points, políticas, mute timings y reglas viven en `deploy/a
 ### Despliegue y validación en `kind` (paso a paso)
 
 ```bash
-# 1) Construir la imagen y cargarla al clúster (el manifiesto usa la etiqueta local)
-docker build -t noc-webhook-service:v1.0.13 ./webhook_service
-kind load docker-image noc-webhook-service:v1.0.13 --name noc-local-cluster
-
-# 2) Aplicar base y aplicaciones, y esperar el rollout
-#    Los Secrets reales no están en el repo: se crean aparte desde las plantillas *.example
+# 1) Base y base de datos (los Secrets reales se crean aparte desde las plantillas *.example)
 kubectl apply -f deploy/base/
-kubectl apply -f deploy/apps/webhook/
 kubectl apply -f deploy/apps/timescaledb/
+# 2) Webhook: la imagen sale de gitops/dev (digest en GHCR). Solo desde main sincronizada.
+bash scripts/deploy_dev.sh
+# 3) Grafana
 kubectl apply -k deploy/apps/grafana
-kubectl rollout status deployment/webhook-service -n dev
-
-# 3) Acceso local para pruebas
-kubectl port-forward -n dev svc/webhook-service 8000:8000
+# 4) Acceso local para pruebas (8081, porque Docker ya publica 8000)
+kubectl port-forward -n dev svc/webhook-service 8081:8000
 ```
 
 > Un `port-forward` a un `Service` se pega a **un solo pod** y se cae cuando ese pod se reemplaza (por ejemplo en un `rollout undo`): hay que relanzarlo. Para probar varias réplicas se usa un `port-forward` por pod.
@@ -975,7 +970,7 @@ Este proyecto sigue **Infrastructure as Code** como principio rector. Cualquier 
 2. Edita el YAML/SQL/código correspondiente
 3. Commit descriptivo (un tema por commit)
 4. Abre PR / merge y haz push a `origin` y `gitlab`
-5. Redeploy: `docker compose up -d --build` (Compose) o `kubectl apply -f deploy/apps/webhook/` y `kubectl apply -k deploy/apps/grafana` (Kubernetes)
+5. Redeploy: `docker compose up -d --build` (Compose) o `bash scripts/deploy_dev.sh` (webhook) y `kubectl apply -k deploy/apps/grafana` (Kubernetes)
 6. Valida el cambio en la UI, con `Invoke-RestMethod` o con la matriz de pruebas de la sección Kubernetes
 
 ---
