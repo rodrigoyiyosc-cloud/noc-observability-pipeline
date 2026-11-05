@@ -79,7 +79,7 @@ done
 echo "== 5/6 Webhook (PG_HOST apunta al Service del clúster solo en este test)"
 sed -E 's#^(  PG_HOST:).*#\1 "timescaledb-service"#' "$CFG" | kubectl apply -f -
 for f in deploy/apps/webhook/*.yaml; do
-  case "$f" in *secret*|*deployment*|*webhook-config*) continue;; esac
+  case "$f" in *secret*|*deployment*|*webhook-config*|*kustomization*) continue;; esac
   kubectl apply -f "$f"
 done
 sed -E "s#(image: )noc-webhook-service:[^[:space:]]+#\1$IMAGE#" deploy/apps/webhook/webhook-deployment.yaml | kubectl apply -f -

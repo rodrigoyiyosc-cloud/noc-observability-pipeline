@@ -43,8 +43,8 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: webhook-receiver
-          # El tag de la imagen debe coincidir con el tag Git del codigo (v1.0.12).
-          image: noc-webhook-service:v1.0.13
+          # Placeholder: el digest real lo fija gitops/<env> (ADR-002).
+          image: noc-webhook-service:definido-en-gitops
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
