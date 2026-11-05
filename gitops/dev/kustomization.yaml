@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Estado deseado de dev. Lo actualiza el pipeline por PR (ADR-002) o, en
+# emergencia, scripts/set_image_digest.sh. Consumidor: scripts/deploy_dev.sh
+# hasta que exista Argo CD (#35).
+resources:
+  - ../../deploy/apps/webhook
+images:
+  - name: noc-webhook-service
+    newName: ghcr.io/rodrigoyiyosc-cloud/noc-webhook-service
+    digest: sha256:2dd55789a1c1d55962ee78fe5c1acd713cd2c4ed289399506d1ea5430f5e245d

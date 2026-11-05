@@ -25,3 +25,8 @@ Alcance (pendiente de analizar): para cada CVE, ¿se usa la función afectada? E
 - Clave de la Grafana Docker reemplazada por una de 24 caracteres (antes 8), cambiada por la interfaz web, y registrada en GF_ADMIN_PASSWORD de .env.
 - Verificado: login con la clave nueva, 401 con admin:admin, Save & test del datasource OK y largo del .env igual al que resuelve docker compose config.
 - No verificado: que la clave sobreviva a recrear el contenedor sin el volumen (el volumen de Grafana persiste, no se probó).
+
+## SEC-003: un workflow puede aprobar PR (2026-11-04, revisión 2026-12-04)
+- Se activó "Allow GitHub Actions to create and approve pull requests" para la promoción por PR (ADR-002).
+- Hoy no pesa, porque el ruleset de `main` exige 0 aprobaciones. Si se sube a 1 o más, un workflow con `pull-requests: write` podría aprobar su propio PR.
+- Mitigación: permisos mínimos por job, ningún workflow llama a `gh pr review --approve`, y revisar esta excepción antes de subir las aprobaciones requeridas.
