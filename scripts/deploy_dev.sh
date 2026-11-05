@@ -26,7 +26,7 @@ esac
 kubectl --context "$CTX" apply -k gitops/dev
 kubectl --context "$CTX" -n dev rollout status deployment/webhook-service --timeout=180s
 got="$(kubectl --context "$CTX" -n dev get pods -l app.kubernetes.io/name=webhook-receiver \
-  -o jsonpath='{.items[*].status.containerStatuses[*].imageID}')"
+  -o go-template='{{range .items}}{{if not .metadata.deletionTimestamp}}{{range .status.containerStatuses}}{{.imageID}} {{end}}{{end}}{{end}}')"
 echo "imageID del pod: $got"
 echo "digest esperado: $want"
 case "$got" in
