@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      digest: ${{ steps.check.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          TAG_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          re='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          [[ "$TAG" =~ $re ]] || { echo "ERROR: el tag '$TAG' no tiene el formato vMAJOR.MINOR.PATCH" >&2; exit 1; }
+          git merge-base --is-ancestor "$TAG_SHA" origin/main || { echo "ERROR: el commit del tag no esta en main" >&2; exit 1; }
+          latest="$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -vx "$TAG" | sort -V | tail -n1 || true)"
+          if [ -n "$latest" ] && [ "$(printf '%s\n%s\n' "$latest" "$TAG" | sort -V | tail -n1)" != "$TAG" ]; then
+            echo "ERROR: $TAG no es mayor que el ultimo tag ($latest)" >&2; exit 1
+          fi
+          DIGEST="$(git show "$TAG_SHA:gitops/dev/kustomization.yaml" | sed -n 's/^ *digest: *//p' | tr -d '\r')"
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "ERROR: digest invalido en gitops/dev del commit del tag" >&2; exit 1; }
+          REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/noc-webhook-service"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker pull "$REPO@$DIGEST" >/dev/null || { echo "ERROR: la imagen $DIGEST no existe en GHCR" >&2; exit 1; }
+          SRC="$(docker image inspect "$REPO@$DIGEST" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
+          [[ "$SRC" =~ ^[0-9a-f]{40}$ ]] || { echo "ERROR: la imagen no trae la etiqueta revision" >&2; exit 1; }
+          git merge-base --is-ancestor "$SRC" "$TAG_SHA" || { echo "ERROR: el commit de origen de la imagen no es ancestro del tag" >&2; exit 1; }
+          git diff --quiet "$SRC" "$TAG_SHA" -- webhook_service/ || { echo "ERROR: dev no refleja el codigo del tag (webhook_service/ cambio desde $SRC)" >&2; exit 1; }
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "OK: $TAG promueve $DIGEST (origen $SRC)"
+
+  promote-prod:
+    name: Promote to prod (PR)
+    needs: validate
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+      packages: write
+    concurrency:
+      group: promote-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etiquetar la imagen y abrir el PR de prod
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGEST: ${{ needs.validate.outputs.digest }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          re='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          [[ "$TAG" =~ $re ]] || { echo "ERROR: tag invalido" >&2; exit 1; }
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "ERROR: digest invalido" >&2; exit 1; }
+          REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/noc-webhook-service"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          if docker pull "$REPO:$TAG" >/dev/null 2>&1; then
+            docker image inspect "$REPO:$TAG" --format '{{json .RepoDigests}}' | grep -q "$DIGEST" \
+              || { echo "ERROR: $REPO:$TAG ya existe con otro digest" >&2; exit 1; }
+            echo "La etiqueta $TAG ya apunta a $DIGEST."
+          else
+            docker buildx imagetools create -t "$REPO:$TAG" "$REPO@$DIGEST"
+            docker pull "$REPO:$TAG" >/dev/null
+            docker image inspect "$REPO:$TAG" --format '{{json .RepoDigests}}' | grep -q "$DIGEST" \
+              || { echo "ERROR: el digest de $TAG no coincide con el original" >&2; exit 1; }
+          fi
+          BRANCH="promote/prod-$TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          bash scripts/set_image_digest.sh prod "$DIGEST"
+          if git diff --quiet; then echo "gitops/prod ya apunta a ese digest: nada que promover."; exit 0; fi
+          [ "$(git diff --name-only)" = "gitops/prod/kustomization.yaml" ] || { echo "ERROR: el cambio toca otros archivos" >&2; exit 1; }
+          [ "$(git diff --numstat | awk '{print $1"/"$2}')" = "1/1" ] || { echo "ERROR: el cambio no es de una linea" >&2; exit 1; }
+          git add gitops/prod/kustomization.yaml
+          git commit -m "chore(gitops): promover prod a $TAG ($DIGEST)"
+          for n in $(gh pr list --state open --json number,headRefName --jq '.[] | select(.headRefName | startswith("promote/prod-")) | .number'); do
+            gh pr close "$n" --delete-branch --comment "Reemplazada por una promocion mas reciente."
+          done
+          git push origin "$BRANCH"
+          PR="$(gh pr create --base main --head "$BRANCH" --title "chore(gitops): promover prod a $TAG" --body "Release $TAG (ADR-002). Digest: $DIGEST")"
+          gh workflow run ci.yml --ref "$BRANCH"
+          gh pr merge "$PR" --auto --squash --delete-branch

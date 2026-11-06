@@ -33,3 +33,5 @@
 - `gitops/prod` queda "sin desplegar, validado solo con kubeconform".
 - Activar "Allow GitHub Actions to create and approve pull requests" tiene un riesgo (ver SEC-003 en `docs/security-exceptions.md`).
 - Revertir exige `kubectl rollout undo` y después `git revert` del commit de promoción.
+- Comprobado el 2026-11-05: el PR de promoción deja una ejecución `pull_request` esperando "Approve and run". Esa aprobación manual es hoy la compuerta humana de cada promoción, en dev y en prod.
+- Primer tag: `v1.0.14`. Los tags se crean a mano, como tag anotado sobre un commit de `main` (`git tag -a`).
