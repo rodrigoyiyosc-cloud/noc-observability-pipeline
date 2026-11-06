@@ -72,6 +72,10 @@ Interpretación: un `/ready` 503 junto con `nc` fallando apunta a la dependencia
 | `update` sobre `pods/ephemeralcontainers` | `no` |
 | `create` sobre `pods/exec` | `no` |
 | `create` sobre `pods` (necesario para `--copy-to`) | `no` |
+| `get`, `patch`, `update` y `create` sobre `configmaps` | `no` |
+| `patch` sobre `deployments` (necesario para `rollout restart` y `undo`) | `sí` |
+
+Riesgo residual (2026-11-06): `patch` sobre `deployments` también permite cambiar variables de entorno del pod (por ejemplo con `kubectl set env`), y RBAC no deja limitarlo a un solo campo. Mitigación: Argo CD con selfHeal (#35) y revisar `rollout history` tras cada cambio. Nota para PM1-A6: `noc-operator` no puede leer ConfigMaps, así que la comparación de claves vivas contra el repo la hace un administrador.
 
 Hoy **solo un administrador** puede depurar. Es el diseño deseado.
 
