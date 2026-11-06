@@ -79,7 +79,7 @@ jobs:
               || { echo "ERROR: $REPO:$TAG ya existe con otro digest" >&2; exit 1; }
             echo "La etiqueta $TAG ya apunta a $DIGEST."
           else
-            docker buildx imagetools create -t "$REPO:$TAG" "$REPO@$DIGEST"
+            docker buildx imagetools create --prefer-index=false -t "$REPO:$TAG" "$REPO@$DIGEST"
             docker pull "$REPO:$TAG" >/dev/null
             docker image inspect "$REPO:$TAG" --format '{{json .RepoDigests}}' | grep -q "$DIGEST" \
               || { echo "ERROR: el digest de $TAG no coincide con el original" >&2; exit 1; }

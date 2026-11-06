@@ -10,3 +10,6 @@ En cada push a main corren test, config-check, manifests e image-scan; después 
 
 ## Releases (2026-11-05)
 Un tag vX.Y.Z (anotado, sobre un commit de main) lanza release.yml: validate comprueba el formato, que sea mayor que el último tag, que la imagen de gitops/dev traiga la etiqueta revision y que webhook_service/ no haya cambiado desde ese commit. promote-prod (environment prod, con revisor) agrega la etiqueta vX.Y.Z a esa misma imagen, sin reconstruir, y abre el PR de gitops/prod.
+
+## Release v1.0.14 fallido (2026-11-06)
+`docker buildx imagetools create` con un solo origen envuelve la imagen en un índice nuevo (digest distinto). release.yml usa ahora `--prefer-index=false` (copia exacta) y comprueba que el digest de la etiqueta sea el original. La etiqueta v1.0.14 de GHCR apunta a un índice que contiene la imagen correcta; no se usa.
