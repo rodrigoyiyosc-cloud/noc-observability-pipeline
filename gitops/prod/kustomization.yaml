@@ -21,4 +21,4 @@ patches:
 images:
   - name: noc-webhook-service
     newName: ghcr.io/rodrigoyiyosc-cloud/noc-webhook-service
-    digest: sha256:2dd55789a1c1d55962ee78fe5c1acd713cd2c4ed289399506d1ea5430f5e245d
+    digest: sha256:5db75e8301f0ef0ea899954d570809801245a92b8933a71db590e4c4b92f5658
