@@ -13,9 +13,7 @@
 1. **Terminal nueva.** Una terminal abierta antes de una rotación puede traer los valores viejos exportados (PM-003). Cierra las viejas y abre una nueva.
 2. **El shell no debe tener secretos exportados.** Esperado: `0` en todas.
    ```bash
-   for v in $(tr -d '\r' < .env | awk -F= '/^[A-Za-z_]/{print $1}'); do
-     [ -n "$(printenv $v)" ] && echo "EN CONFLICTO: $v"
-   done; echo "revision terminada"
+   bash scripts/check_env_shadow.sh
    ```
    Si lista algo, `unset` esa variable antes de seguir. Un script que lo haga solo es la acción PM3-A3.
 3. **Contexto correcto.** Esperado: `kind-noc-local-cluster`.
