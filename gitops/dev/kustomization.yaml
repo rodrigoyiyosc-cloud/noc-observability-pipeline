@@ -8,4 +8,4 @@ resources:
 images:
   - name: noc-webhook-service
     newName: ghcr.io/rodrigoyiyosc-cloud/noc-webhook-service
-    digest: sha256:5db75e8301f0ef0ea899954d570809801245a92b8933a71db590e4c4b92f5658
+    digest: sha256:d05534095c175592a03c8cbeafcaad9a5b977665785e39d3550e82c06bb8cbf3
