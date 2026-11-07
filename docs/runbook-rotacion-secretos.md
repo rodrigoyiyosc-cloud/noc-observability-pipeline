@@ -29,6 +29,18 @@
    ```
    Esperado: archivo con tamaño mayor que 0. El aviso de `continuous_agg` de TimescaleDB es normal. La restauración de este dump no está probada: requiere `timescaledb_pre_restore()` y `timescaledb_post_restore()`.
 
+### Inventario de archivos .env
+
+   Incluye todos los `.env` del repo, no solo el de la raíz: los simuladores de `python-simulator/` cargan el suyo. El 2026-11-06 un simulador falló con 401 porque su `.env` conservaba el token anterior a la rotación. Para listarlos y comparar el hash del token, sin imprimir valores:
+
+   ```bash
+   for f in $(find . -name ".env" -not -path "./.git/*" -not -path "./cka/*"); do
+     printf '%s  ' "$f"; tr -d '\r' < "$f" | awk -F= '$1=="NOC_WEBHOOK_TOKEN"{print substr($0,19)}' | tr -d '\n' | sha256sum | cut -c1-8
+   done
+   ```
+
+   Esperado: el mismo hash de 8 caracteres en todos los archivos que tengan la clave.
+
 ## 2. Generar valores sin imprimirlos
 
 ```bash
@@ -140,3 +152,4 @@ Cierra las terminales abiertas antes de la rotación. El dump de la base se borr
 | El Secret de Postgres cambió y la base sigue con la clave vieja | `POSTGRES_PASSWORD` solo se usa al inicializar un volumen vacío | `ALTER USER` dentro de la base |
 | El largo de la clave nueva y la vieja coincide y no se distingue | El largo no identifica el valor | Comparar hashes de 8 caracteres y hacer una llamada real |
 | Falla la conexión con una DSN | La contraseña lleva `@ / : #` | Generar con `openssl rand -hex` |
+| 401 en un simulador o script local tras rotar el token | Otro archivo `.env` (por ejemplo `python-simulator/.env`) conserva el valor viejo | Listar los `.env` con el comando de la sección 1, comparar hashes y actualizar el archivo |
