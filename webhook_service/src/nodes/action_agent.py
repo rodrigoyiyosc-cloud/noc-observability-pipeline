@@ -110,7 +110,7 @@ action_llm = ChatGroq(
     model=os.getenv("NOC_ACTION_AGENT_MODEL", "openai/gpt-oss-20b"),
     temperature=0,
     max_tokens=1024,
-    model_kwargs={"reasoning_format": "hidden"},
+    reasoning_format="hidden",
 )
 
 action_agent_chain = (

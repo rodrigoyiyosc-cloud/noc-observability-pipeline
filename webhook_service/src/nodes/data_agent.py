@@ -94,7 +94,7 @@ data_llm = ChatGroq(
     model=os.getenv("NOC_DATA_AGENT_MODEL", "openai/gpt-oss-20b"),
     temperature=0,
     max_tokens=1024,
-    model_kwargs={"reasoning_format": "hidden"},
+    reasoning_format="hidden",
 )
 
 data_agent_chain = data_agent_prompt | data_llm | RunnableLambda(clean_think_tags) | parser

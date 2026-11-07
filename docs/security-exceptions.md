@@ -30,3 +30,12 @@ Alcance (pendiente de analizar): para cada CVE, ¿se usa la función afectada? E
 - Se activó "Allow GitHub Actions to create and approve pull requests" para la promoción por PR (ADR-002).
 - Hoy no pesa, porque el ruleset de `main` exige 0 aprobaciones. Si se sube a 1 o más, un workflow con `pull-requests: write` podría aprobar su propio PR.
 - Mitigación: permisos mínimos por job, ningún workflow llama a `gh pr review --approve`, y revisar esta excepción antes de subir las aprobaciones requeridas.
+
+### SEC-001: cierre 2026-11-06
+- Pila actualizada: langchain-core 1.7.6, langgraph 1.2.20, langgraph-checkpoint 4.3.1, langgraph-sdk 0.4.14, langsmith 0.14.17, starlette 1.10.0 (FastAPI 0.162.0), langchain-groq 1.1.3 y langgraph-checkpoint-postgres 3.2.0.
+- Cambio de código: `reasoning_format="hidden"` pasa a ser un parámetro explícito de ChatGroq (4 archivos), porque la versión nueva rechaza que vaya dentro de `model_kwargs`.
+- Verificado: 12 tests unitarios, Trivy sin excepciones, arranque de la imagen, chat del NOC-MAS con memoria (también tras reiniciar) y simulador de incidentes de punta a punta.
+- `.trivyignore.yaml` queda sin entradas.
+- Deuda: las dependencias transitivas no están fijadas (pip resuelve la última al construir); evaluar un archivo de restricciones.
+- También se actualizó `zlib1g` de la base Debian (2 HIGH que Trivy empezó a reportar el 2026-11-07).
+- Deuda: los CVE de la base Debian aparecen cuando Trivy actualiza su base y pueden bloquear PR sin relación. Evaluar `apt-get upgrade` completo o una reconstrucción programada de la imagen.

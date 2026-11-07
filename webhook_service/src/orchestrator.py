@@ -76,7 +76,7 @@ supervisor_prompt = ChatPromptTemplate.from_messages(
 llm = ChatGroq(
     model=os.getenv("NOC_SUPERVISOR_MODEL", "openai/gpt-oss-20b"),
     temperature=0,
-    model_kwargs={"reasoning_format": "hidden"},
+    reasoning_format="hidden",
 )
 
 def clean_think_tags(ai_message) -> str:
