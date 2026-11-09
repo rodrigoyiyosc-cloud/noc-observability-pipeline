@@ -26,3 +26,10 @@ cka/
 
 # Archivo de instrucciones local
 CLAUDE.md
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.kubeconfig
