@@ -1,0 +1,13 @@
+# Configuración de Prometheus (Issue #36). Solo dos objetivos fijos: kube-state-metrics y él mismo.
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: kube-state-metrics
+    static_configs:
+      - targets: ["kube-state-metrics.monitoring.svc.cluster.local:8080"]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

@@ -6,7 +6,7 @@ set -euo pipefail
 OPTS=(-strict -summary -kubernetes-version "$K8S_VERSION")
 
 echo "== 1/4 Kustomize: render y validación"
-for d in deploy/apps/grafana deploy/apps/webhook gitops/dev gitops/prod; do
+for d in deploy/apps/grafana deploy/apps/webhook deploy/apps/kube-state-metrics deploy/apps/prometheus gitops/dev gitops/prod; do
   echo "-- $d"
   kubectl kustomize "$d" | kubeconform "${OPTS[@]}" -
 done

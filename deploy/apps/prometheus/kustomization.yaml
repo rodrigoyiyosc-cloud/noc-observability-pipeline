@@ -1,0 +1,17 @@
+# deploy/apps/prometheus/kustomization.yaml
+# Aplicar con: kubectl apply -k deploy/apps/prometheus   (nunca con -f)
+# El ConfigMap lleva un hash en el nombre: un cambio en prometheus.yml
+# genera un ConfigMap nuevo y un despliegue visible.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - prometheus-deployment.yaml
+  - prometheus-service.yaml
+
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml
