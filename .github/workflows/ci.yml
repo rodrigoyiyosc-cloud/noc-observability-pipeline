@@ -86,6 +86,31 @@ jobs:
       - name: Validate
         run: bash scripts/validate_manifests.sh
 
+  terraform:
+    name: Validate Terraform (fmt, validate, tflint)
+    runs-on: ubuntu-latest
+    env:
+      TF_DIR: infra/terraform/envs/local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.17.0"
+          terraform_wrapper: false
+      - name: terraform fmt
+        run: terraform fmt -check -recursive -diff infra/terraform
+      - name: terraform init y validate
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.64.0
+      - name: tflint
+        working-directory: ${{ env.TF_DIR }}
+        run: tflint --format compact
+
   image-scan:
     name: Scan image (Trivy 0.69.3)
     runs-on: ubuntu-latest
