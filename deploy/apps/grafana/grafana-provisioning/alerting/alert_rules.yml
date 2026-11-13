@@ -163,3 +163,62 @@ groups:
         annotations:
           summary: "CPU > 85% en {{ $labels.hostname }}"
           description: "El dispositivo {{ $labels.hostname }} mantiene uso de CPU superior al 85% durante 5 minutos. Riesgo de degradación en plano de control."
+
+
+  - orgId: 1
+    name: k8s-state-alerts
+    folder: NOC Alerts
+    interval: 1m
+    rules:
+
+      # ─────────────────────────────────────────────────────────────
+      # Regla 4 (#36): pod no listo en dev
+      # La consulta devuelve UNA serie por pod: 0 si está listo, 1 si no.
+      # "max by (namespace, pod)" descarta las labels instance y job: el webhook
+      # toma el dispositivo de la primera label de device, host, hostname, instance,
+      # node, pod, service. Con "instance" presente, todos los pods compartirían
+      # la misma huella de deduplicación y un solo ticket.
+      # noDataState NoData: si kube-state-metrics deja de reportar, avisa (no falla en silencio).
+      # ─────────────────────────────────────────────────────────────
+      - uid: k8s-pod-not-ready-004
+        title: "Pod No Listo (dev)"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus_noc
+            model:
+              expr: max by (namespace, pod) (kube_pod_status_ready{namespace="dev", condition="false"})
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: noc
+          alert_type: pod_not_ready
+        annotations:
+          summary: "Pod {{ $labels.pod }} no listo en {{ $labels.namespace }}"
+          description: "El pod {{ $labels.pod }} del namespace {{ $labels.namespace }} lleva al menos 2 minutos sin estar listo (kube_pod_status_ready). Revisar con kubectl describe pod, logs --previous y los eventos del namespace."
