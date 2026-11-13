@@ -20,6 +20,7 @@ configMapGenerator:
   - name: grafana-provisioning-datasources
     files:
       - grafana-provisioning/datasources/timescaledb.yaml
+      - grafana-provisioning/datasources/prometheus.yaml
 
   - name: grafana-provisioning-alerting
     files:

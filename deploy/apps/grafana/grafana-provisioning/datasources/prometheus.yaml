@@ -1,0 +1,15 @@
+# Datasource de Prometheus para Grafana en Kubernetes (#36, B).
+# Sin secretos: Prometheus no tiene autenticación dentro del clúster.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus-NOC
+    type: prometheus
+    uid: prometheus_noc
+    access: proxy
+    url: http://prometheus.monitoring.svc.cluster.local:9090
+    isDefault: false
+    editable: false
+    jsonData:
+      httpMethod: POST
+      timeInterval: 30s
