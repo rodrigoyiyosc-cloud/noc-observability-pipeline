@@ -84,7 +84,7 @@ Actualización 2026-10-20: el 503 de `/ready` se reprodujo y se capturó directa
 
 | ID | Acción | Tipo | Prioridad | Responsable | Criterio de cierre | Fecha / estado |
 |---|---|---|---|---|---|---|
-| PM2-A1 | Crear alerta en Grafana sobre pod no listo (`kube_pod_status_ready{condition="false"}`) o sobre `/ready` | detect | P1 | Rodrigo | Alerta disparada con Postgres detenido y recibida en el webhook | Vencida (2026-10-22). Duplica PM1-A5: consolidar allí |
+| PM2-A1 | Crear alerta en Grafana sobre pod no listo (`kube_pod_status_ready{condition="false"}`) o sobre `/ready` | detect | P1 | Rodrigo | Alerta disparada con Postgres detenido y recibida en el webhook | Cerrada 2026-11-13 (consolidada en PM1-A5). Criterio modificado: el simulacro usó un pod de prueba, no el webhook; ver ADR-004. |
 | PM2-A2 | Repuntar `PG_HOST` a `timescaledb-service` del clúster y cargar el esquema (fase posterior) | prevent | P2 | Rodrigo | `/ready` 200 con el Postgres de Docker detenido | Vencida (2026-10-29). Coincide con PM-003 A5: unificar |
 | PM2-A3 | Añadir al runbook: ante `Running 0/1`, revisar Postgres antes de reiniciar el pod | mitigate | P1 | Rodrigo | Sección en el runbook, ejecutada una vez | Vencida (2026-10-18). Posible cierre por la ampliación de `runbook-kubectl-debug.md`: verificar |
 | PM2-A4 | Verificar `jira_dedup` tras la recuperación | detect | P2 | Rodrigo | 0 `issue_key` repetidos | **Cerrada el 2026-10-15**: estructura, estados (10 open, 17 closed, 0 creating) y 0 `issue_key` repetidos. Opcional: contrastar las 10 `open` con Jira |
