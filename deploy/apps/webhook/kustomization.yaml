@@ -2,7 +2,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - webhook-serviceaccount.yaml
-  - webhook-config.yaml
   - webhook-service.yaml
   - webhook-ingress.yaml
   - webhook-deployment.yaml
+
+configMapGenerator:
+  - name: webhook-config
+    namespace: dev
+    envs:
+      - webhook-config.env
+    options:
+      labels:
+        app.kubernetes.io/name: webhook-receiver
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/part-of: noc-observability-pipeline
+        environment: dev

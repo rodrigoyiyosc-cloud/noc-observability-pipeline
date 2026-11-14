@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 MAIN = Path("webhook_service/main.py")
-CONFIGMAP = Path("deploy/apps/webhook/webhook-config.yaml")
+CONFIGMAP = Path("deploy/apps/webhook/webhook-config.env")
 SECRET_EXAMPLE = Path("deploy/apps/webhook/webhook-secret.yaml.example")
 
 
@@ -22,6 +22,8 @@ def required_from_main() -> set[str]:
 
 def keys_in(path: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
+    if path.suffix == ".env":
+        return set(re.findall(r"^([A-Z][A-Z0-9_]*)=", text, re.M))
     return set(re.findall(r"^  ([A-Z][A-Z0-9_]*):", text, re.M))
 
 

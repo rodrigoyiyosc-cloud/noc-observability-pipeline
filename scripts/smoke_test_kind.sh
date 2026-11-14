@@ -11,7 +11,7 @@ TOKEN="smoke-token-not-real"
 DBPASS="smoke-db-password-not-real"
 PORT=18000
 SEL="app.kubernetes.io/name=webhook-receiver"
-CFG="deploy/apps/webhook/webhook-config.yaml"
+CFG="deploy/apps/webhook/webhook-config.env"
 PF_PID=""
 FAILED=0
 
@@ -27,7 +27,7 @@ check() { # descripcion esperado obtenido
   else echo "FALLO $1: esperado $2, obtenido $3"; FAILED=1; fi
 }
 http() { curl -s --max-time 20 -o /dev/null -w '%{http_code}' "$@" || true; }
-cfg() { grep -E "^  $1:" "$CFG" | sed -E 's/^[^:]+: *"?([^"#]*)"?.*/\1/' | tr -d '[:space:]'; }
+cfg() { grep -E "^$1=" "$CFG" | cut -d= -f2- | tr -d '[:space:]'; }
 diagnostico() {
   echo "--- diagnóstico (los logs solo nombran variables, nunca valores)"
   kubectl get pods -n dev || true
@@ -77,7 +77,9 @@ for pass in 1 2; do
 done
 
 echo "== 5/6 Webhook (PG_HOST apunta al Service del clúster solo en este test)"
-sed -E 's#^(  PG_HOST:).*#\1 "timescaledb-service"#' "$CFG" | kubectl apply -f -
+cm_args=()
+while IFS= read -r l; do [ -n "$l" ] && cm_args+=(--from-literal="$l"); done < <(sed -E 's#^PG_HOST=.*#PG_HOST=timescaledb-service#' "$CFG" | tr -d '\r')
+kubectl create configmap webhook-config -n dev "${cm_args[@]}" --dry-run=client -o yaml | kubectl apply -f -
 for f in deploy/apps/webhook/*.yaml; do
   case "$f" in *secret*|*deployment*|*webhook-config*|*kustomization*) continue;; esac
   kubectl apply -f "$f"
