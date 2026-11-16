@@ -106,7 +106,7 @@ jobs:
           terraform validate
       - uses: terraform-linters/setup-tflint@v6
         with:
-          tflint_version: v0.64.0
+          tflint_version: v0.65.0
       - name: tflint
         working-directory: ${{ env.TF_DIR }}
         run: tflint --format compact
