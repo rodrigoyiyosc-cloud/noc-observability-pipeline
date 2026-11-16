@@ -177,12 +177,12 @@ Desde el 22-oct las marcas de causa nombran la causa concreta (variable, valor, 
 
 ## 9. Cambios de ConfigMap (PM1-A6, #28)
 
-Fecha: 2026-11-16. Alcance: ConfigMap `webhook-config` del webhook en `dev`, generado con `configMapGenerator` desde `deploy/apps/webhook/webhook-config.env`. **Comandos en Bash** (las secciones 1 a 8 usan PowerShell). Estado: escrita el 2026-11-16, **pendiente de ejecución** (ver 9.5).
+Fecha: 2026-11-16. Alcance: ConfigMap `webhook-config` del webhook en `dev`, generado con `configMapGenerator` desde `deploy/apps/webhook/webhook-config.env`. **Comandos en Bash** (las secciones 1 a 8 usan PowerShell). Estado: ejecutada dos veces el 2026-11-16 (ver 9.5).
 
 ### 9.1 Reglas
 
 - Todo cambio entra por PR. Nada de `kubectl patch` ni `kubectl edit` sobre el ConfigMap (esa fue la causa de PM-001).
-- No usar `rollout undo` para revertir un cambio de ConfigMap. Con el generator el nombre lleva un hash: `undo` vuelve al Deployment anterior, que apunta al ConfigMap viejo, y solo funciona mientras ese ConfigMap siga vivo (sin verificar en este clúster). El retorno normal es revertir el commit (9.4).
+- No usar `rollout undo` para revertir un cambio de ConfigMap. Con el generator el nombre lleva un hash: `undo` vuelve al Deployment anterior, que apunta al ConfigMap viejo, y solo funciona mientras ese ConfigMap siga vivo (sin verificar en este clúster). El retorno normal es revertir el commit (9.4). Verificado el 2026-11-16: el hash depende solo del contenido; al quitar la clave de prueba volvió el nombre original.
 - El `.env` lleva solo configuración no secreta. Lo sensible va en el Secret `webhook-secret`, y sus cambios **no** disparan rollout (hay que reiniciar el pod).
 - Para comparar, mostrar solo nombres de claves, nunca valores. `noc-operator` no puede leer ConfigMaps (sección 6): la comparación la hace un administrador.
 
@@ -241,7 +241,8 @@ Revertir el commit por PR (`git revert <sha>`), fusionar y repetir 9.2 desde el 
 
 | Fecha | Cambio hecho | Tiempo total | Resultado | Notas |
 |---|---|---|---|---|
-| | | | | |
+| 2026-11-16 | Agregar `RUNBOOK_PRUEBA=1` por PR | 9 min 26 s (PR y CI 7 min 48 s, rollout 13 s, borrar el viejo 1 min 25 s) | OK: `rollout=0`, pod `1/1`, nombre `webhook-config-9c9989khc6` a `webhook-config-kfh652fgb6` | Primera ejecución |
+| 2026-11-16 | Quitar `RUNBOOK_PRUEBA` por PR | 7 min 6 s (PR y CI 5 min 40 s, rollout 6 s, borrar el viejo 1 min 19 s) | OK: pod `1/1`, el nombre volvió a `webhook-config-9c9989khc6` | El hash depende solo del contenido |
 
 Cierre de PM1-A6: sección publicada y seguida en un simulacro nuevo (esta tabla).
 
