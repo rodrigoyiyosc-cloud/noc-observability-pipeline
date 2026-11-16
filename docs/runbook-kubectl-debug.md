@@ -1,6 +1,6 @@
 # Runbook: depurar el webhook con `kubectl debug`
 
-Alcance: `webhook-service` en el namespace `dev` del clúster kind `noc-local-cluster`. Comandos en PowerShell 5.1. Probado en laboratorio el 2026-10-20.
+Alcance: `webhook-service` en el namespace `dev` del clúster kind `noc-local-cluster`. Comandos en PowerShell 5.1 (secciones 1 a 8) y Bash (sección 9). Probado en laboratorio el 2026-10-20.
 
 ## 1. Cuándo usar cada herramienta
 
@@ -174,6 +174,81 @@ Desde el 22-oct las marcas de causa nombran la causa concreta (variable, valor, 
 - **Gestión de incidentes**: `debug` es una herramienta de diagnóstico dentro del incidente.
 - **Control de accesos**: el permiso se concede por incidente y se retira al cerrarlo.
 - **Gestión de problemas**: lo encontrado con `debug` alimenta la causa raíz y el post-mortem.
+
+## 9. Cambios de ConfigMap (PM1-A6, #28)
+
+Fecha: 2026-11-16. Alcance: ConfigMap `webhook-config` del webhook en `dev`, generado con `configMapGenerator` desde `deploy/apps/webhook/webhook-config.env`. **Comandos en Bash** (las secciones 1 a 8 usan PowerShell). Estado: escrita el 2026-11-16, **pendiente de ejecución** (ver 9.5).
+
+### 9.1 Reglas
+
+- Todo cambio entra por PR. Nada de `kubectl patch` ni `kubectl edit` sobre el ConfigMap (esa fue la causa de PM-001).
+- No usar `rollout undo` para revertir un cambio de ConfigMap. Con el generator el nombre lleva un hash: `undo` vuelve al Deployment anterior, que apunta al ConfigMap viejo, y solo funciona mientras ese ConfigMap siga vivo (sin verificar en este clúster). El retorno normal es revertir el commit (9.4).
+- El `.env` lleva solo configuración no secreta. Lo sensible va en el Secret `webhook-secret`, y sus cambios **no** disparan rollout (hay que reiniciar el pod).
+- Para comparar, mostrar solo nombres de claves, nunca valores. `noc-operator` no puede leer ConfigMaps (sección 6): la comparación la hace un administrador.
+
+### 9.2 Procedimiento: cambiar un valor
+
+1. Antes de empezar: Postgres arriba y árbol limpio.
+   ```bash
+   docker ps --filter name=timescaledb
+   git switch main && git pull --ff-only origin main && git status --short | wc -l
+   ```
+   Esperado: `Up ...` y `0`. Con Postgres detenido el pod nuevo no arranca y queda en CrashLoopBackOff (ver la tabla del final de este runbook).
+2. Rama y cambio: `git switch -c fix/config-<tema>` y editar **solo** el valor en `deploy/apps/webhook/webhook-config.env`.
+3. Validar las claves:
+   ```bash
+   python scripts/check_config_keys.py; echo "keys=$?"
+   ```
+   Esperado: `keys=0`. Un `1` significa que falta una clave que exige `main.py`.
+4. PR con los checks requeridos en verde, fusionar y actualizar: `git switch main && git pull --ff-only origin main`.
+5. Anotar el nombre actual del ConfigMap (será el "viejo"):
+   ```bash
+   kubectl get deploy webhook-service -n dev -o jsonpath='{.spec.template.spec.containers[0].envFrom[*].configMapRef.name}'; echo
+   ```
+   Esperado: `webhook-config-<hash>`.
+6. Ver qué va a cambiar:
+   ```bash
+   kubectl diff -k gitops/dev; echo "diff=$?"
+   ```
+   Esperado: `diff=1` (1 = hay diferencias, 0 = ninguna, 2 o más = error). Deben cambiar solo el ConfigMap nuevo y la referencia en el Deployment.
+7. Aplicar: `kubectl apply -k gitops/dev`
+8. Esperar el rollout y comprobar:
+   ```bash
+   kubectl rollout status deploy/webhook-service -n dev --timeout=120s; echo "rollout=$?"
+   kubectl rollout history deploy/webhook-service -n dev
+   kubectl get pods -n dev -l app.kubernetes.io/name=webhook-receiver
+   ```
+   Esperado: `rollout=0`, una revisión nueva en el historial y un pod `1/1`.
+9. Borrar el ConfigMap viejo (sin prune queda vivo): `kubectl delete cm webhook-config-<hash viejo> -n dev`. Hacerlo solo con `rollout=0`: después de borrarlo, `rollout undo` ya no sirve.
+10. Cerrar: `kubectl diff -k gitops/dev; echo "diff=$?"`. Esperado: `diff=0`.
+
+### 9.3 Si algo falla después del cambio
+
+1. Leer la causa: `kubectl logs <pod> -n dev --previous --tail=5` y la tabla del final de este runbook (`Faltan variables...` es una clave faltante; `checkpointer` es Postgres).
+2. Comparar las claves vivas con las del repo, sin valores:
+   ```bash
+   CM=$(kubectl get deploy webhook-service -n dev -o jsonpath='{.spec.template.spec.containers[0].envFrom[*].configMapRef.name}')
+   diff <(kubectl get cm "$CM" -n dev -o go-template='{{range $k,$v := .data}}{{$k}}{{"\n"}}{{end}}' | sort) \
+        <(grep -v -e '^#' -e '^$' deploy/apps/webhook/webhook-config.env | cut -d= -f1 | sort); echo "keys=$?"
+   ```
+   Esperado: `keys=0`. Con `1`, las líneas con `<` están solo en el clúster y las con `>` solo en el repo. Sin verificar: asume un único `configMapRef` en `envFrom`.
+
+### 9.4 Retorno
+
+Revertir el commit por PR (`git revert <sha>`), fusionar y repetir 9.2 desde el paso 4. No usar `rollout undo`.
+
+### 9.5 Registro de ejecución (completar al ejecutar)
+
+| Fecha | Cambio hecho | Tiempo total | Resultado | Notas |
+|---|---|---|---|---|
+| | | | | |
+
+Cierre de PM1-A6: sección publicada y seguida en un simulacro nuevo (esta tabla).
+
+### 9.6 ITIL 4
+
+- **Habilitación del cambio:** el cambio pasa por PR, diff y verificación antes de dar el trabajo por hecho.
+- **Gestión de la configuración de servicios:** el repo es la fuente de verdad y `diff -k = 0` lo demuestra.
 
 ## Pod nuevo no arranca: ¿clave faltante o Postgres inalcanzable? (2026-10-27)
 El webhook exige Postgres al arrancar: `orchestrator.py` crea el checkpointer al importarse (5 intentos de 10 s) y, si falla, el proceso termina. Con Postgres caído, un pod nuevo entra en CrashLoopBackOff (no solo falla `/ready`). Durante un rollout, el pod viejo sigue sirviendo.
