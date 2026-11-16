@@ -1,10 +1,10 @@
 provider "kind" {}
 
 resource "kind_cluster" "noc_tf" {
-  name            = "noc-tf"
-  node_image      = "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
+  name            = var.cluster_name
+  node_image      = var.node_image
   wait_for_ready  = true
-  kubeconfig_path = "${path.module}/noc-tf.kubeconfig"
+  kubeconfig_path = "${path.module}/${var.cluster_name}.kubeconfig"
 
   kind_config {
     kind        = "Cluster"

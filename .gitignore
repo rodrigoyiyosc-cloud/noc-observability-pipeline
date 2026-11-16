@@ -33,3 +33,8 @@ CLAUDE.md
 *.tfstate.*
 crash.log
 *.kubeconfig
+
+# Terraform: planes y variables locales (pueden contener secretos)
+*.tfplan
+*.tfvars
+*.tfvars.json
