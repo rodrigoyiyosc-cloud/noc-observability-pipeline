@@ -177,7 +177,7 @@ Desde el 22-oct las marcas de causa nombran la causa concreta (variable, valor, 
 
 ## 9. Cambios de ConfigMap (PM1-A6, #28)
 
-Fecha: 2026-11-16. Alcance: ConfigMap `webhook-config` del webhook en `dev`, generado con `configMapGenerator` desde `deploy/apps/webhook/webhook-config.env`. **Comandos en Bash** (las secciones 1 a 8 usan PowerShell). Estado: ejecutada dos veces el 2026-11-16 (ver 9.5).
+Fecha: 2026-11-16. Alcance: ConfigMap `webhook-config` del webhook en `dev`, generado con `configMapGenerator` desde `deploy/apps/webhook/webhook-config.env`. **Comandos en Bash** (las secciones 1 a 8 usan PowerShell). Estado: ejecutada dos veces el 2026-11-16 y un simulacro de deriva el 2026-11-17 (ver 9.5).
 
 ### 9.1 Reglas
 
@@ -243,8 +243,9 @@ Revertir el commit por PR (`git revert <sha>`), fusionar y repetir 9.2 desde el 
 |---|---|---|---|---|
 | 2026-11-16 | Agregar `RUNBOOK_PRUEBA=1` por PR | 9 min 26 s (PR y CI 7 min 48 s, rollout 13 s, borrar el viejo 1 min 25 s) | OK: `rollout=0`, pod `1/1`, nombre `webhook-config-9c9989khc6` a `webhook-config-kfh652fgb6` | Primera ejecución |
 | 2026-11-16 | Quitar `RUNBOOK_PRUEBA` por PR | 7 min 6 s (PR y CI 5 min 40 s, rollout 6 s, borrar el viejo 1 min 19 s) | OK: pod `1/1`, el nombre volvió a `webhook-config-9c9989khc6` | El hash depende solo del contenido |
+| 2026-11-17 | Simulacro de deriva: `kubectl patch` quita `JIRA_ISSUE_TYPE` del ConfigMap vivo, sin reiniciar el pod | Detectado T+1 min 25 s, causa T+2 min 13 s, resuelto T+2 min 53 s | OK: `diff -k` = 1, `keys=1`, `apply -k` restauró la clave, `diff=0`, mismo pod `1/1` | Asíncrono, no ciego. El nombre del ConfigMap no cambia, así que no hubo rollout |
 
-Cierre de PM1-A6: sección publicada y seguida en un simulacro nuevo (esta tabla).
+Cierre de PM1-A6: cumplido el 2026-11-17 con el simulacro de la última fila.
 
 ### 9.6 ITIL 4
 
