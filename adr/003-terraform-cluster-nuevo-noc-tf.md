@@ -35,3 +35,4 @@
 - Con dos clústeres encendidos la memoria queda justa. Si el uso pasa de unos 6,5 GB, se apagan los nodos del clúster viejo con `docker stop` (reversible).
 - Si se pierde el archivo de estado, `noc-tf` queda sin dueño: se borra con `kind delete cluster --name noc-tf` y se recrea con `terraform apply`.
 - Pendiente: `terraform fmt`, `validate` y `tflint` en CI, y el provider `helm` sobre `noc-tf`.
+- Actualización 2026-11-17: el job de Terraform en CI y el provider helm ya existen (PR #76). Ver ADR-005.
