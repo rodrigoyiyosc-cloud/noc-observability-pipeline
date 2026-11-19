@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # Estado deseado de dev. Lo actualiza el pipeline por PR (ADR-002) o, en
-# emergencia, scripts/set_image_digest.sh. Consumidor: scripts/deploy_dev.sh
-# hasta que exista Argo CD (#35).
+# emergencia, scripts/set_image_digest.sh. Consumidores: scripts/deploy_dev.sh
+# (dev local en noc-local-cluster) y Argo CD (webhook-dev en noc-tf, ADR-006).
 resources:
   - ../../deploy/apps/webhook
 images:
