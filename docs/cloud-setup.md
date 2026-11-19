@@ -21,7 +21,7 @@ Fechas según el plan maestro; si el plan se mueve, se mueven estas.
 | Azure | Semana 8 (desde 14-dic) | Vie 11-dic | AKS y ACR por Terraform, credenciales federadas OIDC |
 | GCP | Semana 9 (desde 21-dic) | Vie 18-dic | Un despliegue real (Cloud Run o GKE) con Workload Identity Federation |
 
-El examen Terraform Associate (lunes 23-nov) no necesita cuenta de nube.
+El examen Terraform Associate no tiene fecha (ver `docs/terraform-associate-schedule.md`) y no necesita cuenta de nube.
 
 ## Lista de verificación por nube (completar al abrir)
 
