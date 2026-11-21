@@ -11,8 +11,16 @@
 - Decisión: los simulacros CKA son práctica asíncrona. No son gate de ninguna semana ni exigencia del plan maestro.
 - Se repiten a lo largo de los días, con límite de 2 h y máximo 8 min por tarea.
 - Fecha de revisión: 2026-11-27.
+
 ## Actualización 2026-10-30: gate "CKA rendido" de la semana 2
 - El plan maestro fija el examen para lun-mar 2 y 3 de nov. Sin presupuesto no hay fecha.
 - Excepción: el gate "CKA rendido" queda abierto. El gate "pipeline con gate funcionando" sigue vigente.
 - Lun-mar de la semana 2 se usan para CI/CD II y fundamentos de nube.
 - Fecha de revisión: 2026-11-27.
+
+## Actualización 2026-11-20: examen en pausa (ADR-007)
+- Cambio: el examen queda en pausa hasta que el empleador defina qué certificaciones pide o financia.
+- Motivo: cambio de foco y de disponibilidad (ver `adr/007-cambio-de-foco-observabilidad-e-infraestructura.md`). Sigue sin presupuesto.
+- Decisión: el contenido ya ejecutado se mantiene en el repo y no hay simulacros programados en el plan maestro v2.
+- Fecha de revisión: 2027-01-04. Reemplaza a las anteriores (2026-11-27).
+- Decide: Rodrigo.

@@ -10,3 +10,9 @@
 ## Gate de la semana 5
 - El gate "Terraform Associate rendido" queda abierto.
 - El gate "PR con `terraform plan` automático" sigue vigente.
+
+## Actualización 2026-11-20: examen en pausa (ADR-007)
+- Cambio: el examen queda en pausa hasta que el empleador defina qué certificaciones pide o financia.
+- Gates de la semana 5 del plan v1: "Terraform Associate rendido" sigue abierto. "PR con `terraform plan` automático" pasa a la pista de nube del plan maestro v2 (desde 2026-05-24) y no se calendariza antes.
+- Fecha de revisión: 2027-01-04. Reemplaza a 2026-12-04.
+- Decide: Rodrigo.
