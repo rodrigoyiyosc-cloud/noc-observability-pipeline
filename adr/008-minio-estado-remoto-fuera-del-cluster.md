@@ -19,7 +19,7 @@ MinIO publicó imágenes oficiales hasta 2025. Según Chainguard, el proyecto de
 2. Los puertos se publican solo en `127.0.0.1`.
 3. Imágenes de Chainguard fijadas por digest: servidor `sha256:e9cf6b99c226e9539ed0f14b6f00e37b07da153c7ba1f4f8709c807574b471ec` y cliente `sha256:94433f625c8057d18c69675dbaa33da6e4864f084f9c44faf30d3eb8e3754e0b` (digests del índice multi-arquitectura). La versión interna de MinIO y de `mc` es desconocida: el cliente reporta `DEVELOPMENT.GOGET`.
 4. Bucket `tfstate` con versionado activado.
-5. El usuario `terraform-state` tiene una política que solo permite listar `tfstate` y leer, escribir y borrar objetos dentro de él (`infra/minio/policy-tfstate.json`). Las credenciales de root se usan solo para administrar MinIO.
+5. El usuario `terraform-state` tiene una política mínima (`infra/minio/policy-tfstate.json`): lista `tfstate`, lee y escribe objetos dentro de él, y borra solo archivos `*.tflock`. No puede borrar el archivo de estado. Las credenciales de root se usan solo para administrar MinIO.
 6. Las credenciales viven en archivos `.env` ignorados por git; el repo solo tiene `.env.example`. Nunca se imprimen.
 
 ## Alternativas consideradas
@@ -28,7 +28,7 @@ MinIO publicó imágenes oficiales hasta 2025. Según Chainguard, el proyecto de
 - Dejar el estado local: descartada, no cumple el gate de TF 3 y deja certificado y clave sin versionado en el disco.
 
 ## Consecuencias
-- Positivas: el estado sobrevive a la destrucción del clúster; el versionado permite volver atrás; el usuario de Terraform no puede crear buckets, ver otros ni administrar (probado, ver runbook).
+- Positivas: el estado sobrevive a la destrucción del clúster; el versionado permite volver atrás; el usuario de Terraform no puede crear buckets, ver otros, administrar ni borrar el archivo de estado (probado, ver runbook).
 - Negativas: componente sin actualizaciones de seguridad de su origen; el digest no se actualiza solo; sin TLS (http en localhost); las credenciales aún no están en un gestor de claves.
 - Riesgo aceptado: usar MinIO comunitario archivado solo en `localhost`. Mitigación: puertos en `127.0.0.1`, revisión el 2027-01-04, escaneo con Trivy pendiente.
 - Cambia el plan: O3 (pgBackRest → MinIO) queda sujeto a la revisión de esta decisión.

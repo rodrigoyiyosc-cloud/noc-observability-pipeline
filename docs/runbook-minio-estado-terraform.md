@@ -88,6 +88,8 @@ mcx version info local/tfstate
 
 Política en `infra/minio/policy-tfstate.json`. Las credenciales se generan sin mostrarlas y quedan en `infra/terraform/envs/local/.env` (ignorado). `mc admin user add` recibe la clave como argumento: queda unos segundos en la línea de comandos del contenedor; aceptable en un equipo local de un solo usuario.
 
+La política permite listar `tfstate`; leer y escribir objetos del bucket; y borrar solo archivos `*.tflock`. Terraform no puede borrar el archivo de estado (ajuste del 2026-11-21, PR 2). Para cambiarla, editar el JSON y repetir `mcx admin policy create local tfstate-rw /work/policy-tfstate.json`: sobrescribe la política (verificado el 2026-11-21: cambió `UpdateDate`). Para ver la que tiene el servidor: `mcx admin policy info local tfstate-rw`.
+
 Esperado: `Created policy tfstate-rw successfully`; `AWS_ACCESS_KEY_ID 15` y `AWS_SECRET_ACCESS_KEY 48`; `Added user terraform-state successfully`; `Attached Policies: [tfstate-rw]`.
 
 ```bash
@@ -155,11 +157,72 @@ Nunca `down -v`: borra el volumen y con él el estado remoto.
 | Fecha | Qué | Resultado |
 |---|---|---|
 | 2026-11-21 | Secciones 3 a 9 completas | Todo según lo esperado. Hallazgo: `ls tf` no da `Access Denied`; prueba corregida con bucket de control |
+| 2026-11-21 | Sección 14 completa (backend, bloqueo, escritura, mínimo privilegio) | Todo según lo esperado. `apply` 1m43,7s; `destroy` 7,9 s; estado de 17 KiB en el bucket |
 
 ## 13. Pendiente
 
 - Guardar las credenciales en un gestor de claves (hoy el `.env` es la única copia).
 - Escanear las dos imágenes con Trivy.
-- Probar el backend desde Terraform y la migración del estado (PR 2).
+- Probar la restauración de una versión anterior del estado (el bucket tiene versionado; no se ha probado restaurar).
 - Respaldo del bucket `tfstate`.
-- Pasar `mcx` y `mctf` a un script si el procedimiento se repite una tercera vez (escalera de toil).
+- Mover `infra/terraform/envs/local/terraform.tfstate.backup` (estado viejo con certificado y clave) fuera del repo.
+- Pasar `mcx`, `mctf` y `tfx` a un script si el procedimiento se repite una tercera vez (escalera de toil).
+
+## 14. Uso con Terraform
+
+El bloque `backend "s3"` está en `infra/terraform/envs/local/versions.tf`: bucket `tfstate`, clave `envs/local/terraform.tfstate`, endpoint `http://127.0.0.1:9000`, `use_path_style`, `use_lockfile` y los `skip_*` (MinIO no tiene STS, IAM ni metadata de EC2). Las credenciales no van en el bloque: Terraform lee `AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY` del entorno, desde `infra/terraform/envs/local/.env` (ignorado).
+
+Función para correr Terraform con esas credenciales sin dejarlas en el shell (vive solo en la terminal donde se define):
+
+```bash
+tfx() ( set -a; . infra/terraform/envs/local/.env; set +a; terraform -chdir=infra/terraform/envs/local "$@" )
+```
+
+**Migración y pruebas (2026-11-21).** Esperado en cada paso:
+
+1. Credenciales falsas deben fallar. Esperado: `403 InvalidAccessKeyId` y `exit=1`.
+```bash
+   ( export AWS_ACCESS_KEY_ID=falso AWS_SECRET_ACCESS_KEY=falso12345678
+     terraform -chdir=infra/terraform/envs/local init -migrate-state; echo "exit=$?" )
+```
+2. Migración real. Esperado: `Successfully configured the backend "s3"!`.
+```bash
+   tfx init -migrate-state
+```
+3. Las credenciales no quedan en `.terraform`. Esperado: `2` y `2` (los argumentos `access_key` y `secret_key` aparecen con valor `null`).
+```bash
+   grep -c -i -E 'access_key|secret_key' infra/terraform/envs/local/.terraform/terraform.tfstate
+   grep -c -E '"(access_key|secret_key)": *null' infra/terraform/envs/local/.terraform/terraform.tfstate
+```
+4. Con el estado local vacío, `init` no escribe nada en el bucket. Esperado: `No state file was found!` y `0`; el bucket vacío.
+```bash
+   tfx state list | wc -l
+   mctf ls --recursive tf/tfstate
+```
+5. Bloqueo, con dos terminales. En la A, `tfx apply` (sin `-auto-approve`) y esperar en `Enter a value:`. En la B, el comando de abajo. Esperado en B: `Error acquiring the state lock` (`412 PreconditionFailed`) y `exit=1`. En la A, responder `no`.
+```bash
+   ( set -a; . infra/terraform/envs/local/.env; set +a
+     terraform -chdir=infra/terraform/envs/local plan -lock-timeout=0s ); echo "exit=$?"
+```
+6. Escritura real. Esperado: `Apply complete! Resources: 2 added` (1m43,7s), el objeto `envs/local/terraform.tfstate` de unos 17 KiB sin `.tflock`, y `2` recursos.
+```bash
+   time tfx apply -auto-approve
+   mctf ls --recursive tf/tfstate
+   tfx state list | wc -l
+```
+7. Destrucción. Esperado: `Destroy complete! Resources: 2 destroyed.` (7,9 s) y `0` recursos.
+```bash
+   time tfx destroy -auto-approve
+   tfx state list | wc -l
+```
+8. Mínimo privilegio. Esperado: el `plan` funciona (crea y borra el `.tflock`) y deja solo el objeto de estado; el `rm` del estado falla con `Access Denied` y `exit=1`, y el objeto sigue ahí.
+```bash
+   tfx plan -no-color | grep -E '^(Plan:|No changes|Error)'
+   mctf ls --recursive tf/tfstate
+   mctf rm tf/tfstate/envs/local/terraform.tfstate; echo "exit=$?"
+   mctf ls --recursive tf/tfstate
+```
+
+**Plan de retorno del backend:** quitar el bloque `backend` de `versions.tf` y ejecutar `terraform init -migrate-state` (sin probar). El estado remoto queda en el bucket.
+
+**Medidas del 2026-11-21 (una sola muestra):** `apply` de clúster y Argo CD, 1m43,7s; `destroy`, 7,9 s. No son la medida del gate de `up.sh`/`down.sh`.
