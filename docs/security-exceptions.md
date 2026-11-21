@@ -39,3 +39,20 @@ Alcance (pendiente de analizar): para cada CVE, ¿se usa la función afectada? E
 - Deuda: las dependencias transitivas no están fijadas (pip resuelve la última al construir); evaluar un archivo de restricciones.
 - También se actualizó `zlib1g` de la base Debian (2 HIGH que Trivy empezó a reportar el 2026-11-07).
 - Deuda: los CVE de la base Debian aparecen cuando Trivy actualiza su base y pueden bloquear PR sin relación. Evaluar `apt-get upgrade` completo o una reconstrucción programada de la imagen.
+
+## SEC-004: MinIO comunitario archivado, sin parches (2026-11-21, revisión 2027-01-04)
+- Detectado: 2026-11-21, al elegir la imagen de MinIO para el estado remoto de Terraform (ADR-008).
+- Hecho: según Chainguard, MinIO dejó de publicar la imagen de la edición comunitaria en octubre de 2025, y sus mantenedores declinaron parchear CVE-2025-62506 en esa edición. Sin verificar en las fuentes oficiales de MinIO.
+- Decisión: imágenes de Chainguard fijadas por digest (servidor y cliente), con puertos solo en 127.0.0.1. Riesgo aceptado hasta la revisión.
+- Verificado: `docker compose ps` muestra `127.0.0.1:9000-9001`; el usuario de Terraform no crea buckets, no ve otros ni administra (runbook, sección 8).
+- No verificado: qué versión de MinIO trae la imagen (el cliente reporta `DEVELOPMENT.GOGET`); si CVE-2025-62506 afecta este uso local; vulnerabilidades de las imágenes (Trivy pendiente). Sin TLS (http en localhost).
+- Pendiente: escanear ambas imágenes con Trivy; decidir el 2027-01-04, al inicio de O3, si se mantiene MinIO o se cambia el almacén.
+- Relación con el diplomado: (pendiente: la completa Rodrigo).
+
+## SEC-005: sin gestor de claves (2026-11-21, revisión 2026-11-28)
+- Detectado: 2026-11-21, al crear las credenciales de MinIO.
+- Hecho: las credenciales de root de MinIO (`infra/minio/.env`) y del usuario de Terraform (`infra/terraform/envs/local/.env`) existen solo como archivos locales ignorados por git. Las reglas del plan piden un gestor de claves y hoy no hay. Lo mismo aplica a los demás `.env` del repo (por ejemplo `GF_ADMIN_PASSWORD`, según SEC-002).
+- Verificado: ambos `.env` están ignorados (`git check-ignore`) y fuera de los commits (`git status --short -uall`).
+- No verificado: que exista una copia de estas claves fuera de este equipo.
+- Pendiente: elegir e instalar un gestor (KeePassXC o Bitwarden; planes sin verificar), guardar ahí las claves y cerrar este registro.
+- Relación con el diplomado: (pendiente: la completa Rodrigo).
