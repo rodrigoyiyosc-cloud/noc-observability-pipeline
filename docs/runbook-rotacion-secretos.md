@@ -62,6 +62,8 @@ Usa `hex` para evitar `@ / : #` en contraseñas que van dentro de una DSN. Usa l
 
 ## 4. Procedimiento A: Secret del StatefulSet de Postgres del clúster (probado el 2026-11-02)
 
+**Consumidores de `dev/timescaledb-secret` (verificado el 2026-11-20):** el StatefulSet `timescaledb`. El `webhook-service` del clúster no lo usa: su `PG_PASSWORD` (en `webhook-secret`) tiene otro hash y su `PG_HOST` apunta a `host.docker.internal`, es decir, al Postgres de Docker. Otros consumidores del clúster (por ejemplo, Grafana): sin verificar. Cuando el issue #32 (PM3-A5) mueva Postgres al clúster, este inventario cambia y esta sección se actualiza.
+
 `POSTGRES_PASSWORD` solo se lee al inicializar un volumen vacío. Cambiar el Secret no cambia la clave de una base existente: hay que hacer `ALTER USER` y después recrear el Secret.
 
 1. Lectura previa, sin cambios: claves y largos del Secret, y tablas existentes.
@@ -153,3 +155,12 @@ Cierra las terminales abiertas antes de la rotación. El dump de la base se borr
 | El largo de la clave nueva y la vieja coincide y no se distingue | El largo no identifica el valor | Comparar hashes de 8 caracteres y hacer una llamada real |
 | Falla la conexión con una DSN | La contraseña lleva `@ / : #` | Generar con `openssl rand -hex` |
 | 401 en un simulador o script local tras rotar el token | Otro archivo `.env` (por ejemplo `python-simulator/.env`) conserva el valor viejo | Listar los `.env` con el comando de la sección 1, comparar hashes y actualizar el archivo |
+
+## 9. Registro de ejecuciones
+
+| Fecha | Procedimiento | Alcance | Resultado | Evidencia | Observaciones |
+|---|---|---|---|---|---|
+| 2026-10-28 | B (versión original, sin la sección 1) | `PG_PASSWORD`, tokens, Groq, Jira | Falló: variables heredadas del shell | PM-003 | Origen de las comprobaciones de la sección 1 |
+| 2026-11-02 17:28 | A | `dev/timescaledb-secret` | Sin incidentes | Marca `managedFields` 20:28:15Z, PM3-A4, cabecera de este runbook | El commit del runbook (`aad3f36`) es de las 17:46, 18 min después. Sin verificar si había borrador antes |
+| 2026-11-20 | Sección 1, solo lectura | Terminal limpia, contexto, inventario de consumidores | Ninguna variable pisa al `.env`; contexto `kind-noc-local-cluster`; el webhook no usa `timescaledb-secret` | `check_env_shadow.sh`, `kubectl`, comparación de hashes | No se rotó nada |
+| Pendiente | B completo y C | Docker, `.env`, Groq, Atlassian, token del webhook | Sin ejecutar con el texto actual | — | Se ejecutan en la próxima rotación real o con #32. Sin fecha |
