@@ -77,6 +77,7 @@ systemctl is-active <svc>
 | `Main process exited, code=killed, status=9/KILL` + `Failed with result 'signal'` | Un `kill -KILL` (verificado). Un OOM killer daría el mismo código (sin verificar: se prueba en el simulacro del 2026-11-25) | `Restart=on-failure` lo levanta solo; buscar quién o qué lo mató |
 | `Deactivated successfully` y `is-active` = `inactive` | Salida limpia: `TERM` o `exit 0`. `Restart=on-failure` no la cuenta como fallo | `sudo systemctl start <svc>` |
 | `status=203/EXEC` + `Unable to locate executable '<ruta>': No such file or directory` | Ruta de `ExecStart` inexistente (verificado el 2026-11-24) | Corregir la unidad y recuperar (sección 5). Mientras tanto systemd reinicia cada 2 s: `NRestarts` sube y el estado es `activating` |
+| `status=203/EXEC` + `Unable to locate executable '<ruta>': Permission denied` | El script existe pero perdió el permiso `x` (verificado el 2026-11-24) | `chmod +x <ruta>` y `sudo systemctl restart <svc>` |
 
 ## 5. Recuperar
 
@@ -154,6 +155,7 @@ sudo systemctl daemon-reload
 | 2026-11-24 | `kill -KILL` al `MainPID` | Caída 18:37:31, recuperado 18:37:33 (unos 2 s, automático) | OK: `NRestarts=1`, `MainPID` 634 a 2805 | Laboratorio, no ciego |
 | 2026-11-24 | `kill -TERM` al `MainPID` | Caída 18:39:44, inicio a mano 18:40:07 (23 s, incluye reacción humana) | OK: no reinició, `start` manual dejó `active` | Contraste de la política |
 | 2026-11-24 | `ExecStart` con ruta inexistente (`203/EXEC`) | Cambio 21:28:13, diagnóstico 21:28:25 (12 s), recuperado 21:28:40 (27 s desde el cambio) | OK: causa en el journal, `active` y `exit=0` tras restaurar la unidad | Laboratorio, no ciego: la causa se conocía de antemano. Los tiempos incluyen la reacción humana |
+| 2026-11-24 | Script sin permiso `x` (`203/EXEC`, `Permission denied`) | Diagnóstico 23:18:05; no se anotó la hora del cambio ni la de RESUELTO | OK: `active`, `exit=0`, modo 755 tras `chmod +x` | Laboratorio, no ciego. Sin tiempos de recuperación por no haber marcado la hora |
 
 ## 11. ITIL 4
 
