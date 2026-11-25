@@ -3,7 +3,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade apt libapt-pkg7.0 zlib1g \
+    && apt-get install -y --no-install-recommends --only-upgrade apt libapt-pkg7.0 zlib1g libzstd1 \
     && rm -rf /var/lib/apt/lists/*    
 
 COPY requirements.txt .
