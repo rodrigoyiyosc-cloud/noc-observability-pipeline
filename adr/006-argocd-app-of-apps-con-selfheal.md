@@ -5,7 +5,7 @@
 | Estado | Aceptada |
 | Fecha | 2026-11-19 |
 | Decide | Rodrigo Codoceo |
-| Fecha de revisión | 2026-11-27 |
+| Fecha de revisión | 2026-12-04 |
 
 ## Contexto
 
@@ -39,3 +39,9 @@
 - Resolución de las medidas: ±1 s. La espera sin `selfHeal` fue de 30 s, no se midió cuánto tarda en aparecer `OutOfSync`.
 - Los manifiestos de `gitops/apps/` y `gitops/bootstrap/` no pasan por `kubeconform` en CI (no conoce el tipo `Application`; el script revisa una lista fija). Hoy los valida solo un `--dry-run=server` local.
 - Pendiente: validar las Applications en CI, medir el `prune` de los ConfigMap viejos del generator (sin probar), fijar las imágenes de Argo CD por digest (revisión de ADR-005) y el Secret del webhook (Sealed Secrets, M9).
+- Revisión 2026-11-27: se mantiene la decisión, sin cambios en los puntos 1 a 7. En el repositorio, `gitops/apps/webhook-dev.yaml` y `gitops/bootstrap/root.yaml` no cambiaron desde su creación (`6d50da0`) y siguen con `prune` y `selfHeal` activos.
+  - Punto 3: `scripts/up.sh` aplica `root` (`k apply -f "$ROOT_APP"`), con el camino manual en `docs/runbook-up-down.md`. Se verificó leyendo el script. No se ejecutó `up.sh --apply` en esta revisión porque `noc-tf` no está levantado.
+  - Punto 4: el repositorio sigue `PUBLIC`. La decisión depende de eso y de la revisión de la política de Accenture, aún pendiente.
+  - Resuelto: imágenes de Argo CD por digest (ADR-005, actualización del 2026-11-19).
+  - Sigue abierto: validar las `Application` en CI (#94), medir el `prune` de los ConfigMap viejos y su orden frente al rollout (#95), y el Secret del webhook (Sealed Secrets, M9).
+  - ADR-007 no menciona Argo CD ni GitOps: no cambia esta decisión.
