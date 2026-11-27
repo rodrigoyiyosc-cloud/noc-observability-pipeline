@@ -5,7 +5,7 @@
 | Estado | Aceptada |
 | Fecha | 2026-11-19 |
 | Decide | Rodrigo Codoceo |
-| Fecha de revisión | 2026-12-04 |
+| Fecha de revisión | 2026-12-11 |
 
 ## Contexto
 
@@ -45,3 +45,4 @@
   - Resuelto: imágenes de Argo CD por digest (ADR-005, actualización del 2026-11-19).
   - Sigue abierto: validar las `Application` en CI (#94), medir el `prune` de los ConfigMap viejos y su orden frente al rollout (#95), y el Secret del webhook (Sealed Secrets, M9).
   - ADR-007 no menciona Argo CD ni GitOps: no cambia esta decisión.
+- Se movió de 2026-12-04 a 2026-12-11: ese día ya vencen ADR-001, ADR-002 y SEC-003, y la revisión del viernes dura 1 h.
